@@ -46,6 +46,15 @@ for(const m of A.MODS){ if(MODSEL.length&&!MODSEL.includes(m.id)) continue;
     if(/30 mL\/kg 晶體液/.test(t)&&w!==null&&ht!==null&&ht>=120&&w/Math.pow(ht/100,2)>30&&(o.sex==='m'||o.sex==='f')&&!/調整體重/.test(t)) return 'BMI>30 未用調整體重';
     if(m.id==='ams'&&o.hx_pd&&/haloperidol<\/b>：<b>0\.5–1 mg/.test(h)) return 'Parkinson 仍給 haloperidol 劑量';
     if(m.id!=='acls'){ const ns=[...h.matchAll(/class="st-n">(\d+)</g)].map(x=>+x[1]); for(let j=0;j<ns.length;j++) if(ns[j]!==j+1) return '步驟編號不連續 '+ns.join(','); }
+    // 腎功能（v0.8）：rv() 不存在時（舊版）略過
+    if(A.rv){ const x=A.rv('crcl'), sev=x&&(x.hd||x.v<30);
+      if(sev&&/enoxaparin [\d.]+ mg SC q12h/.test(t)) return 'CrCl <30 或透析仍給 enoxaparin q12h';
+      if(x&&!x.hd&&x.v>=30&&/enoxaparin [\d.]+ mg SC q24h/.test(t)) return 'CrCl ≥30 卻給 enoxaparin q24h';
+      if(m.id==='ams'&&/levetiracetam [\d.]+ mg IV/.test(t)&&A.rv('egfr')&&!/之後 維持/.test(t)) return '有腎功能但未顯示 levetiracetam 維持劑量';
+      if(sev&&/NSAID 合併使用/.test(t)) return 'CrCl <30 仍建議 NSAID';
+      if(x&&(x.hd||x.v<40)&&/metoclopramide 10 mg IV/.test(t)) return 'CrCl <40 仍 metoclopramide 10 mg';
+      if(x&&(x.hd||x.v<50)&&/desmopressin 2 µg IV/.test(t)&&!/CrCl <50 禁忌/.test(t)) return 'CrCl <50 desmopressin 未標禁忌';
+    }
     if(m.id==='htn'){ const organ=/高血壓急症：/.test(t), noOrg=/無器官損傷證據/.test(t); if(organ&&noOrg) return '同時判定急症與無器官損傷'; }
     return '';
   }]);
@@ -57,14 +66,25 @@ if(!MODSEL.length||MODSEL.includes('rsi')) outs.push(['rsi',A.rsiCard,(t,h,o)=>{
   if(hypo&&/Ketamine （?[^）]*）?1–2 mg\/kg ＝/.test(t)) return '低血壓仍用 ketamine 1–2';
   if(hypo&&!/Propofol 列為次選/.test(t)) return '低血壓 propofol 未降為次選';
   if(!hypo&&/列為次選/.test(t)) return '非低血壓卻降 propofol';
+  if(A.rv){ const x=A.rv('crcl'); if(x&&(x.hd||x.v<30)&&!/sugammadex 仿單不建議/.test(t)) return 'CrCl <30 sugammadex 未標不建議'; }
   return ''; }]);
 if(!MODSEL.length||MODSEL.includes('tachy')) if(typeof A.nhiDoacCheck().ok==='undefined') outs.push(['noac',A.nhiDoacCheck,(t,h,o)=>{
-  const age=num(o.age), eg=num(o.egfr), risk=o.hx_dm||o.t_htn||o.c_cad;
+  const age=num(o.age), x=A.rv?A.rv('crcl'):null, eg=A.rv?(x&&!x.hd?x.v:null):num(o.egfr), hd=!!(x&&x.hd), risk=o.hx_dm||o.t_htn||o.c_cad;
   const base=o.t_stroke||o.t_ef==='low'||o.hx_hf||(age!==null&&age>=75);
-  const exp = !o.g_type && !(eg!==null&&eg<15) && (base||(age!==null&&age>=50&&age<75&&risk));
+  const exp = !o.g_type && !hd && !(eg!==null&&eg<15) && (base||(age!==null&&age>=50&&age<75&&risk));
   const got=/rivaroxaban（2\.1\.4\.2）： ✔ 符合/.test(t);
   return exp!==got? `rivaroxaban 判定 ${got} ≠ 預期 ${exp}`:''; }]);
-for(const [lab,fn] of [['score',A.scoreBox],['red',A.redBanner],['abg',A.abgRes],['gcs',A.gcsBox],['calc',A.calcPanel],['drugs',A.renderDrugs]]) if(!MODSEL.length) outs.push([lab,fn,()=> '']);
+for(const [lab,fn] of [['score',A.scoreBox],['red',A.redBanner],['abg',A.abgRes],['gcs',A.gcsBox],['calc',A.calcPanel]]) if(!MODSEL.length) outs.push([lab,fn,()=> '']);
+// 藥物頁：有腎功能資料時，每個有腎功能列的藥恰好一個 ▶；沒有資料時不可出現 ▶
+if(!MODSEL.length||MODSEL.includes('drug')) outs.push(['drugs',()=>{ A.S.dflt='all'; return A.renderDrugs(); },(t,h,o)=>{
+  if(!A.renPick) return '';
+  const cards=h.split('<div class="card drug">').slice(1);
+  for(const c of cards){ if(!/<div class="k">腎功能<\/div>/.test(c)) continue;
+    const n=(c.match(/▶/g)||[]).length, name=(c.match(/<h3>([^<]*)/)||[])[1];
+    const known=!!A.rv('crcl')||!!A.rv('scr');
+    if(n>1) return name+' 多個 ▶';
+    if(!known&&n) return name+' 無腎功能資料卻標 ▶'; }
+  return ''; }]);
 
 for(let i=0;i<N;i++){
   const o={}; for(const f of Object.keys(F)) o[f]=rnd(f);

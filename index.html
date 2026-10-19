@@ -196,7 +196,7 @@ textarea.sbar{width:100%;font:13.5px/1.55 var(--f-mono);color:var(--ink);backgro
 <script>
 "use strict";
 /* ================= 基本設定 ================= */
-const APP_VERSION="0.7";
+const APP_VERSION="0.8";
 const CHECKED = "2026-10-19";
 
 /* ================= 出處 ================= */
@@ -472,6 +472,35 @@ function alteredMental(){ const g=GCS(); return !!(S.conf || (g!==null && g<15))
 function postop(){ const p=num(S.pod); return p!==null && p<=28; }
 /* 理想體重（Devine）：需身高與性別 */
 function ibwCalc(){ const h=num(S.ht); if(h===null||h<120||(S.sex!=="m"&&S.sex!=="f")) return null; return (S.sex==="m"?50:45.5)+0.9055*(h-152.4); }
+/* 腎功能：Cockcroft-Gault CrCl（mL/min）。BMI ≥30 用調整體重、實際體重 < IBW 用實際體重；透析另計 */
+function renal(){
+  const age=num(S.age), wt=num(S.wt), cr=num(S.cr), eg=num(S.egfr), ht=num(S.ht);
+  let crcl=null, wl="";
+  if(age!==null&&wt!==null&&cr!==null&&cr>0&&(S.sex==="m"||S.sex==="f")){
+    let w=wt; wl="實際體重"; const ibw=ibwCalc();
+    if(ibw!==null&&ht!==null&&wt/Math.pow(ht/100,2)>=30&&wt>ibw){ w=ibw+0.4*(wt-ibw); wl="調整體重"; }
+    crcl=(140-age)*w/(72*cr)*(S.sex==="f"?0.85:1);
+  }
+  return {crcl, eg, cr, hd:!!S.u_hd, wl};
+}
+/* 依仿單基準取值：b＝"crcl"（缺時以 eGFR 代）、"egfr"（缺時以 CrCl 代）、"scr"（血清 Cr）。回傳 {v, lab, sub, hd} 或 null */
+function rv(b){
+  const r=renal();
+  if(r.hd) return {v:null,hd:true,lab:"透析中"};
+  if(b==="scr") return r.cr!==null?{v:r.cr,lab:`Cr ${r.cr}`}:null;
+  const c=r.crcl!==null?{v:r.crcl,lab:`CrCl ${fmt(r.crcl,0)}`}:null, e=r.eg!==null?{v:r.eg,lab:`eGFR ${r.eg}`}:null;
+  if(b==="egfr") return e||(c&&Object.assign(c,{sub:"以 CrCl 代 eGFR"}));
+  return c||(e&&Object.assign(e,{sub:"未能算 CrCl（需年齡、體重、性別、Cr），以 eGFR 代"}));
+}
+/* DRUGS.ren → 依病人腎功能挑出適用的一列 */
+function renPick(ren){
+  const x=rv(ren.b); if(!x) return null;
+  if(x.hd) return ren.hd? {x, txt:ren.hd}:null;
+  const t=(ren.t||[]).find(([lo,hi,,inc])=>(lo===null||x.v>=lo)&&(hi===null||(inc?x.v<=hi:x.v<hi)));
+  return t? {x, txt:t[2]} : null;
+}
+function renTag(x){ return `<span class="cau">已依腎功能調整（${x.lab}${x.sub?"；"+x.sub:""}）</span>`; }
+
 /* 敗血症起始 30 mL/kg：SSC 2026 remark——BMI >30 以調整或理想體重計（調整體重＝IBW＋0.4×(實際−IBW)）；
    心衰竭／末期腎病：SSC 未另訂減量（引觀察性資料），之後 liberal／restrictive 依病人與監測床位 */
 function fluid30(){
@@ -621,13 +650,13 @@ function ptCard(which,light){
   ${light?`<details style="border-top:0"><summary style="padding-left:0">生命徵象（不穩定或需計分時填寫）</summary><div style="padding-top:4px">${vit}</div></details>`:vit}
   <details style="margin-top:6px;border-top:0"><summary style="padding-left:0">背景、共病、用藥（勾選後才影響結果）</summary><div style="padding:4px 0 0">
     <div class="grid">
-      ${fld("age","年齡")}${sel("sex","性別",[["","—"],["m","男"],["f","女"]])}${fld("wt","體重（kg）")}${fld("ht","身高（cm）")}${fld("egfr","eGFR（mL/min/1.73m²）")}
+      ${fld("age","年齡")}${sel("sex","性別",[["","—"],["m","男"],["f","女"]])}${fld("wt","體重（kg）")}${fld("ht","身高（cm）")}${fld("cr","Cr（mg/dL）")}${fld("egfr","eGFR（mL/min/1.73m²）")}
       ${fld("pod","術後第幾天（POD）")}${sel("dnr","急救意願",[["","未確認"],["full","全力急救"],["dni","DNR（含不插管）"],["comfort","安寧／舒適照護"]])}
       ${sel("med_ac","抗凝血劑",[["","無／不明"],["vka","warfarin"],["dabi","dabigatran"],["fxa","FXa 抑制劑（apixaban、rivaroxaban、edoxaban）"],["ufh","UFH"],["lmwh","LMWH"]])}
     </div>
     <div class="chks">
       ${chk("hx_copd","COPD")}${chk("hx_hcrf","其他 hypercapnia 風險（肥胖低通氣、神經肌肉疾病、胸廓變形）")}${chk("hx_asthma","氣喘")}${chk("hx_hf","心衰竭")}
-      ${chk("hx_ckd","慢性腎病")}${chk("hx_cirr","肝硬化")}${chk("hx_dm","糖尿病")}${chk("hx_cancer","活動性癌症")}${chk("hx_vte","曾有 DVT／PE")}${chk("hx_pd","Parkinson's disease／Lewy body dementia")}
+      ${chk("hx_ckd","慢性腎病")}${chk("u_hd","透析中（ESRD）")}${chk("hx_cirr","肝硬化")}${chk("hx_dm","糖尿病")}${chk("hx_cancer","活動性癌症")}${chk("hx_vte","曾有 DVT／PE")}${chk("hx_pd","Parkinson's disease／Lewy body dementia")}
       ${chk("med_opioid","近期使用 opioid")}${chk("med_benzo","近期使用 benzodiazepine／鎮靜安眠藥")}${chk("med_insulin","使用 insulin 或 sulfonylurea")}${chk("med_antichol","使用抗膽鹼、抗組織胺或抗精神病藥")}
     </div>
   </div></details>
@@ -734,7 +763,7 @@ Object.assign(REF,{
   btsIcsNiv:{t:"BTS/ICS 高碳酸呼吸衰竭 2016",f:"Davidson AC, Banham S, Elliott M, et al. BTS/ICS guideline for the ventilatory management of acute hypercapnic respiratory failure in adults. Thorax 2016;71(Suppl 2):ii1–ii35。最佳內科治療後 pH <7.35 且 pCO₂ >6.5 kPa（約 49 mmHg）持續或出現 → 開始 NIV（Grade A）；嚴重酸中毒本身不排除 NIV 嘗試（需在可立即插管處）；pH <7.25 不必等 CXR；IPAP 15 起、10–30 分鐘內調至 20–30 cmH₂O；EPAP 至少 3 cmH₂O 以排出呼氣；NIV 中 SaO₂ 目標 88–92%（Grade A）。",u:"https://thorax.bmj.com/content/71/Suppl_2/ii1"},
   escAcs:{t:"ESC ACS 2023",f:"Byrne RA, Rossello X, Coughlan JJ, et al. 2023 ESC Guidelines for the management of acute coronary syndromes. Eur Heart J 2023;44:3720–3826。疑 ACS：首次接觸 10 分鐘內 12 導程 ECG；以 hs-troponin 0/1 h（或 0/2 h）流程判讀。本工具僅引用流程概要，細節請以原文確認。"},
   atsCap19:{t:"ATS/IDSA CAP 2019",f:"Metlay JP, Waterer GW, Long AC, et al. Diagnosis and Treatment of Adults with Community-acquired Pneumonia. Am J Respir Crit Care Med 2019;200:e45–e67。疑吸入性肺炎不建議常規加入 anaerobe 涵蓋，除非懷疑肺膿瘍或膿胸（conditional, low quality）。院內／術後肺炎依院內抗藥性與 HAP 指引。"},
-  enoxPI:{t:"Enoxaparin 仿單",f:"Lovenox／Clexane（enoxaparin sodium）Prescribing Information：DVT／PE 治療 1 mg/kg SC q12h（或 1.5 mg/kg q24h，特定族群）；CrCl <30 mL/min 調整為 1 mg/kg SC q24h；脊椎／硬膜外麻醉或穿刺有硬膜外血腫風險（boxed warning）。台灣健保給付規定請確認。"}
+  enoxPI:{t:"Enoxaparin 仿單",f:"Lovenox／Clexane（enoxaparin sodium）Prescribing Information：DVT／PE 治療 1 mg/kg SC q12h（或 1.5 mg/kg q24h，特定族群）；CrCl <30 mL/min 調整為 1 mg/kg SC q24h；脊椎／硬膜外麻醉或穿刺有硬膜外血腫風險（boxed warning）。CrCl <30 預防劑量 30 mg SC q24h；仿單未訂透析劑量。台灣健保給付規定請確認。（腎調整：2026-10-19 依 FDA 仿單核對）"}
 });
 
 /* ================= 喘：衍生值 ================= */
@@ -821,7 +850,9 @@ function dyspCard(cs,c){
       if(dd!==null){ const negY=dd<ya, negA=dd<aa; ddTxt+=` 本次 ${dd}：YEARS ${negY?'<span class="ok">陰性</span>':'<span class="ng">陽性</span>'}、age-adjusted ${negA?'<span class="ok">陰性</span>':'<span class="ng">陽性</span>'}${(negY||negA)&&(c.po||S.hx_cancer)?'；<span class="cau">住院／術後／癌症病人以調整切點排除的偽陰性較高，臨床懷疑高時仍做影像</span>'+src("slice"):""}${(!negY&&!negA)?" → CTPA":""}。`; }
     }
     const egfr=num(S.egfr), wt=num(S.wt);
-    const enox = wt!==null? `enoxaparin ${fmt(wt,0)} mg SC q12h（1 mg/kg）${egfr!==null&&egfr<30?`；<span class="cau">eGFR ${egfr}：1 mg/kg q24h（仿單依 CrCl <30）</span>`:""}`:"enoxaparin 1 mg/kg SC q12h（CrCl <30：q24h）";
+    const rx=rv("crcl"), lo=rx&&!rx.hd&&rx.v<30; const enox = rx&&rx.hd? `enoxaparin：<span class="ng">透析中，仿單未訂劑量</span>，考慮下列 UFH 或依院內`
+      : lo? `enoxaparin ${wt!==null?fmt(wt,0)+" mg":"1 mg/kg"} SC <b>q24h</b>（1 mg/kg）${renTag(rx)}`
+      : wt!==null? `enoxaparin ${fmt(wt,0)} mg SC q12h（1 mg/kg）`:"enoxaparin 1 mg/kg SC q12h（CrCl <30：q24h）";
     const ufh = wt!==null? `UFH ${Math.round(80*wt/100)*100} U IV bolus（80 U/kg）→ ${Math.round(18*wt/10)*10} U/h（18 U/kg/h），依 aPTT／anti-Xa 調整`:"UFH 80 U/kg IV bolus → 18 U/kg/h，依院內 nomogram 調整";
     o.rows=[
       ["評分",`Wells：${w.it.length?w.it.join("、"):"0 項"}${w.miss.length?`（缺 ${w.miss.join("、")}）`:""} ${src("wells")}<br>${ddTxt}${ddTxt?src("years")+src("escPe19","age-adjusted IIa"):""}`],
@@ -1057,7 +1088,7 @@ function seDoses(wt){
 }
 function se2Doses(wt){
   if(wt===null) return ul(["levetiracetam 60 mg/kg（上限 4,500 mg）","valproate 40 mg/kg（上限 3,000 mg）"+(S.hx_cirr?'<span class="ng">肝硬化：避免</span>':""),"fosphenytoin 20 mg PE/kg（上限 1,500 mg PE）","phenobarbital 15 mg/kg（上述皆無時）"]);
-  return ul([`levetiracetam <b>${fmt(Math.min(60*wt,4500),0)} mg IV</b>（60 mg/kg，上限 4,500 mg）${num(S.egfr)!==null&&num(S.egfr)<30?'<span class="cau">（負荷劑量不需減量，之後維持劑量依腎功能調整）</span>':""}`,
+  return ul([`levetiracetam <b>${fmt(Math.min(60*wt,4500),0)} mg IV</b>（60 mg/kg，上限 4,500 mg）${(()=>{ const ren=DRUGS.find(d=>d.id==="lev").ren, pk=renPick(ren); return pk? `；負荷劑量不依腎功能減量，之後<b>${pk.txt}</b> ${renTag(pk.x)}${src("levPI")}`:""; })()}`,
     `valproate <b>${fmt(Math.min(40*wt,3000),0)} mg IV</b>（40 mg/kg，上限 3,000 mg）${S.hx_cirr?'<span class="ng">肝硬化：避免</span>':""}`,
     `fosphenytoin <b>${fmt(Math.min(20*wt,1500),0)} mg PE IV</b>（20 mg PE/kg，上限 1,500；≤150 mg PE/min，心電監測）${src("cerebyxPI")}`,
     `phenobarbital <b>${fmt(15*wt,0)} mg IV</b>（15 mg/kg；上述皆無時）`]);
@@ -1403,8 +1434,8 @@ function cpCard(cs,c){
       :`ECG、心臟超音波（積液）、CRP；<b>aspirin 或 NSAID ＋ colchicine 同時使用</b>（ESC 2025 Class I），合併胃腸保護。`;
     { const wt=num(S.wt), eg=num(S.egfr);
       const col = wt===null? "colchicine 0.5 mg QD（<70 kg）或 BID（≥70 kg）": wt<70? "colchicine 0.5 mg QD（體重 <70 kg）":"colchicine 0.5 mg BID（體重 ≥70 kg）";
-      o.rows=[["劑量",ul([`aspirin 750–1,000 mg q8h，或 ibuprofen 600–800 mg q8h，1–2 週後漸減`,col+(eg!==null&&eg<30?`；<span class="cau">eGFR ${eg}：減量並注意毒性</span>`:"")+"，至少 3–6 個月",`<span class="small cau">劑量取自 ESC 2025 的二手整理，請以原文確認</span>`])],
-        ["注意",ul([S.med_ac||S.g_type?`<span class="cau">已用抗凝或有出血：NSAID 出血風險高，與心臟科討論</span>`:"",(num(S.egfr)!==null&&num(S.egfr)<30)?`<span class="cau">eGFR <30：避免 NSAID</span>`:"","類固醇不作第一線（IIa C，第一線失敗後低至中劑量）",c.po?"心臟手術後之心包症候群處理依心臟外科":""])],
+      o.rows=[["劑量",ul([`aspirin 750–1,000 mg q8h，或 ibuprofen 600–800 mg q8h，1–2 週後漸減`,col+(()=>{ const pk=renPick(DRUGS.find(d=>d.id==="colch").ren); return pk&&(pk.x.hd||pk.x.v<80)? `；<span class="cau">${pk.txt}</span> ${renTag(pk.x)}${src("colchPI")}`:""; })()+"，至少 3–6 個月",`<span class="small cau">劑量取自 ESC 2025 的二手整理，請以原文確認</span>`])],
+        ["注意",ul([S.med_ac||S.g_type?`<span class="cau">已用抗凝或有出血：NSAID 出血風險高，與心臟科討論</span>`:"",(()=>{ const x=rv("crcl"); return x&&(x.hd||x.v<30)?`<span class="cau">${x.hd?"透析":x.lab+" <30"}：避免 NSAID</span>`:""; })(),"類固醇不作第一線（IIa C，第一線失敗後低至中劑量）",c.po?"心臟手術後之心包症候群處理依心臟外科":""])],
         ["健保",nhiLic("aspirin、ibuprofen、colchicine")]]; }
     break;
   case "eso":
@@ -2332,7 +2363,7 @@ function chads(){
 }
 function nhiDoacCheck(){
   /* 健保藥品給付規定 2.1.4.2–2.1.4.4、2.1.5（現行條文）：非瓣膜性 AF，符合適應條件之一；排除條件另需確認 */
-  const age=num(S.age), eg=num(S.egfr), base=[];
+  const age=num(S.age), rx=rv("crcl"), eg=rx&&!rx.hd?rx.v:null, base=[];
   if(S.t_stroke) base.push("曾中風／栓塞"); if(S.t_ef==="low") base.push("LVEF <40%"); if(S.hx_hf) base.push("症狀性心衰竭");
   if(age!==null&&age>=75) base.push("≥75 歲");
   const risk=S.hx_dm||S.t_htn||S.c_cad, rf=[S.hx_dm?"糖尿病":"",S.t_htn?"高血壓":"",S.c_cad?"冠心症":""].filter(Boolean).join("、");
@@ -2342,14 +2373,15 @@ function nhiDoacCheck(){
     const why=base.concat(ageOk?[`${a0}–<75 歲合併${rf}`]:[]);
     let st;
     if(S.g_type) st=nhiNG("消化道出血中（屬排除條件：出血風險增加）");
-    else if(eg!==null&&(eg<lo||(hi!==null&&eg>hi))) st=nhiNG(`腎功能排除：CrCl ${hi!==null?`<${lo} 或 >${hi}`:`<${lo}`}（目前 eGFR ${eg}）`);
+    else if(rx&&rx.hd) st=nhiNG("透析：屬腎功能排除（CrCl <15）");
+    else if(eg!==null&&(eg<lo||(hi!==null&&eg>hi))) st=nhiNG(`腎功能排除：CrCl ${hi!==null?`<${lo} 或 >${hi}`:`<${lo}`}（目前 ${rx.lab}）`);
     else if(why.length) st=nhiOK(`適應條件：${why.join("、")}`);
     else if(age===null) st=nhiQ("缺年齡");
     else st=nhiNG(`未符合適應條件（年齡條件 ${a0}–<75 歲須合併糖尿病、高血壓或冠心症）`);
     return `${n}（${art}）：${st}`;
   });
   const notes=["排除條件逐項確認：嚴重瓣膜疾病、14 天內中風、6 個月內嚴重中風、出血風險增加、活動性肝病、懷孕",
-    eg!==null?"條文腎功能以 CrCl 計，此處以 eGFR 代入，接近切點時請以 Cockcroft-Gault 確認":"",
+    rx&&rx.sub?"條文腎功能以 CrCl 計，此處以 eGFR 代入；填年齡、性別、體重、Cr 可自動算 CrCl":"",
     S.t_vasc&&!S.c_cad?"周邊動脈或主動脈斑塊不在條文適應條件內（條文為冠狀動脈疾病）":""];
   return ul(rows.concat(notes.filter(Boolean)));
 }
@@ -2849,7 +2881,7 @@ function renderNa(){
       c.ods.length?`<span class="cau">ODS 高風險（${c.ods.join("、")}）：美國專家小組建議任 24 小時 ≤8</span> ${src("usHypoNa13")}`:"",
       c.rise!==null&&c.h!==null?`本次 ${c.h} 小時內 Na 由 ${num(S.na_prev)} 升至 ${c.na}（+${fmt(c.rise,0)}）${c.over?'：<b class="ng">超過上限</b>':"：未超過上限"}`:"填入「前次 Na」與間隔小時以檢查速度"]),
     x:"2023 兩篇大型觀察性研究（NEJM Evidence）顯示 ODS 罕見、與快速矯正相關性弱；指引尚未修改。",why:src("eurHypoNaSl")}));
-  if(c.over) H.push(st({k:"bx",t:"過度矯正",c:ul(["停止 3% NaCl、NS 等升鈉治療，諮詢腎臟科／內分泌科",`考慮 10 mL/kg 無電解質水（如 D5W）IV 1 小時${num(S.wt)!==null?`（${fmt(10*num(S.wt),0)} mL）`:""}，監測尿量與 Na`,"考慮 desmopressin 2 µg IV，間隔不短於 8 小時"]),why:src("eurHypoNaSl")}));
+  if(c.over) H.push(st({k:"bx",t:"過度矯正",c:ul(["停止 3% NaCl、NS 等升鈉治療，諮詢腎臟科／內分泌科",`考慮 10 mL/kg 無電解質水（如 D5W）IV 1 小時${num(S.wt)!==null?`（${fmt(10*num(S.wt),0)} mL）`:""}，監測尿量與 Na`,"考慮 desmopressin 2 µg IV，間隔不短於 8 小時"+(()=>{ const x=rv("crcl"); return x&&(x.hd||x.v<50)?`（<span class="ng">${x.hd?"透析":x.lab}：DDAVP 注射仿單 CrCl <50 禁忌</span>${src("ddavpPI")}）`:""; })()]),why:src("eurHypoNaSl")}));
   H.push(st({k:cl?"go":"info",t:"分類",c:cl?`<b>${cl.t}</b>`+ul([`血清滲透壓 ${c.so!==null?c.so:"未驗"}、尿滲透壓 ${c.uo!==null?c.uo:"未驗"}、尿 Na ${c.un!==null?c.un:"未驗"}、容積 ${{"":"未評估",hypo:"不足",eu:"正常",hyper:"增加"}[S.vol]}`]):`<span class="muted">填入 Na（<135）、血清與尿滲透壓、尿 Na、容積狀態後分類。</span>`,
     x:"同時驗 TSH、cortisol（腎上腺功能不全）；看用藥（thiazide、SSRI、carbamazepine、oxcarbazepine、opioid 等）。",why:src("eurHypoNaSl")}));
   if(cl&&cl.k!=="incomplete"){
@@ -2906,7 +2938,7 @@ function lyteCards(c){
     const lvl = c.caM>3.5?"緊急（>14 mg/dL）": c.caM>=3.0?"中度（12–14）":"輕度（<12）";
     C.push(optCard({cls:c.caM>3.5?"must":"pref",title:`高血鈣：${lvl}（校正鈣 ${fmt(c.cca,1)} mg/dL）`,tags:src("sfeHyperCa"),open:true,lead:ul([
       c.caM>=3.0? `<b>0.9% NaCl 4–6 L/24 h</b>${(S.hx_hf||(c.eg!==null&&c.eg<30)||(num(S.age)!==null&&num(S.age)>=75))?'（<span class="cau">心衰竭、腎功能差或老人注意容積過多</span>）':""}；loop 利尿劑只用於容積過多` : "輕度通常無症狀，不需緊急矯正；停用致高鈣藥物（thiazide、鈣、維生素 D、lithium）並找原因",
-      c.caM>=3.0? `<b>bisphosphonate</b>：zoledronic acid 4 mg IV 15 分鐘，或 pamidronate 30–90 mg（20 mg/h）；${c.eg!==null&&c.eg<60?'<span class="cau">腎功能差：減慢輸注或減量</span>':"腎功能差時減慢或減量"}；最低點約 2–4 天` : "",
+      c.caM>=3.0? `<b>bisphosphonate</b>：zoledronic acid 4 mg IV 15 分鐘，或 pamidronate 30–90 mg（20 mg/h）；${(()=>{ const cr=num(S.cr); return cr!==null&&cr>=4.5?`<span class="cau">Cr ${cr} ≥4.5：zoledronic acid 臨床試驗排除，評估風險效益</span>`:"zoledronic acid：Cr <4.5 不需調整，給藥前驗 Cr、充分補液"; })()} ${src("zolPI")}；最低點約 2–4 天` : "",
       "第二線（專科）：calcitonin、denosumab；淋巴瘤、肉芽腫、維生素 D 中毒：prednisolone 40 mg；嚴重腎衰竭考慮透析",
       `驗 PTH（高 → 副甲狀腺；低 → 惡性腫瘤等）、磷、腎功能、ECG（QT 縮短）${S.hx_cancer?"；活動性癌症：最可能為惡性腫瘤相關":""}`]),rows:[["健保",nhiQ("zoledronic acid、pamidronate 用於高血鈣之給付條件請確認")]]}));
   }
@@ -3047,7 +3079,7 @@ function renderNV(){
   const L=[];
   const usedClass=S.nv_prophy;
   L.push(`${usedClass==="5ht3"?'<span class="cau">已用 5-HT3 預防：改用不同類別</span> ':""}<b>ondansetron</b> 4 mg IV（單次 IV ≤16 mg）${c.qt?'；<span class="ng">QTc 延長：避免或心電監測</span>':""} ${src("ponv20")}${src("fdaOnd12")}`);
-  if(!c.obst&&!c.pd) L.push(`<b>metoclopramide</b> 10 mg IV（≥3 分鐘緩推），每日最多 3 次、≤5 天，24 小時上限 0.5 mg/kg${c.age!==null&&c.age>=65?'；<span class="cau">老人錐體外症狀風險高（Beers）</span>':""} ${src("emaMcp13")}`);
+  if(!c.obst&&!c.pd) L.push(`<b>metoclopramide</b> ${mcpLow()?`<b>5 mg</b> IV（約半量）${renTag(rv("crcl"))}${src("mcpPI")}`:"10 mg IV"}（≥3 分鐘緩推），每日最多 3 次、≤5 天，24 小時上限 0.5 mg/kg${c.age!==null&&c.age>=65?'；<span class="cau">老人錐體外症狀風險高（Beers）</span>':""} ${src("emaMcp13")}`);
   else L.push(`<span class="ng">${c.obst?"疑腸阻塞":"Parkinson 病"}：避免 metoclopramide${c.pd?"、prochlorperazine、haloperidol":""}</span> ${src("beers23")}`);
   if(!c.qt&&!c.pd) L.push(`haloperidol 0.5–<2 mg IV/IM 或 droperidol 0.625 mg IV（PONV；QT 延長注意）${src("ponv20")}`);
   L.push(`dexamethasone 4–8 mg IV 主要用於預防（誘導時），${usedClass==="dex"?"已用過":"可合併"} ${src("ponv20")}`);
@@ -3073,11 +3105,14 @@ function renderPain(){
     :`疼痛分數、部位與性質、功能影響；鎮靜程度（POSS）與呼吸；目前止痛藥與時間；腎肝功能。`,why:src("asaAps16")}));
   const L=[];
   const para = (S.hx_cirr||S.a_etoh||S.a_malnut)? "1 g TID（上限 3 g）" : (wt!==null&&wt<50? (wt<=40?"500 mg QID（上限 2 g）":"1 g TID（上限 3 g）") : "1 g QID（上限 4 g）");
-  L.push(`<b>acetaminophen</b> 規則給：${para}${eg!==null&&eg<30?"；CrCl <30 間隔 6 小時":""} ${src("nhsPara")}`);
-  const nsaidNo=[]; if(eg!==null&&eg<30) nsaidNo.push("eGFR <30"); if(S.g_type) nsaidNo.push("消化道出血"); if(S.med_ac) nsaidNo.push("抗凝"); if(S.hx_hf) nsaidNo.push("心衰竭"); if(S.u_bleed) nsaidNo.push("出血"); if(S.hx_cirr) nsaidNo.push("肝硬化");
+  const rc=rv("crcl"), sev=rc&&(rc.hd||rc.v<=30), sev30=rc&&(rc.hd||rc.v<30);
+  L.push(`<b>acetaminophen</b> 規則給：${para}${sev?`；<span class="cau">CrCl ≤30：延長間隔（NHS：至少 q6h）並減少每日總量</span> ${renTag(rc)}${src("apapIV")}`:""} ${src("nhsPara")}`);
+  const nsaidNo=[]; if(sev30) nsaidNo.push(rc.hd?"透析":rc.lab+" <30"); if(S.g_type) nsaidNo.push("消化道出血"); if(S.med_ac) nsaidNo.push("抗凝"); if(S.hx_hf) nsaidNo.push("心衰竭"); if(S.u_bleed) nsaidNo.push("出血"); if(S.hx_cirr) nsaidNo.push("肝硬化");
   L.push(nsaidNo.length?`<span class="ng">NSAID 避免（${nsaidNo.join("、")}）</span>`:`<b>NSAID</b> 合併使用（短期；老人、腎功能、出血風險評估；ketorolac 合計 ≤5 天）${src("beers23")}`);
   L.push(`${overSed?'<span class="ng">鎮靜恢復、呼吸穩定後再重新調整 opioid</span>；':""}opioid：可口服優先於 IV；需非口服途徑時用 <b>IV PCA</b>；${S.pn_naive?"opioid-naive：PCA 不常規加 basal infusion":"已長期使用 opioid：維持基礎需求並加上急性需求"}；避免 IM ${src("asaAps16")}`);
-  if((eg!==null&&eg<30)) L.push(`<span class="cau">eGFR <30：避免 meperidine、codeine；morphine 代謝物累積，傾向其他 opioid 並減量（依藥劑部）；tramadol IR q12h、上限 200 mg/日</span> ${src("beers23")}`);
+  if(sev30) L.push(`<span class="cau">${rc.hd?"透析":rc.lab+" <30"}：避免 meperidine、codeine ${src("beers23")}；morphine 以低於一般劑量開始、緩慢調整 ${src("morPI")}；hydromorphone 起始為一般劑量 1/4–1/2 ${src("hmPI")}；tramadol 改 q12h、每日上限 200 mg ${src("tramPI")}</span>`);
+  else if(rc&&rc.v<60) L.push(`<span class="small">腎功能不全（${rc.lab}）：morphine 低劑量開始緩慢調整 ${src("morPI")}；hydromorphone 起始 1/4–1/2 ${src("hmPI")}</span>`);
+  if(!nsaidNo.length) L.push(`<span class="small">ketorolac：晚期腎功能不全禁用；≥65 歲、腎功能不全或 <50 kg → 15 mg IV q6h（每日 ≤60 mg），≤5 天 ${src("ketoPI")}</span>`);
   if(age!==null&&age>=65) L.push(`<span class="cau">老人：避免 meperidine；opioid 合併 benzodiazepine 增加跌倒與呼吸抑制</span> ${src("beers23")}`);
   L.push(`輔助：gabapentin／pregabalin、IV ketamine、腹部手術 IV lidocaine（conditional，依麻醉或疼痛團隊）${src("asaAps16")}`);
   H.push(optCard({cls:"pref",title:"多模式止痛",tags:src("asaAps16")+src("nhsPara"),open:true,lead:ul(L),rows:[["健保",nhiLic("acetaminophen、NSAID、morphine 等")]]}));
@@ -3185,7 +3220,7 @@ function hdCard(cs){
   case "cvst": o.lead=`MRI／MRV 或 CT venography；會診神經科。`; break;
   case "pdph": o.tags=src("pdph24"); o.lead=`規則 <b>acetaminophen ＋ NSAID</b>（NSAID 禁忌時只用 acetaminophen）；第一個 24 小時 caffeine 每日 ≤900 mg（哺乳 ≤300 mg）；口服補水；影響日常生活或有神經症狀 → 通知麻醉科評估<b>硬膜外血液貼片</b>。`; o.rows=[["影像",`>5 天後之非姿勢性頭痛、神經缺損、視覺或意識改變 → 影像排除其他診斷 ${src("pdph24")}`]]; break;
   case "caff": o.lead=`補充咖啡因或處理原因；停用可疑藥物。`; break;
-  case "prim": o.tags=src("ahs16")+src("acepHa19"); o.lead=`acetaminophen 或 NSAID；偏頭痛：<b>metoclopramide 10 mg IV</b> 或 prochlorperazine IV（AHS 2016）；<b>避免 opioid</b>（ACEP Level A）。`; break;
+  case "prim": o.tags=src("ahs16")+src("acepHa19"); o.lead=`acetaminophen 或 NSAID；偏頭痛：<b>metoclopramide ${mcpLow()?"5 mg IV</b>（CrCl <40 約半量）":"10 mg IV</b>"} 或 prochlorperazine IV（AHS 2016）；<b>避免 opioid</b>（ACEP Level A）。`; break;
   }
   return cardWrap(cs,o);
 }
@@ -3220,7 +3255,7 @@ Object.assign(REF,{
   propPI:{t:"Propofol 仿單",f:"Diprivan（propofol）Prescribing Information：健康成人 <55 歲 2–2.5 mg/kg（每 10 秒 40 mg）；老人、虛弱或 ASA III–IV 1–1.5 mg/kg（每 10 秒 20 mg，不可快速 bolus）；心臟麻醉 0.5–1.5 mg/kg。",u:"https://www.rxlist.com/diprivan-drug.htm"},
   rocPI:{t:"Rocuronium 仿單",f:"Rocuronium bromide（Pfizer/Hospira）Prescribing Information：RSI 0.6–1.2 mg/kg（多數 2 分鐘內達插管條件）；一般插管 0.6 mg/kg。1.2 mg/kg 臨床作用時間中位 67 分鐘（18–64 歲）、94 分鐘（≥65 歲）。肥胖依實際體重給藥。",u:"https://labeling.pfizer.com/ShowLabeling.aspx?id=4593"},
   sccPI:{t:"Succinylcholine 仿單",f:"Anectine（succinylcholine）Prescribing Information：成人插管平均 0.6 mg/kg IV（0.3–1.1 mg/kg），約 1 分鐘起效、4–6 分鐘恢復；無靜脈時 IM 3–4 mg/kg（總量 ≤150 mg）。禁忌：惡性高熱體質、骨骼肌病變、大面積燒傷、多重創傷、廣泛去神經或上運動神經元損傷之急性期後（高血鉀風險約 7–10 天達高峰）；電解質異常或 digoxin 中毒可致高血鉀心律不整。",u:"https://www.rxlist.com/anectine-drug.htm"},
-  sugPI:{t:"Sugammadex 仿單",f:"Bridion（sugammadex）SmPC：常規逆轉 2 mg/kg（T2 出現）或 4 mg/kg（1–2 個 PTC）；rocuronium 1.2 mg/kg 後需立即逆轉：3 分鐘後給 16 mg/kg，中位 1.5 分鐘恢復；10 秒內快速 IV bolus。",u:"https://www.medicines.org.uk/emc/product/6409/smpc"},
+  sugPI:{t:"Sugammadex 仿單",f:"Bridion（sugammadex）SmPC：常規逆轉 2 mg/kg（T2 出現）或 4 mg/kg（1–2 個 PTC）；rocuronium 1.2 mg/kg 後需立即逆轉：3 分鐘後給 16 mg/kg，中位 1.5 分鐘恢復；10 秒內快速 IV bolus。腎功能：CrCl <30（含透析）不建議；CrCl 30–<80 劑量同一般，常規逆轉後再用 rocuronium 需間隔 24 小時。（腎調整：2026-10-19 依 SmPC 核對）",u:"https://www.medicines.org.uk/emc/product/6409/smpc",u:"https://www.medicines.org.uk/emc/product/6409/smpc"},
   litflSt:{t:"類固醇等效劑量",f:"Nickson C, Pearlman J. Steroid Conversion. LITFL Critical Care Compendium（2026/1 更新；引 Goodman & Gilman、Katzung）。等效抗發炎劑量：hydrocortisone 20 mg ＝ prednisolone／prednisone 5 mg ＝ methylprednisolone 4 mg ＝ dexamethasone 0.75 mg；礦物皮質作用 hydrocortisone 1、prednisolone 0.3、methylprednisolone 0.25、dexamethasone 0；作用時間：hydrocortisone 短（8–12 h）、prednisolone／methylprednisolone 中（12–36 h）、dexamethasone 長（36–72 h）。",u:"https://litfl.com/steroid-conversion/"},
   eseGiai24:{t:"ESE/ES 類固醇相關腎上腺功能不全 2024",f:"Beuschlein F, Else T, Bancos I, et al. European Society of Endocrinology and Endocrine Society Joint Clinical Guideline: Diagnosis and therapy of glucocorticoid-induced adrenal insufficiency. J Clin Endocrinol Metab 2024（doi:10.1210/clinem/dgae250）／Eur J Endocrinol 2024。口服使用約 ≥3–4 週且劑量高於 hydrocortisone 當量約 15–25 mg/日（prednisolone 約 4–6 mg、methylprednisolone 3–5 mg、dexamethasone 0.25–0.5 mg）預期有腎上腺功能不全風險；未經檢驗排除者遇壓力應給 stress dose（R3.1）：輕微壓力且無血行動力學不穩、無持續嘔吐腹瀉 → 口服；中重度壓力、全身或區域麻醉、需長時間禁食、血行動力學不穩或持續嘔吐腹瀉 → 注射。血行動力學不穩、嘔吐或腹瀉者，不論劑型、途徑、劑量皆應考慮腎上腺危象，給注射類固醇與輸液（R3.2）。",u:"https://www.endocrine.org/clinical-practice-guidelines/glucocorticoid-induced-adrenal-insufficiency"},
   woodcock20:{t:"圍術期類固醇（Association of Anaesthetists 2020）",f:"Woodcock T, Barker P, Daniel S, et al. Guidelines for the management of glucocorticoids during the peri-operative period for patients with adrenal insufficiency. Anaesthesia 2020;75:654–663（Association of Anaesthetists、Royal College of Physicians、Society for Endocrinology UK）。風險：prednisolone ≥5 mg/日 >4 週。麻醉下手術：誘導前 hydrocortisone 100 mg IV，之後 200 mg/24 h 持續輸注（或 50 mg IV／IM q6h）至可進食；恢復後原口服劑量加倍至少 48 小時（大手術至 1 週）再回原劑量。內視鏡等侵入性檢查：術前 hydrocortisone 100 mg IV／IM，之後原劑量加倍 24 小時。小手術：前後各加 hydrocortisone 10 mg 口服。已用 prednisolone ≥10 mg/日、恢復順利者可不需加倍。引自 NHS Highland TAM452（2025/8 審閱）。",u:"https://rightdecisions.scot.nhs.uk/tam-treatments-and-medicines-nhs-highland/adult-therapeutic-guidelines/endocrine/peri-operative-guidance-for-patients-with-or-at-risk-of-adrenal-insufficiency-guidelines"},
@@ -3517,7 +3552,7 @@ function rsiCard(){
   R.push(`<b>肌肉鬆弛</b>（rocuronium、succinylcholine 擇一，conditional）${src("sccmRsi23")}`+ul([
     `<b>Rocuronium</b>（Esmeron）1.2 mg/kg（仿單 RSI 0.6–1.2，依實際體重）${d(1.2,null,10)}；作用約 1 小時以上 ${src("rocPI")}`,
     `<b>Succinylcholine</b>：仿單 0.6 mg/kg（0.3–1.1）${d(0.6,null,20)}；RSI 實務多用 1–1.5 mg/kg（請確認院內）${sccNo?`<div class="ng">K ${K}：高血鉀 → 避免 succinylcholine，改 rocuronium</div>`:""}<div class="small muted">禁忌：惡性高熱體質、肌病變、燒傷／重大創傷／去神經損傷急性期後、高血鉀</div> ${src("sccPI")}`]));
-  R.push(`<b>緊急逆轉</b>：rocuronium 1.2 mg/kg 後 3 分鐘給 <b>sugammadex 16 mg/kg</b>${d(16,null,100)}（Bridion）${src("sugPI")}`);
+  R.push(`<b>緊急逆轉</b>：rocuronium 1.2 mg/kg 後 3 分鐘給 <b>sugammadex 16 mg/kg</b>${d(16,null,100)}（Bridion）${src("sugPI")}${(()=>{ const x=rv("crcl"); return x&&(x.hd||x.v<30)?`；<span class="ng">${x.hd?"透析":x.lab}：sugammadex 仿單不建議（CrCl <30）</span>`:""; })()}`);
   return `<div class="card" id="acls-rsi"><h3>RSI 插管藥物 <span class="sub">依體重${wt!==null?`（${fmt(wt,0)} kg）`:""}</span></h3><div class="cb">
     ${wt===null?`<div class="cau">填寫體重（上方）以計算劑量</div>`:""}${ul(R)}
     <div class="note">mL 換算以括號內濃度計（etomidate 2、ketamine 50、propofol 10、rocuronium 10、succinylcholine 20、sugammadex 100 mg/mL），請核對院內品項。肥胖者 rocuronium 依實際體重。${(S.dnr==="dni"||S.dnr==="comfort")?`<br><span class="ng">已註記不插管：確認病人意願。</span>`:""}</div>
@@ -3766,6 +3801,19 @@ function renderTools(){
 }
 
 /* ================= 藥物資料 ================= */
+Object.assign(REF,{
+  levPI:{t:"Levetiracetam 仿單",f:"Keppra（levetiracetam）Prescribing Information（US）與 SmPC（EU）：成人腎功能調整依 BSA 校正之 CrCl（mL/min/1.73 m²）——>80：500–1,500 mg q12h；50–80：500–1,000 mg q12h；30–50：250–750 mg q12h；<30：250–500 mg q12h；透析之 ESRD：500–1,000 mg q24h，透析後追加 250–500 mg。（2026-10-19 核對）",u:"https://www.pfizermedical.com/levetiracetam/dosage-admin"},
+  mcpPI:{t:"Metoclopramide 注射劑仿單（US）",f:"Metoclopramide injection Prescribing Information（Pfizer）：CrCl <40 mL/min 者以約一半建議劑量開始，再依療效與安全性調整。（2026-10-19 核對）",u:"https://www.pfizermedical.com/metoclopramide/dosage-admin"},
+  mgPI:{t:"Magnesium sulfate 仿單",f:"Magnesium sulfate in water for injection Prescribing Information（Pfizer）：重度腎功能不全時須頻繁監測血清鎂，最大劑量 20 g／48 小時（仿單未以 CrCl 定義「重度」）。（2026-10-19 核對）",u:"https://www.pfizermedical.com/magnesium-sulfate-0/dosage-admin"},
+  apapIV:{t:"Acetaminophen IV 仿單（Ofirmev）",f:"Ofirmev（acetaminophen injection）Prescribing Information 8.7：重度腎功能不全（CrCl ≤30 mL/min）可能需延長給藥間隔並減少每日總量；8.6：肝功能不全可能需減少每日總量。（2026-10-19 核對）",u:"https://www.drugs.com/pro/ofirmev.html"},
+  colchPI:{t:"Colchicine 仿單（Colcrys）",f:"Colcrys（colchicine）Prescribing Information 2.5：FMF——CrCl 30–80 密切監測、可能需減量；CrCl <30 由 0.3 mg/日開始，加量需密切監測；透析起始 0.3 mg/日。痛風預防——CrCl <30 起始 0.3 mg/日，透析 0.3 mg 每週 2 次。心包炎非仿單適應症。（2026-10-19 依 FDA 仿單 2019 核對）",u:"https://www.accessdata.fda.gov/drugsatfda_docs/label/2019/022352s022lbl.pdf"},
+  zolPI:{t:"Zoledronic acid 仿單（Zometa）",f:"Zometa Prescribing Information：惡性高血鈣 4 mg 單次 IV ≥15 分鐘，給藥前充分補液；輕至中度腎功能不全（血清 Cr <4.5 mg/dL）不需調整；Cr >4.5 臨床試驗排除，需評估風險效益；每次給藥前驗 Cr；再治療至少間隔 7 天。（2026-10-19 核對）",u:"https://www.drugs.com/pro/zometa.html"},
+  ddavpPI:{t:"Desmopressin 注射劑仿單（DDAVP）",f:"DDAVP Injection（desmopressin acetate）Prescribing Information 4：禁忌——中至重度腎功能不全（CrCl <50 mL/min）。低血鈉過度矯正之 rescue 為仿單外用途。（2026-10-19 核對）",u:"https://www.drugs.com/pro/ddavp.html"},
+  tramPI:{t:"Tramadol 仿單",f:"Tramadol hydrochloride tablets Prescribing Information：CrCl <30 mL/min 給藥間隔延長為 q12h，每日上限 200 mg；重度肝功能不全 50 mg q12h；>75 歲每日 ≤300 mg。（2026-10-19 核對）",u:"https://medlibrary.org/lib/rx/meds/tramadol-hydrochloride-62/page/2/"},
+  hmPI:{t:"Hydromorphone 注射劑仿單",f:"Hydromorphone Hydrochloride Injection Prescribing Information（Pfizer）2.3／2.4：腎或肝功能不全者以一般起始劑量的 1/4–1/2 開始，依不全程度調整。（2026-10-19 核對）",u:"https://www.pfizermedical.com/hydromorphone-0/dosage-admin"},
+  morPI:{t:"Morphine 口服錠仿單",f:"Morphine sulfate tablets Prescribing Information 8.7：腎衰竭時藥動學改變，以低於一般劑量開始並緩慢調整，監測呼吸抑制、鎮靜與低血壓。（2026-10-19 核對）",u:"https://medlibrary.org/lib/rx/meds/morphine-sulfate-52/page/7/"},
+  ketoPI:{t:"Ketorolac 注射劑仿單",f:"Ketorolac tromethamine injection Prescribing Information（Pfizer）：晚期腎功能不全禁用；≥65 歲、腎功能不全或 <50 kg：單次 IV 15 mg 或 IM 30 mg，多次 15 mg q6h（每日 ≤60 mg）；IV／IM 與口服合計 ≤5 天。（2026-10-19 核對）",u:"https://www.pfizermedical.com/ketorolac-inj"}
+});
 const DRUGS = [
  {id:"salb",cls:"resp",name:"Salbutamol",brand:"Ventolin",type:"SABA",
   dose:"氣喘急性發作：MDI＋spacer 4–10 puffs 每 20 分鐘 × 1 小時，或 nebulizer 2.5–5 mg；COPD 惡化：SABA ± SAMA；高血鉀（輔助）：10–20 mg nebulised，不單獨使用（UKKA 2023）。",
@@ -3778,8 +3826,8 @@ const DRUGS = [
   dose:"COPD 惡化：prednisone 40 mg（或等效）每日 × 5 天，口服與靜脈等效（methylprednisolone 約 32 mg）；氣喘發作：prednisolone 40–50 mg（或等效）。",
   adj:"無需腎肝調整。",caut:"高血糖（糖尿病病人追蹤血糖）、譫妄、消化道出血風險。",
   guide:"COPD "+src("gold26")+"；氣喘 "+src("gina26"),nhi:nhiLic()},
- {id:"mg",cls:"resp",name:"Magnesium sulfate",brand:"",type:"支氣管擴張輔助",
-  dose:"重度氣喘、初始治療反應差：2 g IV 20 分鐘。低血鎂：重度或有症狀 5 g（20 mmol）IV，1–2 g/h（≤9 g/h）；輕度無法口服 1–5 g。torsades（QT 延長）復發：AHA 2025 可考慮（2b），劑量常用 1–2 g IV（請確認）。",adj:"腎衰竭注意高血鎂。",caut:"低血壓、潮紅；監測反射與呼吸。",
+ {id:"mg",ren:{b:"crcl",t:[[null,30,"重度腎功能不全：最大 20 g／48 小時，頻繁驗血鎂（仿單未以 CrCl 定義重度，本工具以 <30 提示）"],[30,null,"注意高血鎂，追蹤血鎂"]],hd:"最大 20 g／48 小時，頻繁驗血鎂",r:["mgPI"]},cls:"resp",name:"Magnesium sulfate",brand:"",type:"支氣管擴張輔助",
+  dose:"重度氣喘、初始治療反應差：2 g IV 20 分鐘。低血鎂：重度或有症狀 5 g（20 mmol）IV，1–2 g/h（≤9 g/h）；輕度無法口服 1–5 g。torsades（QT 延長）復發：AHA 2025 可考慮（2b），劑量常用 1–2 g IV（請確認）。",adj:"見腎功能列。",caut:"低血壓、潮紅；監測反射與呼吸。",
   guide:src("gina26")+src("spsMg"),nhi:nhiLic()},
  {id:"epi",cls:"resp",name:"Adrenaline（epinephrine）",brand:"Bosmin",type:"α／β 致效劑",
   dose:"過敏性休克：0.5 mg IM（1 mg/mL 取 0.5 mL）大腿前外側，5 分鐘可重複；兩劑無效 → IV infusion（專家協助；ASCIA：1 mg 加入 100 mL NS，0.5 mL/kg/h 起，約 0.1 µg/kg/min）。心跳停止：1 mg IV/IO q3–5 min。心搏過慢（atropine 無效）：2–10 µg/min 輸注。",
@@ -3792,8 +3840,8 @@ const DRUGS = [
  {id:"ntg",cls:"cardio",name:"Nitroglycerin（IV）",brand:"",type:"血管擴張劑",
   dose:"10–20 µg/min 起，可調至 200 µg/min（SBP >110 mmHg）。",adj:"—",
   caut:"低血壓、右心梗塞、嚴重主動脈瓣狹窄、48 小時內 PDE5 抑制劑。",guide:src("escHf","IIb"),nhi:nhiLic()},
- {id:"enox",cls:"cardio",name:"Enoxaparin",brand:"Clexane",type:"LMWH",
-  dose:"PE 治療：1 mg/kg SC q12h。",adj:"CrCl <30 mL/min：1 mg/kg q24h（仿單）。",
+ {id:"enox",ren:{b:"crcl",t:[[null,30,"治療 1 mg/kg SC q24h；預防 30 mg SC q24h"],[30,null,"不需調整"]],hd:"仿單未訂透析劑量，依院內規範",r:["enoxPI"]},cls:"cardio",name:"Enoxaparin",brand:"Clexane",type:"LMWH",
+  dose:"PE 治療：1 mg/kg SC q12h。",adj:"見腎功能列。",
   caut:"脊椎／硬膜外麻醉或導管：硬膜外血腫（boxed warning）；術後出血風險與外科討論。",
   guide:"AHA/ACC 2026：住院 PE Category C–E1 LMWH 優於 UFH（Class 1）"+src("ahaPe26")+src("enoxPI"),nhi:nhiQ("抗凝血劑給付條文請確認"),
   upd:"AHA/ACC 2026 急性 PE 指引：LMWH 優於 UFH（Class 1）"},
@@ -3818,8 +3866,8 @@ const DRUGS = [
   dose:"癲癇重積無 IV：10 mg IM（>40 kg）、5 mg IM（13–40 kg），單次。",adj:"腎肝衰竭作用延長。",caut:"呼吸抑制。",guide:src("aes16"),nhi:nhiLic()},
  {id:"dzp",cls:"neuro",name:"Diazepam",brand:"Valium",type:"Benzodiazepine",
   dose:"癲癇重積：0.15–0.2 mg/kg IV（每劑上限 10 mg），可重複一次。",adj:"—",caut:"呼吸抑制；長效代謝物。",guide:src("aes16"),nhi:nhiLic()},
- {id:"lev",cls:"neuro",name:"Levetiracetam",brand:"Keppra",type:"抗癲癇藥",
-  dose:"癲癇重積第二線：60 mg/kg IV（上限 4,500 mg）。",adj:"負荷劑量不減；維持劑量依腎功能調整。",
+ {id:"lev",ren:{b:"egfr",t:[[80,null,"維持 500–1,500 mg q12h"],[50,80,"維持 500–1,000 mg q12h"],[30,50,"維持 250–750 mg q12h"],[null,30,"維持 250–500 mg q12h"]],hd:"維持 500–1,000 mg q24h；透析後追加 250–500 mg",note:"仿單以 BSA 校正 CrCl（mL/min/1.73 m²）分級，此處以 eGFR 代入；負荷劑量見上",r:["levPI"]},cls:"neuro",name:"Levetiracetam",brand:"Keppra",type:"抗癲癇藥",
+  dose:"癲癇重積第二線：60 mg/kg IV（上限 4,500 mg）。",adj:"負荷劑量不依腎功能減量；維持劑量見腎功能列。",
   caut:"嗜睡、躁動或情緒變化。",guide:src("aes16")+src("esett"),nhi:nhiQ("注射劑給付條件請確認")},
  {id:"vpa",cls:"neuro",name:"Valproate（IV）",brand:"Depakine",type:"抗癲癇藥",
   dose:"癲癇重積第二線：40 mg/kg IV（上限 3,000 mg）。",adj:"肝病避免。",
@@ -3866,8 +3914,8 @@ const DRUGS = [
  {id:"labet",cls:"cardio",name:"Labetalol",brand:"Trandate",type:"α／β blocker",
   dose:"20 mg IV（2 分鐘以上），每 10 分鐘 40–80 mg，總量 ≤300 mg；或 2 mg/min 輸注依血壓調整。主動脈剝離：SBP <120、HR 60–80（ACC/AHA 2022）。",adj:"肝病謹慎。",
   caut:"心搏過緩、房室傳導阻滯、氣喘、急性心衰竭。",guide:src("accAorta22")+src("labetPI"),nhi:nhiLic()},
- {id:"colch",cls:"cardio",name:"Colchicine",brand:"",type:"抗發炎",
-  dose:"急性心包炎（合併 aspirin 或 NSAID）：<70 kg 0.5 mg QD、≥70 kg 0.5 mg BID，3–6 個月。",adj:"老人、腎功能差減量（eGFR <30 避免或大幅減量）。",
+ {id:"colch",ren:{b:"crcl",t:[[null,30,"起始 0.3 mg/日，加量需密切監測（仿單 FMF；台灣錠劑 0.5 mg，依院內品項）"],[30,80,"密切監測副作用，可能需減量"],[80,null,"不需調整"]],hd:"起始 0.3 mg/日（仿單 FMF）",note:"心包炎劑量依 ESC；腎調整引自仿單（FMF、痛風）",r:["colchPI"]},cls:"cardio",name:"Colchicine",brand:"",type:"抗發炎",
+  dose:"急性心包炎（合併 aspirin 或 NSAID）：<70 kg 0.5 mg QD、≥70 kg 0.5 mg BID，3–6 個月。",adj:"老人注意；腎功能見腎功能列。",
   caut:"腹瀉；強效 CYP3A4／P-gp 抑制劑（clarithromycin 等）交互作用致中毒。",guide:src("escPeri25")+"（劑量來自二手整理）",nhi:nhiQ("心包炎非仿單適應症，給付請確認")},
  {id:"cagluc",cls:"metab",name:"Calcium gluconate 10%",brand:"",type:"鈣劑",
   dose:"高血鉀合併 ECG 變化：30 mL IV 10 分鐘以上，ECG 未改善可重複（或 10% CaCl₂ 10 mL）。有症狀低血鈣：10–20 mL 加入 50–100 mL 5% 葡萄糖 IV 10 分鐘，之後 100 mL 加入 1 L，50–100 mL/h。",adj:"—",
@@ -3938,25 +3986,25 @@ const DRUGS = [
  {id:"kcl",cls:"metab",name:"Potassium chloride",brand:"",type:"鉀補充",
   dose:"口服：輕度 24 mmol BID–TID、中度 24–36 mmol TID–QID；IV：20–40 mmol/L（不含葡萄糖），周邊 ≤40 mmol/L、通常 ≤10 mmol/h，>20 mmol/h 需中心靜脈與心電監測；每日上限 2–3 mmol/kg。",
   adj:"腎功能差減量。",caut:"IV 濃縮 KCl 嚴禁直接推注；同時補鎂。",guide:src("spsK"),nhi:nhiLic()},
- {id:"zol",cls:"metab",name:"Zoledronic acid",brand:"Zometa",type:"Bisphosphonate",
-  dose:"高血鈣（校正鈣 ≥12 mg/dL 合併補液）：4 mg IV 15 分鐘；最低點約 2–4 天。",adj:"腎功能差：減慢輸注或減量。",caut:"低血鈣、急性期反應、顎骨壞死（長期）。",
+ {id:"zol",ren:{b:"scr",t:[[null,4.5,"高血鈣：不需調整；每次給藥前驗 Cr"],[4.5,null,"Cr ≥4.5：臨床試驗排除，評估風險效益後才使用"]],hd:"Cr 通常 ≥4.5：評估風險效益",r:["zolPI"]},cls:"metab",name:"Zoledronic acid",brand:"Zometa",type:"Bisphosphonate",
+  dose:"高血鈣（校正鈣 ≥12 mg/dL 合併補液）：4 mg IV 15 分鐘；最低點約 2–4 天。",adj:"輸注 ≥15 分鐘；腎功能見腎功能列。",caut:"低血鈣、急性期反應、顎骨壞死（長期）。",
   guide:src("sfeHyperCa"),nhi:nhiQ("高血鈣用途之給付條件請確認")},
  {id:"phos",cls:"metab",name:"Phosphate（IV）",brand:"台灣品項請確認",type:"磷補充",
   dose:"<0.3 mmol/L：40–60 kg 25 mmol、61–80 kg 35 mmol、81–120 kg 50 mmol；0.3–0.6（無法口服）：10／15／20 mmol；輸注 12–24 小時。",adj:"腎功能差減量或不適用。",
   caut:"先矯正低血鈣；製劑含鉀或鈉。",guide:src("ukmiP"),nhi:nhiLic()},
- {id:"ddavp",cls:"metab",name:"Desmopressin",brand:"Minirin",type:"Vasopressin 類似物",
-  dose:"低血鈉過度矯正：2 µg IV，間隔不短於 8 小時（合併無電解質水 10 mL/kg 1 小時，專科指導）。",adj:"—",caut:"低血鈉、水中毒；密集追蹤 Na。",guide:src("eurHypoNaSl"),nhi:nhiLic()},
+ {id:"ddavp",ren:{b:"crcl",t:[[null,50,"禁忌（DDAVP 注射仿單：CrCl <50）；低血鈉 rescue 屬仿單外，由腎臟科或內分泌科決定"],[50,null,"不需調整"]],hd:"禁忌（CrCl <50）",r:["ddavpPI"]},cls:"metab",name:"Desmopressin",brand:"Minirin",type:"Vasopressin 類似物",
+  dose:"低血鈉過度矯正：2 µg IV，間隔不短於 8 小時（合併無電解質水 10 mL/kg 1 小時，專科指導）。",adj:"見腎功能列。",caut:"低血鈉、水中毒；密集追蹤 Na。",guide:src("eurHypoNaSl"),nhi:nhiLic()},
  {id:"nicar",cls:"cardio",name:"Nicardipine（IV）",brand:"Perdipine",type:"Dihydropyridine CCB",
   dose:"高血壓急症：5 mg/h 起，每 15–30 分鐘加 2.5 mg/h（上限 15 mg/h），達標後減量。",adj:"—",caut:"反射性心搏過速、靜脈炎；嚴重主動脈瓣狹窄謹慎。",guide:src("escHtnEm"),nhi:nhiLic()},
  {id:"urap",cls:"cardio",name:"Urapidil",brand:"Ebrantil",type:"α1 阻斷劑",
   dose:"高血壓急症：ESC 立場文件 12.5–25 mg IV bolus，5–40 mg/h 輸注；歐盟仿單 10–50 mg 緩慢 IV，輸注 2 mg/min 起、維持平均 9 mg/h，療程 ≤7 天。",adj:"老人減量。",caut:"低血壓。",guide:src("escHtnEm")+src("urapSmPC"),nhi:nhiLic()},
  {id:"ond",cls:"gi",name:"Ondansetron",brand:"Zofran",type:"5-HT3 拮抗劑",
   dose:"4 mg IV（PONV）；單次 IV 不超過 16 mg。",adj:"重度肝病每日上限降低（依仿單）。",caut:"QT 延長（先矯正 K、Mg；長 QT、心衰竭、心搏過緩）；便秘。",guide:src("ponv20")+src("fdaOnd12"),nhi:nhiLic()},
- {id:"mcp",cls:"gi",name:"Metoclopramide",brand:"Primperan",type:"多巴胺拮抗劑",
-  dose:"10 mg IV（≥3 分鐘）或口服，每日最多 3 次、≤5 天，24 小時上限 0.5 mg/kg；偏頭痛 10 mg IV。",adj:"腎功能差減量（依仿單）。",
+ {id:"mcp",ren:{b:"crcl",t:[[null,40,"起始約一半劑量（如 5 mg），依療效調整"],[40,null,"不需調整"]],hd:"起始約一半劑量",r:["mcpPI"]},cls:"gi",name:"Metoclopramide",brand:"Primperan",type:"多巴胺拮抗劑",
+  dose:"10 mg IV（≥3 分鐘）或口服，每日最多 3 次、≤5 天，24 小時上限 0.5 mg/kg；偏頭痛 10 mg IV。",adj:"見腎功能列。",
   caut:"腸阻塞禁用；Parkinson 病避免；錐體外症狀、遲發性運動異常（老人）。",guide:src("emaMcp13")+src("ahs16")+src("beers23"),nhi:nhiLic()},
- {id:"apap",cls:"neuro",name:"Acetaminophen",brand:"Panadol、Scanol",type:"解熱止痛",
-  dose:"≥50 kg：1 g q6h（上限 4 g/日）；<50 kg：15 mg/kg（上限 60 mg/kg 且 ≤3 g）；肝病、酒精、營養不良：1 g TID（上限 3 g）；CrCl <30：間隔 6 小時。",adj:"見劑量。",
+ {id:"apap",ren:{b:"crcl",t:[[null,30,"FDA：延長給藥間隔並減少每日總量；NHS：間隔至少 6 小時",true],[30,null,"不需調整"]],hd:"延長給藥間隔並減少每日總量",r:["apapIV","nhsPara"]},cls:"neuro",name:"Acetaminophen",brand:"Panadol、Scanol",type:"解熱止痛",
+  dose:"≥50 kg：1 g q6h（上限 4 g/日）；<50 kg：15 mg/kg（上限 60 mg/kg 且 ≤3 g）；肝病、酒精、營養不良：1 g TID（上限 3 g）。",adj:"肝病見劑量；腎功能見腎功能列。",
   caut:"重複含 acetaminophen 之複方；嚴重肝衰竭禁 IV。",guide:src("nhsPara")+src("asaAps16"),nhi:nhiLic()},
  {id:"zolp",cls:"neuro",name:"Zolpidem",brand:"Stilnox",type:"Z-drug 安眠藥",
   dose:"女性 5 mg、男性 5–10 mg（上限 10 mg）睡前，需剩 7–8 小時；老人、虛弱、輕中度肝病 5 mg。",adj:"嚴重肝功能不全避免。",
@@ -3981,17 +4029,27 @@ const DRUGS = [
   dose:"RSI 1.2 mg/kg（仿單 0.6–1.2），依實際體重。",adj:"老人作用延長。",caut:"作用約 1 小時以上；需 sugammadex 16 mg/kg 才能立即逆轉。",guide:src("rocPI")+src("sccmRsi23"),nhi:nhiLic()},
  {id:"sux",cls:"resp",name:"Succinylcholine",brand:"",type:"去極化肌肉鬆弛劑",
   dose:"仿單 0.6 mg/kg（0.3–1.1）；RSI 實務多用 1–1.5 mg/kg（請確認院內）。",adj:"—",caut:"高血鉀、惡性高熱體質、肌病變、燒傷／創傷／去神經損傷急性期後禁用；心搏過慢。",guide:src("sccPI")+src("sccmRsi23"),nhi:nhiLic()},
- {id:"suga",cls:"resp",name:"Sugammadex",brand:"Bridion",type:"肌肉鬆弛逆轉",
-  dose:"立即逆轉（rocuronium 1.2 mg/kg 後 3 分鐘）16 mg/kg；常規 2 或 4 mg/kg。",adj:"重度腎功能不全不建議（依仿單）。",caut:"過敏、心搏過慢；16 mg/kg 後 24 小時內再用 rocuronium 效果差。",guide:src("sugPI"),nhi:nhiQ("給付條件請確認")}
+ {id:"suga",ren:{b:"crcl",t:[[null,30,"不建議"],[30,80,"劑量同一般；常規逆轉後再用 rocuronium 需間隔 24 小時"],[80,null,"不需調整"]],hd:"不建議（含透析）",r:["sugPI"]},cls:"resp",name:"Sugammadex",brand:"Bridion",type:"肌肉鬆弛逆轉",
+  dose:"立即逆轉（rocuronium 1.2 mg/kg 後 3 分鐘）16 mg/kg；常規 2 或 4 mg/kg。",adj:"見腎功能列。",caut:"過敏、心搏過慢；16 mg/kg 後 24 小時內再用 rocuronium 效果差。",guide:src("sugPI"),nhi:nhiQ("給付條件請確認")}
 ];
 const DCLS = {all:"全部",resp:"呼吸",cardio:"心血管・抗凝",neuro:"神經",metab:"代謝・電解質",gi:"腸胃・肝",anti:"解毒・逆轉"};
 
+function mcpLow(){ const x=rv("crcl"); return !!(x&&(x.hd||x.v<40)); }
+function renRow(ren){
+  const pk=renPick(ren), bl={crcl:"CrCl",egfr:"eGFR",scr:"Cr"}[ren.b], u=ren.b==="scr"?"mg/dL":"";
+  const rng=(lo,hi,inc)=> lo===null?`${bl} ${inc?"≤":"<"}${hi}${u}`: hi===null?`${bl} ≥${lo}${u}`:`${bl} ${lo}–<${hi}${u}`;
+  const L=(ren.t||[]).map(([lo,hi,txt,inc])=>{ const on=pk&&!pk.x.hd&&pk.txt===txt; return `${on?"<b>▶ ":""}${rng(lo,hi,inc)}：${txt}${on?"</b>":""}`; });
+  if(ren.hd) L.push(`${pk&&pk.x.hd?"<b>▶ ":""}透析：${ren.hd}${pk&&pk.x.hd?"</b>":""}`);
+  const cur=pk? `<div>${renTag(pk.x)}</div>` : `<div class="small muted">填 eGFR，或年齡、性別、體重、Cr 以自動判定</div>`;
+  return cur+ul(L)+(ren.note?`<div class="small muted">${ren.note}</div>`:"")+(ren.r||[]).map(k=>src(k)).join("");
+}
 function renderDrugs(){
   const list = DRUGS.filter(d=>S.dflt==="all"||d.cls===S.dflt);
   return list.map(d=>`<div class="card drug"><h3>${esc(d.name)} ${d.brand?`<span class="sub">（${esc(d.brand)}）</span>`:""}${d.upd?upd(d.upd):""}</h3><div class="cb">
     <div class="row"><div class="k">類別</div><div>${d.type}</div></div>
     <div class="row"><div class="k">劑量</div><div>${d.dose}</div></div>
     <div class="row"><div class="k">調整</div><div>${d.adj}</div></div>
+    ${d.ren?`<div class="row"><div class="k">腎功能</div><div>${renRow(d.ren)}</div></div>`:""}
     <div class="row"><div class="k">注意</div><div>${d.caut}</div></div>
     <div class="row"><div class="k">指引建議</div><div>${d.guide}</div></div>
     <div class="row"><div class="k">健保</div><div>${d.nhi}${src("nhi")}</div></div>
@@ -4178,7 +4236,7 @@ function buildPanels(){
   </div></div></div>
   <div class="card"><h2>處置流程</h2><div class="cb" id="r-hd"></div></div>`;
   P.calc=calcPanel();
-  P.drug=`<div class="filters seg" id="dSeg" style="margin-bottom:10px">${Object.entries(DCLS).map(([k,v])=>`<button type="button" class="btn" data-dc="${k}">${v}</button>`).join("")}</div><div id="r-drugs"></div>`;
+  P.drug=`<div class="filters seg" id="dSeg" style="margin-bottom:10px">${Object.entries(DCLS).map(([k,v])=>`<button type="button" class="btn" data-dc="${k}">${v}</button>`).join("")}</div><div class="note" style="margin-bottom:10px">腎功能列依病人資料的 CrCl（Cockcroft-Gault；需年齡、性別、體重、Cr）或 eGFR 自動標出適用劑量（▶）。抗生素劑量與腎調整見 <a href="https://aaa0015100-coder.github.io/abx-helper/" target="_blank" rel="noopener">abx-helper</a>。</div><div id="r-drugs"></div>`;
   P.ref=renderRefPanel();
   return P;
 }
@@ -4196,6 +4254,7 @@ function renderRefPanel(){
     ["GI bleeding",["acgUgib21","esgeVar22","acgLgib23","acgAc22","haltit","aabb23","gbs","childPugh"]],
     ["低血壓／休克、升壓藥",["ssc26hemo","levoPI","epiPI","vasoPI","pitTW","dopaPI","dobuPI","pheniPI","sfeAdrenal"]],
     ["心搏過速／過慢、ACLS",["ahaAcls25","ahaAlg25","rcuk25","escAf24","accAf23","escSvt19","diltPI","metoPI"]],
+    ["腎功能劑量（仿單）",["levPI","mcpPI","mgPI","apapIV","colchPI","zolPI","ddavpPI","tramPI","hmPI","morPI","ketoPI"]],
     ["RSI 插管",["sccmRsi23","rsiTrial25","preoxi24","etoPI","ketPI","propPI","rocPI","sccPI","sugPI"]],
     ["計算工具：類固醇、輸血",["litflSt","eseGiai24","woodcock20","aabbPlt25","chestTx25","vghBlood"]],
     ["高血糖",["dkaCcjm"]],
@@ -4211,7 +4270,12 @@ function renderRefPanel(){
     <div class="note">建議強度標示：AHA/ACC、AHA/ASA＝Class 1／2a／2b／3 ＋ LOE；ESC＝I／IIa／IIb／III；ERS/ATS、GRADE＝strong／conditional；BTS＝Grade A–D。「依輸入推導」的鑑別排序為本工具的規則，不是指引分類。</div>
   </div></div>
   <div class="card"><h2>Changelog</h2><div class="cb small">
-    <p style="margin:0 0 6px"><b>v0.7（${CHECKED}）</b></p>
+    <p style="margin:0 0 6px"><b>v0.8（${CHECKED}）</b></p>
+    <ul class="tight"><li>腎功能：病人資料新增 Cr 與「透析中」；有年齡、性別、體重、Cr 時自動算 Cockcroft-Gault CrCl（BMI ≥30 用調整體重），摘要列顯示 CrCl 或「透析」。仿單以 CrCl 訂切點者用 CrCl，缺時以 eGFR 代並註明。</li>
+    <li>藥物頁新增「腎功能」列（enoxaparin、levetiracetam、metoclopramide、magnesium sulfate、sugammadex、acetaminophen、colchicine、zoledronic acid、desmopressin），依病人腎功能以 ▶ 標出適用劑量；出處為各藥 FDA／EMA 仿單。抗生素見 abx-helper。</li>
+    <li>各頁劑量自動調整並標「已依腎功能調整」：PE 的 enoxaparin（CrCl <30 改 q24h、透析改提示 UFH）、癲癇重積 levetiracetam 維持劑量（含透析後追加）、metoclopramide（CrCl <40 約半量）、止痛（acetaminophen、NSAID、morphine、hydromorphone、tramadol、ketorolac）、心包炎 colchicine、RSI sugammadex、低血鈉 desmopressin（CrCl <50 禁忌）、高血鈣 zoledronic acid（Cr ≥4.5）、健保 NOAC 判定改用 CrCl。</li>
+    <li>測試：fuzz.js 新增腎功能不變式（enoxaparin 頻次、levetiracetam 維持、NSAID、metoclopramide、desmopressin、sugammadex、藥物頁 ▶ 唯一）；2,500 組 0 失敗；同組不變式對 v0.7 的頁面文字抓到 10 種錯誤。</li></ul>
+    <p style="margin:8px 0 6px"><b>v0.7（2026-10-19）</b></p>
     <ul class="tight"><li>氧氣目標依情境：COPD／CO₂ 滯留 88–92%；疑 ACS（STEMI、缺血 ECG、troponin 上升或升高、典型胸痛）SpO₂ <90% 才給氧；氣喘 92–95%（GINA 2026）；其餘 94–98%（BTS）。與 BTS 不同處並列。跨頁氧氣卡、喘頁、胸痛頁與 SBAR 一致。</li>
     <li>敗血症 30 mL/kg：病人資料新增身高；BMI >30 改顯示調整體重與理想體重的量（SSC 2026）；心衰竭、透析時並列 SSC 2026（未另訂減量）與 ESC HF（避免大量輸液）。</li>
     <li>RSI：低血壓、shock index ≥1 或使用升壓藥時，etomidate 0.2 mg/kg、ketamine 1 mg/kg（仿單下限），propofol 降為次選。</li>
@@ -4270,6 +4334,7 @@ function renderStrip(){
   v("temp","T","°C"); const g=GCS(); if(g!==null) c.push(`<span class="chip ${g<=8?"hi":""}">GCS <b>${g}</b></span>`);
   const gl=num(S.glu); if(gl!==null) c.push(`<span class="chip ${gl<70?"hi":""}">血糖 <b>${gl}</b></span>`);
   v("pod","POD"); v("age","年齡");
+  { const r=renal(); if(r.hd) c.push(`<span class="chip mid"><b>透析</b></span>`); else if(r.crcl!==null) c.push(`<span class="chip ${r.crcl<30?"mid":""}">CrCl <b>${fmt(r.crcl,0)}</b></span>`); }
   if(S.vs_ok&&!news2().parts.length) c.push(`<span class="chip"><b>VS 穩定</b></span>`);
   if(S.dnr) c.push(`<span class="chip ${S.dnr!=="full"?"mid":""}"><b>${{full:"全力急救",dni:"DNR／DNI",comfort:"安寧"}[S.dnr]}</b></span>`);
   document.getElementById("strip").innerHTML=`<span class="lbl">病人摘要</span>${c.length?c.join(""):'<span class="muted">尚未輸入</span>'}<button class="linkbtn" id="sbarBtn" type="button">SBAR 交班</button><button class="linkbtn" id="clearAll" type="button">清除全部</button>`;
