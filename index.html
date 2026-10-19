@@ -196,15 +196,15 @@ textarea.sbar{width:100%;font:13.5px/1.55 var(--f-mono);color:var(--ink);backgro
 <script>
 "use strict";
 /* ================= 基本設定 ================= */
-const APP_VERSION="0.6";
-const CHECKED = "2026-10-18";
+const APP_VERSION="0.7";
+const CHECKED = "2026-10-19";
 
 /* ================= 出處 ================= */
 const REF = {
   /* --- 共用 --- */
   news2:{t:"NEWS2（RCP 2017）",f:"Royal College of Physicians. National Early Warning Score (NEWS) 2: Standardising the assessment of acute-illness severity in the NHS. London: RCP, 2017。六項生理參數＋給氧；總分 0–4 低風險（任一單項 3 分為 low–medium，需 urgent ward-based response）、5–6 中風險（urgent response 門檻）、≥7 高風險（emergency response，團隊需含重症／呼吸道處置能力）。SpO₂ Scale 2 僅用於經臨床確認之 hypercapnic 呼吸衰竭（目標 88–92%）。新出現混亂（C）與 V／P／U 同計 3 分。",u:"https://www.rcp.ac.uk/media/a4ibkkbf/news2-final-report_0_0.pdf"},
   ssc21:{t:"SSC 2021",f:"Evans L, Rhodes A, Alhazzani W, et al. Surviving Sepsis Campaign: International Guidelines for Management of Sepsis and Septic Shock 2021. Crit Care Med 2021;49:e1063–e1143。不建議以 qSOFA 作為單一篩檢工具（相較 SIRS、NEWS、MEWS；strong）；可能敗血性休克或高度懷疑敗血症：抗生素立即、理想 1 小時內（strong）；可能敗血症但無休克：快速評估，若仍懷疑感染，3 小時內給抗生素（weak）。",u:"https://sccm.org/sepsisguidelines"},
-  ssc26:{t:"SSC 2026",f:"Prescott HC, Antonelli M, Alhazzani W, et al. Surviving Sepsis Campaign: International Guidelines for Management of Sepsis and Septic Shock 2026. Crit Care Med 2026（2026/3/23 線上發表）. doi:10.1097/CCM.0000000000007075。住院成人以 NEWS／NEWS2、MEWS 或 SIRS 篩檢，不以 qSOFA 單獨篩檢（conditional）；不以單一生物標記確立或排除敗血症（strong）；血液培養儘早、理想於抗生素前（strong）；敗血性休克與可能或確定敗血症：立即、理想 1 小時內給抗生素（strong）；僅「可能」敗血症無休克：限時快速評估，仍懷疑感染則 3 小時內（conditional）；低灌流或休克：3 小時內至少 30 mL/kg 晶體液（conditional）；晶體液為第一線（strong），balanced 優於 0.9% NaCl（conditional，腦外傷除外），不合併 albumin（conditional），不用 starch（strong）；以動態指標指引輸液（conditional）；norepinephrine 為第一線升壓劑（strong），可先由周邊開始（conditional），劑量上升時加 vasopressin（conditional），仍不足再加 epinephrine（conditional），不建議 terlipressin（conditional）；MAP 目標 65 mmHg（strong），≥65 歲 60–65（conditional）；敗血性休克建議 IV 類固醇（conditional）。全文劑量細節未取得。",u:"https://www.sccm.org/clinical-resources/guidelines/guidelines/surviving-sepsis-campaign-international-guidelines-for-management-of-sepsis-and-septic-shock-2026"},
+  ssc26:{t:"SSC 2026",f:"Prescott HC, Antonelli M, Alhazzani W, et al. Surviving Sepsis Campaign: International Guidelines for Management of Sepsis and Septic Shock 2026. Crit Care Med 2026（2026/3/23 線上發表）. doi:10.1097/CCM.0000000000007075。住院成人以 NEWS／NEWS2、MEWS 或 SIRS 篩檢，不以 qSOFA 單獨篩檢（conditional）；不以單一生物標記確立或排除敗血症（strong）；血液培養儘早、理想於抗生素前（strong）；敗血性休克與可能或確定敗血症：立即、理想 1 小時內給抗生素（strong）；僅「可能」敗血症無休克：限時快速評估，仍懷疑感染則 3 小時內（conditional）；低灌流或休克：3 小時內至少 30 mL/kg 晶體液（conditional）；晶體液為第一線（strong），balanced 優於 0.9% NaCl（conditional，腦外傷除外），不合併 albumin（conditional），不用 starch（strong）；以動態指標指引輸液（conditional）；norepinephrine 為第一線升壓劑（strong），可先由周邊開始（conditional），劑量上升時加 vasopressin（conditional），仍不足再加 epinephrine（conditional），不建議 terlipressin（conditional）；MAP 目標 65 mmHg（strong），≥65 歲 60–65（conditional）；敗血性休克建議 IV 類固醇（conditional）。Remark：30 mL/kg 以實際體重計，BMI >30 可用調整或理想體重（調整體重＝IBW＋0.4×〔實際−IBW〕，Devine）；觀察性研究中前 3 小時 <30 mL/kg 與死亡率上升相關，末期腎病與心衰竭病人亦同；初始 30 mL/kg 後 liberal 或 restrictive 依病人（如心衰竭）與系統因素決定（conditional）。（體重與心衰竭／末期腎病段落：2026-10-19 依 Intensive Care Med 全文核對）",u:"https://www.sccm.org/clinical-resources/guidelines/guidelines/surviving-sepsis-campaign-international-guidelines-for-management-of-sepsis-and-septic-shock-2026"},
   sepsis3:{t:"Sepsis-3（qSOFA）",f:"Singer M, Deutschman CS, Seymour CW, et al. The Third International Consensus Definitions for Sepsis and Septic Shock (Sepsis-3). JAMA 2016;315:801–10。qSOFA：RR ≥22、意識改變、SBP ≤100，≥2 項提示預後較差。"},
   /* --- 氧氣與呼吸支持 --- */
   bts:{t:"BTS 氧氣 2017",f:"O'Driscoll BR, Howard LS, Earis J, Mak V. BTS guideline for oxygen use in adults in healthcare and emergency settings. Thorax 2017;72(Suppl 1):ii1–ii90。多數急性病人 SpO₂ 目標 94–98%；COPD 或其他 hypercapnic 呼吸衰竭風險者 88–92%（待血液氣體），PCO₂ 正常可調回 94–98%（曾需 NIV／插管者除外），30–60 分鐘後複驗血液氣體。SpO₂ <85% 且無 hypercapnia 風險者先用 reservoir mask 15 L/min。BTS 2019 檢視 IOTA 統合分析後認為無需更新；新版目標血氧指引自 2023 年起編寫中。",u:"https://www.brit-thoracic.org.uk/quality-improvement/guidelines/emergency-oxygen/"},
@@ -215,7 +215,7 @@ const REF = {
   berend:{t:"Berend NEJM 2014",f:"Berend K, de Vries APJ, Gans ROB. Physiological approach to assessment of acid–base disturbances. N Engl J Med 2014;371:1434–45。代謝性酸中毒預期 PaCO₂＝1.5 × HCO₃⁻ ＋ 8 ± 2（Winter）；呼吸性酸中毒急性每升 10 mmHg PaCO₂、HCO₃⁻ 升 1，慢性升 3.5–4；代謝性鹼中毒 HCO₃⁻ 每升 1、PaCO₂ 升約 0.7；anion gap＝Na −（Cl ＋ HCO₃⁻），白蛋白每降 1 g/dL 校正 ＋2.5；delta ratio 判斷合併的代謝異常。"},
   /* --- COPD／氣喘 --- */
   gold26:{t:"GOLD 2026",f:"Global Initiative for Chronic Obstructive Lung Disease. Global Strategy for the Diagnosis, Management, and Prevention of COPD, 2026 Report。第 4 章（急性惡化）全面改寫，新增 HFNC 與 NIV 等支持模式。住院惡化：SABA ± SAMA；prednisone 40 mg（或等效）每日 5 天，口服與靜脈等效；抗生素用於痰量增加＋膿痰，或需呼吸器者，療程 5–7 天；SpO₂ 目標 88–92%；呼吸性酸中毒首選 NIV。GOLD 全文需註冊，本工具依公開摘要整理，請以原文確認。",u:"https://goldcopd.org/"},
-  gina26:{t:"GINA 2026",f:"Global Initiative for Asthma. Global Strategy for Asthma Management and Prevention, 2026 update。急性發作：新增 4 張流程圖；氧氣門檻與目標下修——SpO₂ <92% 才給氧，成人與青少年目標上限 95%（舊版 93–95%）。SABA（± ipratropium 於重度）、早期全身性類固醇；重度且初始治療反應不佳時考慮 IV magnesium sulfate。GINA 全文請以原文確認。",u:"https://www.guidelinecentral.com/insights/may-2026-gina-asthma-guideline-spotlight/"},
+  gina26:{t:"GINA 2026",f:"Global Initiative for Asthma. Global Strategy for Asthma Management and Prevention, 2026 update。急性發作：新增 4 張流程圖；氧氣門檻與目標下修——SpO₂ <92% 才給氧，成人與青少年目標上限 95%（舊版 93–95%）。SABA（± ipratropium 於重度）、早期全身性類固醇；重度且初始治療反應不佳時考慮 IV magnesium sulfate。氧氣門檻（<92% 才給氧）與上限 95%：2026-10-19 依 Guideline Central GINA 2026 摘要核對；類固醇、magnesium 劑量未取得全文，請確認。",u:"https://www.guidelinecentral.com/insights/may-2026-gina-asthma-guideline-spotlight/"},
   /* --- 心衰竭 --- */
   escHf:{t:"ESC 心衰竭 2021／2023",f:"McDonagh TA, Metra M, Adamo M, et al. 2021 ESC Guidelines for the diagnosis and treatment of acute and chronic heart failure. Eur Heart J 2021;42:3599–726；2023 Focused Update. Eur Heart J 2023;44:3627–39。急性心衰竭靜脈 loop diuretic：未使用利尿劑者 furosemide 20–40 mg IV，已長期使用者為口服每日劑量的 1–2 倍 IV；2 小時 spot urine Na <50–70 mEq/L 或 6 小時尿量 <100–150 mL/h 為反應不足 → 劑量加倍（上限約 400–600 mg/日，嚴重腎功能不全可至 1,000 mg）或合併不同作用部位利尿劑。SBP >110 mmHg 可考慮 IV 血管擴張劑（IIb）；不常規使用 opioid（III／IIb）。",u:"https://www.escardio.org/guidelines/clinical-practice-guidelines/all-esc-practice-guidelines/focused-update-on-heart-failure-guidelines"},
   hfaDiur:{t:"HFA 利尿劑共識 2019",f:"Mullens W, Damman K, Harjola VP, et al. The use of diuretics in heart failure with congestion — a position statement from the Heart Failure Association of the ESC. Eur J Heart Fail 2019;21:137–55。以 2 小時 spot urine Na 與 6 小時尿量評估反應並逐步加強（natriuresis-guided）。"},
@@ -238,6 +238,7 @@ const REF = {
   aes16:{t:"AES 癲癇重積 2016",f:"Glauser T, Shinnar S, Gloss D, et al. Evidence-based guideline: treatment of convulsive status epilepticus in children and adults. Epilepsy Curr 2016;16:48–61。0–5 分鐘穩定；5–20 分鐘 benzodiazepine：lorazepam 0.1 mg/kg IV（每劑上限 4 mg，可重複一次）、midazolam 10 mg IM（>40 kg）、diazepam 0.15–0.2 mg/kg IV（每劑上限 10 mg，可重複一次）；20–40 分鐘第二線：fosphenytoin 20 mg PE/kg（上限 1,500 mg PE）、valproate 40 mg/kg（上限 3,000 mg）、levetiracetam 60 mg/kg（上限 4,500 mg）擇一，或 phenobarbital 15 mg/kg；40–60 分鐘重複第二線或麻醉劑量藥物，需 ICU 與 EEG。"},
   esett:{t:"ESETT",f:"Kapur J, Elm J, Chamberlain JM, et al. Randomized trial of three anticonvulsant medications for status epilepticus. N Engl J Med 2019;381:2103–13；Chamberlain JM, et al. Lancet 2020;395:1217–24（依年齡分析）。benzodiazepine 失敗後 levetiracetam 60 mg/kg、fosphenytoin 20 mg PE/kg、valproate 40 mg/kg 效果相近（約 45–47% 止抽），兒童、成人、老人一致。"},
   cerebyxPI:{t:"Fosphenytoin 仿單",f:"CEREBYX（fosphenytoin sodium）Prescribing Information（Pfizer）。Boxed warning：成人 IV 給藥速率不可超過 150 mg PE/min（嚴重低血壓與心律不整）；癲癇重積負荷 15–20 mg PE/kg，100–150 mg PE/min；需心電監測。台灣許可證與院內品項請確認。",u:"https://www.pfizermedical.com/cerebyx"},
+  sdaDel:{t:"SIGN 157／SDA 譫妄用藥",f:"Healthcare Improvement Scotland. SIGN 157: Risk reduction and management of delirium（2019）；NHS Scotland Right Decisions 版「Pharmacological treatment」（引 Scottish Delirium Association 處置路徑，專家意見）。藥物療效與安全性證據不足以提出建議；先試非藥物處置並處理疼痛、尿滯留、便秘、口渴等原因；haloperidol 0.5–1 mg 口服（24 小時 ≤2 mg）或 0.5 mg IM（24 小時 ≤2 mg），最低劑量起、每 24 小時檢視；與延長 QTc 藥物併用屬禁忌，屬仿單外使用依院內規定；有 Parkinsonism 或 Lewy body 失智徵象不用；抗精神病藥禁忌時 lorazepam 0.5–1 mg 口服（24 小時 ≤2 mg）；年輕病人可能需較高劑量。（2026-10-19 核對）",u:"https://rightdecisions.scot.nhs.uk/risk-reduction-and-management-of-delirium-sign/treatment/pharmacological-treatment"},
   niceDel:{t:"NICE 譫妄 CG103",f:"National Institute for Health and Care Excellence. Delirium: prevention, diagnosis and management in hospital and long-term care (CG103；2019／2023 更新)。先找原因並以非藥物處置；病人痛苦或危及自身／他人且言語與非言語降溫無效時，考慮短期（通常 ≤1 週）haloperidol，由最低適當劑量開始謹慎調整；Parkinson's disease、Lewy body dementia 謹慎使用或不用。2019 起不再列 olanzapine。",u:"https://www.nice.org.uk/guidance/cg103"},
   mhraHal:{t:"MHRA 2021 haloperidol",f:"MHRA Drug Safety Update (Dec 2021)：老年譫妄使用 haloperidol 神經與心臟不良反應風險增加；僅在非藥物處置無效且無禁忌（含 Parkinson's disease、Lewy body dementia）時使用，最低劑量、最短時間，監測心臟（QT）與錐體外症狀。",u:"https://www.gov.uk/drug-safety-update/haloperidol-haldol-reminder-of-risks-when-used-in-elderly-patients-for-the-acute-treatment-of-delirium"},
   esaic24:{t:"ESAIC 術後譫妄 2024",f:"Aldecoa C, Bettelli G, Bilotta F, et al. Update of the European Society of Anaesthesiology and Intensive Care Medicine evidence-based and consensus-based guideline on postoperative delirium in adult patients. Eur J Anaesthesiol 2024;41:81–108。以有效工具每日篩檢至少 3 天；術前、術中、術後多元非藥物預防；dexmedetomidine 僅選擇性使用。",u:"https://pubmed.ncbi.nlm.nih.gov/37599617/"},
@@ -330,7 +331,7 @@ const GLOSS = {
 /* ================= 狀態 ================= */
 const S0 = {
   // 病人背景
-  age:null, sex:"", wt:null, egfr:null, pod:null, dnr:"",
+  age:null, sex:"", wt:null, ht:null, egfr:null, pod:null, dnr:"",
   hx_copd:false, hx_hcrf:false, hx_asthma:false, hx_hf:false, hx_ckd:false, hx_cirr:false, hx_dm:false, hx_cancer:false, hx_vte:false, hx_pd:false,
   med_opioid:false, med_benzo:false, med_ac:"", med_insulin:false, med_antichol:false,
   // 生命徵象
@@ -457,12 +458,36 @@ function gcsCalc(){
 function GCS(){ const g=gcsCalc(); return g!==null? g : num(S.gcs); }
 function onO2(){ if(S.o2_dev&&S.o2_dev!=="air") return true; if(S.o2_dev==="air") return false; return S.o2==="o2"? true : S.o2==="air"? false : null; }
 function hypercapRisk(){ const p=num(S.pco2); return !!(S.hx_copd||S.hx_hcrf||(p!==null&&p>45)); }
+function acsSusp(){ return !!(S.ecg==="stemi"||S.ecg==="ischemia"||S.trop==="rise"||S.trop==="pos"||S.c_typical); }
+/* SpO₂ 目標：hypercapnia 風險 > 疑 ACS > 氣喘 > 一般（BTS）。後兩者與 BTS 不同，以 alt 並列 */
 function o2Target(){
-  if(hypercapRisk()) return {lo:88,hi:92,txt:"88–92%",why:"COPD 或其他 hypercapnic 呼吸衰竭風險"+(num(S.pco2)!==null&&num(S.pco2)>45?"（PaCO₂ >45）":"")};
-  return {lo:94,hi:98,txt:"94–98%",why:"無 hypercapnia 風險"};
+  if(hypercapRisk()) return {lo:88,hi:92,txt:"88–92%",en:"88-92%",why:"COPD 或其他 hypercapnic 呼吸衰竭風險"+(num(S.pco2)!==null&&num(S.pco2)>45?"（PaCO₂ >45）":""),refs:["bts"]};
+  if(acsSusp()) return {lo:90,hi:98,txt:"≥90%",en:"≥90% (ACS)",why:"疑 ACS：SpO₂ <90% 才給氧",refs:["accAcs25","bts"],
+    alt:`指引不同：ACC/AHA ACS 2025 SpO₂ <90% 才給氧 ${src("accAcs25")}；BTS 2017 一般急性病人目標 94–98% ${src("bts")}。本工具依 ACS 指引判定是否給氧，給氧中仍以 >98% 為下調門檻。`};
+  if(S.hx_asthma) return {lo:92,hi:95,txt:"92–95%",en:"92-95% (asthma)",why:"氣喘：SpO₂ <92% 才給氧、上限 95%",refs:["gina26","bts"],
+    alt:`指引不同：GINA 2026 SpO₂ <92% 才給氧、成人上限 95% ${src("gina26")}；BTS 2017 一般急性病人 94–98% ${src("bts")}。本工具依 GINA 判定。`};
+  return {lo:94,hi:98,txt:"94–98%",en:"94-98%",why:"無 hypercapnia 風險",refs:["bts"]};
 }
 function alteredMental(){ const g=GCS(); return !!(S.conf || (g!==null && g<15)); }
 function postop(){ const p=num(S.pod); return p!==null && p<=28; }
+/* 理想體重（Devine）：需身高與性別 */
+function ibwCalc(){ const h=num(S.ht); if(h===null||h<120||(S.sex!=="m"&&S.sex!=="f")) return null; return (S.sex==="m"?50:45.5)+0.9055*(h-152.4); }
+/* 敗血症起始 30 mL/kg：SSC 2026 remark——BMI >30 以調整或理想體重計（調整體重＝IBW＋0.4×(實際−IBW)）；
+   心衰竭／末期腎病：SSC 未另訂減量（引觀察性資料），之後 liberal／restrictive 依病人與監測床位 */
+function fluid30(){
+  const w=num(S.wt), h=num(S.ht), R=v=>Math.round(30*v/100)*100, notes=[];
+  let vol="";
+  if(w!==null){
+    const bmi=(h!==null&&h>=120)? w/Math.pow(h/100,2) : null;
+    if(bmi!==null&&bmi>30){ const ibw=ibwCalc();
+      if(ibw!==null){ const abw=ibw+0.4*(w-ibw); vol=`（BMI ${fmt(bmi,0)} >30：調整體重 ${fmt(abw,0)} kg → <b>${R(abw)} mL</b>；理想體重 ${fmt(ibw,0)} kg → ${R(ibw)} mL）`; }
+      else vol=`（實際體重 ${R(w)} mL；BMI ${fmt(bmi,0)} >30 應改用調整或理想體重：填性別後自動計算）`; }
+    else { vol=`（${R(w)} mL）`; if(h===null) notes.push(`BMI >30 時改用調整或理想體重（填身高、性別自動計算）${src("ssc26")}`); }
+  }
+  const hf=S.hx_hf||S.s_us_lv;
+  if(hf||S.u_hd) notes.push(`${[hf?(S.hx_hf?"心衰竭":"POCUS LV 收縮差"):"",S.u_hd?"透析":""].filter(Boolean).join("、")}：SSC 2026 未另訂減量，仍建議至少 30 mL/kg（觀察性研究中前 3 小時 <30 mL/kg 與死亡率上升相關，末期腎病與心衰竭病人亦同）；之後 liberal 或 restrictive 依病人狀況（如心衰竭）與監測床位決定 ${src("ssc26")}${hf?`；ESC HF：心因性休克或肺水腫避免大量輸液 ${src("escHf")}（情境不同，兩者並列）`:""}`);
+  return {vol,notes};
+}
 
 /* NEWS2 */
 function news2(){
@@ -596,7 +621,7 @@ function ptCard(which,light){
   ${light?`<details style="border-top:0"><summary style="padding-left:0">生命徵象（不穩定或需計分時填寫）</summary><div style="padding-top:4px">${vit}</div></details>`:vit}
   <details style="margin-top:6px;border-top:0"><summary style="padding-left:0">背景、共病、用藥（勾選後才影響結果）</summary><div style="padding:4px 0 0">
     <div class="grid">
-      ${fld("age","年齡")}${sel("sex","性別",[["","—"],["m","男"],["f","女"]])}${fld("wt","體重（kg）")}${fld("egfr","eGFR（mL/min/1.73m²）")}
+      ${fld("age","年齡")}${sel("sex","性別",[["","—"],["m","男"],["f","女"]])}${fld("wt","體重（kg）")}${fld("ht","身高（cm）")}${fld("egfr","eGFR（mL/min/1.73m²）")}
       ${fld("pod","術後第幾天（POD）")}${sel("dnr","急救意願",[["","未確認"],["full","全力急救"],["dni","DNR（含不插管）"],["comfort","安寧／舒適照護"]])}
       ${sel("med_ac","抗凝血劑",[["","無／不明"],["vka","warfarin"],["dabi","dabigatran"],["fxa","FXa 抑制劑（apixaban、rivaroxaban、edoxaban）"],["ufh","UFH"],["lmwh","LMWH"]])}
     </div>
@@ -925,7 +950,7 @@ function renderDysp(){
       "看最近 24 小時用藥紀錄（opioid、鎮靜、新藥）、輸液與輸血、I/O、引流量",
       c.hcr?"COPD／hypercapnia 風險：先驗 ABG":"",
       alteredMental()?"意識改變：驗 ABG（PaCO₂）、血糖":""]),
-    why:`氧氣依目標範圍給予並監測，避免過度給氧 ${src("bts")}${src("iota")}`}));
+    why:`氧氣依目標範圍給予並監測，避免過度給氧 ${src("bts")}${src("iota")}${tg.alt?`<div style="margin-top:4px">${tg.alt}</div>`:""}`}));
   // 2. Survey
   const tests=["CXR（portable）","12 導程 ECG","CBC、電解質、腎功能"];
   if(c.hcr||alteredMental()||c.hypot||c.sp===null||c.respAcid||(c.rr!==null&&c.rr>=25)) tests.push("ABG（或 VBG 看 pH、PaCO₂）");
@@ -1187,8 +1212,10 @@ function amsCard(cs,c){
     o.tags=src("niceDel")+src("mhraHal")+src("esaic24")+src("at4");
     o.lead=`譫妄是症狀：<b>先找並處理底層原因</b>（上方各項：缺氧、感染、藥物、電解質、尿滯留、便秘、疼痛）；非藥物處置優先。`;
     o.rows=[["非藥物","定向、眼鏡與助聽器、維持睡眠清醒週期、早期活動、減少約束與不必要管路、家屬陪伴 "+src("niceDel")],
-      ["藥物",`痛苦或危及自身／他人且降溫無效 → <b>短期（≤1 週）haloperidol，最低劑量起謹慎調整</b>${S.hx_pd?'；<span class="ng">Parkinson 病／Lewy body 失智：避免或極謹慎</span>':""}；監測 QTc 與錐體外症狀 ${src("niceDel")}${src("mhraHal")}`],
-      ["避免","benzodiazepine（除酒精或 benzodiazepine 戒斷）"],
+      ["藥物",S.hx_pd
+        ?`<span class="ng">Parkinson 病／Lewy body 失智：不用 haloperidol</span> ${src("sdaDel")}${src("mhraHal")}；痛苦或危及安全且非藥物無效 → 抗精神病藥禁忌時可用 <b>lorazepam 0.5–1 mg 口服</b>（24 小時 ≤2 mg），最低劑量、每 24 小時重新評估；建議會診神經科或精神科 ${src("sdaDel")}`
+        :`痛苦或危及自身／他人且降溫無效 → <b>短期（≤1 週）haloperidol</b>：<b>0.5–1 mg 口服</b>或 <b>0.5 mg IM</b>（24 小時 ≤2 mg），最低劑量起、每 24 小時重新評估；年輕病人可能需較高劑量 ${src("sdaDel")}${src("niceDel")}；監測 QTc 與錐體外症狀，與延長 QTc 藥物併用屬禁忌 ${src("mhraHal")}${src("sdaDel")}`],
+      ["避免",S.hx_pd?"benzodiazepine 一般避免（酒精或 benzodiazepine 戒斷除外）；Parkinson 病／Lewy body 失智抗精神病藥不可用時，依上列低劑量 lorazepam":"benzodiazepine（除酒精或 benzodiazepine 戒斷）"],
       ["術後",`ESAIC 2024：術後每日以有效工具篩檢至少 3 天，多元非藥物預防 ${src("esaic24")}`+upd("ESAIC 2024 更新術後譫妄指引（2017 版之更新）")]];
     break;}
   }
@@ -1346,7 +1373,7 @@ function cpCard(cs,c){
     o.tags=src("accAcs25")+src("escAcs");
     o.lead=cs.lvl==="must"?`<b>NSTE-ACS 可能性高</b>：通知心臟科；${aspTxt(c)}；連續 ECG 與 hs-cTn；持續疼痛、血行動力學不穩、心律不整或心衰竭 → 立即侵入性策略。`
       :`<b>ECG（10 分鐘內）＋ hs-cTn</b>，1–2 小時重複（依院內 0/1 h 或 0/2 h 流程）；疼痛再發時重做 ECG。`;
-    o.rows=[["持續治療",ul([`SpO₂ <90% 才給氧 ${src("accAcs25")}`,`無心衰竭、低心輸出或休克時，24 小時內開始口服 β-blocker ${src("accAcs25")}`,`high-intensity statin ${src("accAcs25")}`,"P2Y12 抑制劑、抗凝劑種類與時機依心臟科"])],
+    o.rows=[["持續治療",ul([acsSusp()?`SpO₂ <90% 才給氧 ${src("accAcs25")}`:`若確立 ACS：氧氣僅於 SpO₂ <90% 時給予；目前尚未疑 ACS，SpO₂ 目標依氧氣卡（${o2Target().txt}）${src("accAcs25")}`,`無心衰竭、低心輸出或休克時，24 小時內開始口服 β-blocker ${src("accAcs25")}`,`high-intensity statin ${src("accAcs25")}`,"P2Y12 抑制劑、抗凝劑種類與時機依心臟科"])],
       ["判讀",ul(["troponin 升高也見於 PE、心衰竭、敗血症、腎衰竭、心肌炎：看動態變化與臨床",c.po?`術後：見 MINS 卡 ${src("escNcs22")}`:""])],
       ["健保",nhiLic("aspirin")]];
     break;
@@ -1416,7 +1443,7 @@ function cpLab(){
 function renderCP(){
   const c=cpCtx(); const H=[]; const st=stepper();
   H.push(st({k:"go",t:"先做（0–10 分鐘）",
-    c:`<b>12 導程 ECG（10 分鐘內）</b>、監視器、IV、生命徵象（<b>雙手血壓</b>）；SpO₂ <90% 才給氧；抽 hs-cTn。`,
+    c:`<b>12 導程 ECG（10 分鐘內）</b>、監視器、IV、生命徵象（<b>雙手血壓</b>）；${acsSusp()&&!hypercapRisk()?"疑 ACS：SpO₂ <90% 才給氧":`SpO₂ 目標 ${o2Target().txt}（${o2Target().why}）`}；抽 hs-cTn。`,
     x:ul([c.sbp===null||c.hr===null?"先補量 SBP、HR、SpO₂":"","與舊 ECG 比較；疼痛持續或再發時每 15–30 分鐘重做",
       "給 aspirin 或抗凝前，先想主動脈剝離與出血風險"]),
     why:`${src("accAcs25")}${src("escAcs")}`}));
@@ -1526,7 +1553,7 @@ function fevCard(cs,c){
     break;
   case "sepsis":
     o.tags=src("ssc26")+src("sepsis3")+upd("SSC 2026：可能或確定敗血症（無休克）1 小時內抗生素（strong）；僅「可能」者限時評估、3 小時內（conditional）；MAP ≥65 歲 60–65");
-    o.lead=`血液培養 2 套後給抗生素：${c.hypot?"<b>疑敗血性休克 → 立即（1 小時內）</b>":"<b>高度懷疑敗血症 → 1 小時內</b>"}；lactate；低灌流（低血壓或 lactate ≥4）給 <b>30 mL/kg crystalloid</b>（3 小時內）。`;
+    o.lead=`血液培養 2 套後給抗生素：${c.hypot?"<b>疑敗血性休克 → 立即（1 小時內）</b>":"<b>高度懷疑敗血症 → 1 小時內</b>"}；lactate；低灌流（低血壓或 lactate ≥4）給 <b>30 mL/kg crystalloid</b>${fluid30().vol}（3 小時內）。${fluid30().notes.length?ul(fluid30().notes):""}`;
     o.rows=[["休克",ul([`MAP 目標 65 mmHg（strong）；≥65 歲 60–65（conditional）${src("ssc26")}`,`升壓劑首選 norepinephrine（strong），可先由周邊靜脈開始（conditional）；細節見低血壓／休克頁 ${src("ssc26")}`,`balanced crystalloid 優於 NS（conditional）；不合併 albumin（conditional）${src("ssc26")}`,`儘快找出需外科或引流處理的感染源 ${src("ssc26")}`])],
       ["抗生素","選擇見 abx-helper（依感染源、院內抗藥性、過去培養）"]];
     break;
@@ -1994,8 +2021,8 @@ Object.assign(REF,{
   aabb23:{t:"AABB 輸血 2023",f:"Carson JL, Stanworth SJ, Guyatt G, et al. Red Blood Cell Transfusion: 2023 AABB International Guidelines. JAMA 2023;330:1892–1902。住院、血行動力學穩定成人：Hb <7 g/dL 輸血（strong）；既有心血管疾病者 <8 g/dL。",u:"https://jamanetwork.com/journals/jama/fullarticle/2811010"},
   gbs:{t:"Glasgow-Blatchford Score",f:"Blatchford O, Murray WR, Blatchford M. A risk score to predict need for treatment for upper-gastrointestinal haemorrhage. Lancet 2000;356:1318–1321。BUN（mg/dL）18.2–22.3＝2、22.4–27.9＝3、28–69.9＝4、≥70＝6；Hb 男 12–12.9＝1、10–11.9＝3、<10＝6；女 10–11.9＝1、<10＝6；SBP 100–109＝1、90–99＝2、<90＝3；HR ≥100＝1；黑便 1；暈厥 2；肝病 2；心衰竭 2。"},
   childPugh:{t:"Child-Pugh",f:"Pugh RN, Murray-Lyon IM, Dawson JL, Pietroni MC, Williams R. Transection of the oesophagus for bleeding oesophageal varices. Br J Surg 1973;60:646–649。膽紅素 <2／2–3／>3 mg/dL；白蛋白 >3.5／2.8–3.5／<2.8 g/dL；INR <1.7／1.7–2.3／>2.3；腹水 無／輕度／中重度；肝性腦病變 無／1–2 級／3–4 級；各 1／2／3 分。A 5–6、B 7–9、C 10–15。"},
-  cdeDex13:{t:"CDE 102CDR05008（健保 7.1 條文引述）",f:"財團法人醫藥品查驗中心. Dexilant 醫療科技評估報告（102CDR05008），2013 年 6 月，附錄引述健保藥品給付規定 7.1 消化性潰瘍用藥：「其針劑限使用於消化道出血不能口服之病人急性期替代療法」；壓力性潰瘍預防：「此類藥物之針劑限使用於不能口服之前述病患短期替代療法」。為 2013 年版文字，現行條文請確認。",u:"https://data.nhi.gov.tw/ch/dl-11889-306442647fc24c07a07cb3b6db0ebc00-1.pdf"},
-  cmuVar09:{t:"中國藥訊 2009（octreotide 健保規範引述）",f:"中國醫藥大學附設醫院藥劑部. 中國藥訊 2009;14(1)：食道靜脈曲張出血用藥比較表，健保規範欄：octreotide「於胃食道靜脈曲張出血，最長以三天為原則」；terlipressin「無」。為 2009 年院內藥訊，現行條文請確認。",u:"https://cmuch.cmuh.cmu.edu.tw/FileUploads/FileUpload/9803.pdf"}
+  nhi71:{t:"健保 7.1 消化性潰瘍用藥",f:"衛生福利部中央健康保險署 藥品給付規定 第 7 節 7.1 消化性潰瘍用藥（92/10/1 起，最近修訂 113/8/1）。2.(3)：「其針劑限使用於消化道出血不能口服之病人急性期替代療法。」2.(9) 壓力性潰瘍預防（嚴重外傷、大手術、腦部手術、嚴重燒傷、休克、嚴重胰臟炎、急性中風等）：「此類藥物之針劑限使用於不能口服之前述病患短期替代療法。」（2026-10-19 依健保署 7.1 條文 PDF〔113/8/1 版〕核對）",u:"https://info.nhi.gov.tw/api/INAE3000/INAE3000S01/getPDF?DurgFileName=7.1._20240801.pdf"},
+  nhi543:{t:"健保 5.4.3 Octreotide",f:"衛生福利部中央健康保險署 藥品給付規定 第 5 節 5.4.3 Octreotide inj（如 Sandostatin inj；87/11/1、102/1/1）第 3 項：「使用於胃、食道靜脈曲張出血，最長以三天為原則。」（2026-10-19 依健保署第 5 節修正草案對照表〔該項未修〕與醫院轉載之條文核對；terlipressin、somatostatin 未查到專屬條文）",u:"https://www.nhi.gov.tw/ch/dl-7903-b997f18ed66942f9be9f273c11a7ea8a-1.pdf"}
 });
 Object.assign(GLOSS,{
   "GBS":"Glasgow-Blatchford Score（上消化道出血風險）",
@@ -2062,7 +2089,7 @@ function gibCard(cs,c){
       ["輸血",`Hb ≤7 g/dL 輸血，目標 7–9（限制性）；過度輸血增加門脈壓 ${src("esgeVar22")}`],
       ["TIPS",cp.cls?`Child-Pugh ${cp.s}（${cp.cls}）：${(cp.cls==="C"&&cp.s<=13)||(cp.cls==="B"&&cp.s>7)?'<span class="cau">可能符合 pre-emptive TIPS 條件（Child C ≤13，或 Child B >7 且內視鏡時仍活動性出血）→ 72 小時內（最好 24 小時內）評估</span>':"未達 pre-emptive TIPS 條件"} ${src("esgeVar22")}`:`填入膽紅素、白蛋白、INR、腹水、肝性腦病變以計算 Child-Pugh ${src("childPugh")}`],
       ["其他","肝性腦病變預防與處理見意識改變頁；不建議 TXA"],
-      ["健保",nhiQ("octreotide：2009 院內藥訊引述「胃食道靜脈曲張出血最長以三天為原則」"+src("cmuVar09")+"；terlipressin、somatostatin 給付條件請確認；erythromycin 用於內視鏡前屬仿單外用途")]];
+      ["健保",nhiOK("octreotide：胃、食道靜脈曲張出血，最長以三天為原則（第 4–5 天超過給付原則）"+src("nhi543"))+"<br>"+nhiQ("terlipressin、somatostatin：未查到專屬給付條文")+"<br>"+nhiQ("erythromycin 用於內視鏡前屬仿單外用途")]];
     break;}
   case "pud":
     o.tags=src("acgUgib21")+src("haltit");
@@ -2070,7 +2097,7 @@ function gibCard(cs,c){
       :`血行動力學不穩的血便可能來自上消化道：BUN 明顯升高、曾有消化性潰瘍或 NSAID → 考慮先上消化道內視鏡（與腸胃科討論）。`;
     o.rows=[["PPI",ul([`內視鏡前 PPI：ACG 2021 不作建議（未證實改善臨床結果）${src("acgUgib21")}`,"內視鏡治療後：例如 esomeprazole 80 mg IV bolus ＋ 8 mg/h × 72 小時，或每日 ≥2 次高劑量間歇 bolus"])],
       ["不建議",`TXA（HALT-IT：未降低死亡，靜脈血栓增加）${src("haltit")}`],
-      ["健保",nhiQ("PPI 針劑：2013 年版 7.1 條文「限使用於消化道出血不能口服之病人急性期替代療法」"+src("cdeDex13")+"，現行條文請確認")]];
+      ["健保",nhiOK("PPI 針劑：消化道出血不能口服之急性期替代療法（7.1 2.(3)）；可口服後改口服"+src("nhi71"))]];
     break;
   case "lgib":
     o.tags=src("acgLgib23");
@@ -2182,8 +2209,8 @@ function vasoCard(c,septic){
   L.push(`仿單起始 8–12 µg/min，維持常見 2–4 µg/min，依 MAP 調整${wt!==null?`（${fmt(wt,0)} kg：0.1 µg/kg/min ≈ ${fmt(0.1*wt,1)} µg/min）`:""}；${neStartTxt()} ${src("levoPI")}`);
   L.push(`MAP 目標 <b>${c.mapTgt} mmHg</b>${c.mapTgt==="60–65"?"（≥65 歲，conditional）":"（strong）"}，維持在目標 ±5 內；放置動脈導管監測 ${src("ssc26hemo")}`);
   if(septic){
-  L.push(`norepinephrine 劑量上升 → 加 <b>vasopressin</b>（SSC 2021 內文常於 NE 0.25–0.5 µg/kg/min 時加，常用至 0.03 U/min）；仍不足 → 加 epinephrine（皆 suggest）；不建議 terlipressin ${src("ssc26hemo")}${src("ssc21")}`);
-  L.push(`敗血性休克：IV 類固醇（suggest；2026 未限定仍需升壓劑者）${src("ssc26hemo")}；劑量常用 hydrocortisone 200 mg/日（50 mg q6h），SSC 2021 以 norepinephrine 或 epinephrine ≥0.25 µg/kg/min 持續 ≥4 小時為開始時機 ${src("ssc21")}${ne!==null&&ne>=0.25?`<br><span class="cau">目前 norepinephrine ${ne} µg/kg/min</span>`:""}`);
+  L.push(`norepinephrine 劑量上升 → 加 <b>vasopressin</b>（SSC 2026 專家組實務：NE 中位數 0.3 µg/kg/min 時加〔二手整理，請確認〕；SSC 2021 內文 0.25–0.5；常用至 0.03 U/min）；仍不足 → 加 epinephrine（皆 suggest）；不建議 terlipressin ${src("ssc26hemo")}${src("ssc21")}`);
+  L.push(`敗血性休克：IV 類固醇（suggest；2026 未限定仍需升壓劑者）${src("ssc26hemo")}；劑量常用 hydrocortisone 200 mg/日（50 mg q6h）；SSC 2021 以 norepinephrine 或 epinephrine ≥0.25 µg/kg/min 持續 ≥4 小時為開始時機 ${src("ssc21")}${ne!==null&&ne>=0.25?`<br><span class="cau">目前 norepinephrine ${ne} µg/kg/min</span>`:""}`);
   L.push(`合併心功能不全：norepinephrine 或 epinephrine 皆可第一線；仍低灌流 → dobutamine 加於 NE，或單用 epinephrine ${src("ssc26hemo")}`);
   }
   return optCard({cls:"pref",title:"升壓劑與目標",tags:src("ssc26hemo")+src("levoPI")+upd("SSC 2026：≥65 歲 MAP 60–65；NE 優於 vasopressin 降為 suggest；心功能不全時 NE 或 epinephrine 皆可第一線；類固醇不限仍需升壓劑者；不建議 terlipressin"),lead:ul(L),rows:[["健保",nhiLic("norepinephrine")+"；vasopressin "+nhiQ("台灣仿單（必壓生）無休克適應症，給付請確認")]],open:true});
@@ -2205,7 +2232,7 @@ function shockCard(cs,c){
     break;
   case "sepsis":{
     o.tags=src("ssc26")+upd("SSC 2026 指引（2026/3）");
-    o.lead=`血液培養後 <b>${c.hypot?"立即、1 小時內":"1 小時內（可能或確定敗血症）"}</b>給抗生素（見 abx-helper）；低灌流或休克：3 小時內至少 <b>30 mL/kg 晶體液</b>${c.wt!==null?`（${Math.round(30*c.wt/100)*100} mL）`:""}，balanced 優於 NS，以動態指標（PLR、脈壓變異、CRT）指引後續；液體後仍低血壓 → norepinephrine（見下方升壓劑卡）。`;
+    o.lead=`血液培養後 <b>${c.hypot?"立即、1 小時內":"1 小時內（可能或確定敗血症）"}</b>給抗生素（見 abx-helper）；低灌流或休克：3 小時內至少 <b>30 mL/kg 晶體液</b>${fluid30().vol}，balanced 優於 NS，以動態指標（PLR、脈壓變異、CRT）指引後續；液體後仍低血壓 → norepinephrine（見下方升壓劑卡）。${fluid30().notes.length?ul(fluid30().notes):""}`;
     o.rows=[["感染源","找需引流或手術的感染源，儘快處理"],["細節","見發燒頁（依感染源鑑別）"]];
     break;}
   case "cardio":
@@ -2272,12 +2299,12 @@ function renderShock(){
 
 /* ================= 心搏過速／心悸：出處 ================= */
 Object.assign(REF,{
-  escAf24:{t:"ESC AF 2024",f:"Van Gelder IC, Rienstra M, Bunting KV, et al. 2024 ESC Guidelines for the management of atrial fibrillation developed in collaboration with the European Association for Cardio-Thoracic Surgery (EACTS). Eur Heart J 2024;45:3314–3414。中風風險改用 CHA₂DS₂-VA（移除女性）：0 分不抗凝，1 分建議考慮（IIa），≥2 分建議抗凝；DOAC 優於 warfarin；電擊整流後抗凝 4 週；digoxin 恢復為第一線心率控制藥物之一。AF 持續 <24 小時之早期整流與抗凝細節，本工具引自二手評論，請以原文確認。",u:"https://academic.oup.com/eurheartj/article/45/36/3314/7738779"},
+  escAf24:{t:"ESC AF 2024",f:"Van Gelder IC, Rienstra M, Bunting KV, et al. 2024 ESC Guidelines for the management of atrial fibrillation developed in collaboration with the European Association for Cardio-Thoracic Surgery (EACTS). Eur Heart J 2024;45:3314–3414。中風風險改用 CHA₂DS₂-VA（移除女性）：0 分不抗凝，1 分建議考慮（IIa），≥2 分建議抗凝；DOAC 優於 warfarin；電擊整流後抗凝 4 週；digoxin 恢復為第一線心率控制藥物之一。早期整流以已知 AF 持續 24 小時為界（未抗凝滿 3 週或未經 TEE 排除血栓者）、CHA₂DS₂-VA 1 分考慮／≥2 分建議抗凝：2026-10-19 依 Europace 2024 Spotlight（ESC 2024 十項重點）核對；建議等級與心率控制細節請以原文確認。",u:"https://academic.oup.com/eurheartj/article/45/36/3314/7738779"},
   accAf23:{t:"ACC/AHA/ACCP/HRS AF 2023",f:"Joglar JA, Chung MK, Armbruster AL, et al. 2023 ACC/AHA/ACCP/HRS Guideline for the Diagnosis and Management of Atrial Fibrillation. Circulation 2024;149:e1–e156. doi:10.1161/CIR.0000000000001193。年中風風險 ≥2%（約 CHA₂DS₂-VASc 男 ≥2、女 ≥3）建議抗凝；穩定 AF RVR 以 β-blocker 或 non-dihydropyridine CCB 控制心率，已知 LV 收縮功能不全者 non-dihydropyridine CCB 有害；無效再考慮 digoxin，之後 IV amiodarone；未抗凝且 AF <48 小時直接整流之安全性受質疑，症狀 <12 小時且 CHA₂DS₂-VASc 0–1 可不經 TEE 整流（2b）；≥48 小時或不明：抗凝 3 週或 TEE。部分內容取自二手摘要，請以原文確認。",u:"https://www.ahajournals.org/doi/10.1161/CIR.0000000000001193"},
   escSvt19:{t:"ESC SVT 2019",f:"Brugada J, Katritsis DG, Arbelo E, et al. 2019 ESC Guidelines for the management of patients with supraventricular tachycardia. Eur Heart J 2020;41:655–720。血行動力學不穩之窄 QRS 心搏過速首選同步電擊；verapamil／diltiazem 由 I 降為 IIa，β-blocker 由 IIb 升為 IIa；寬 QRS：procainamide IIa、adenosine IIa、amiodarone IIb。",u:"https://academic.oup.com/eurheartj/article/41/5/655/5556821"},
   diltPI:{t:"Diltiazem 注射劑仿單",f:"Diltiazem hydrochloride injection（Pfizer）Prescribing Information：0.25 mg/kg（實際體重）IV 2 分鐘；反應不足 15 分鐘後 0.35 mg/kg IV 2 分鐘；持續輸注 10 mg/h 起（部分 5 mg/h 即足），每次加 5 mg/h，上限 15 mg/h，最長 24 小時。",u:"https://www.pfizermedical.com/diltiazem/dosage-admin"},
   metoPI:{t:"Metoprolol 注射劑仿單",f:"Metoprolol tartrate injection（Pfizer）Prescribing Information：5 mg IV bolus，約每 2 分鐘一劑，共 3 劑，給藥時監測血壓、心率與 ECG（仿單用法情境為急性心肌梗塞早期）。",u:"https://www.pfizermedical.com/metoprolol/dosage-admin"},
-  nhiDoac:{t:"健保 NOAC 條文（2014 草案、2020 學會引述）",f:"健保署 103 年 2 月 20 日藥品給付項目及支付標準共同擬訂會議（藥品部分）附件草案：apixaban、rivaroxaban 限非瓣膜性心房顫動且符合下列之一：曾中風或全身性栓塞、LVEF <40%、NYHA ≥II 之症狀性心衰竭、≥75 歲、65–74 歲合併糖尿病、高血壓或冠心症；排除嚴重瓣膜疾病、14 天內中風、6 個月內嚴重中風、出血風險高、肝病、懷孕等。台灣腦中風學會 NOAC 指引（2020）引述健保腎功能排除：dabigatran CrCl <30；rivaroxaban、apixaban <15；edoxaban <15 或 >95 mL/min。皆非現行條文全文，請確認。",u:"https://www1.cgmh.org.tw/intr/intr5/6370Z/guidelines/taiwan/6_AF_TW.pdf"}
+  nhiDoac:{t:"健保 2.1.4／2.1.5 NOAC",f:"衛生福利部中央健康保險署 藥品給付規定 第 2 節 心臟血管及腎臟藥物：2.1.4.2 Rivaroxaban（101/1/1 起，最近修訂 115/10/1）、2.1.4.3 Apixaban（最近 111/2/1）、2.1.4.4 Edoxaban（最近 111/2/1）、2.1.5 Dabigatran（最近 112/3/1）。非瓣膜性心房纖維顫動且符合下列之一：曾中風或全身性栓塞；LVEF <40%；症狀性心衰竭 NYHA ≥II；≥75 歲；rivaroxaban 50 歲（含）至 <75 歲、其餘 65 歲（含）至 <75 歲且合併糖尿病、高血壓或冠狀動脈疾病。排除：嚴重心臟瓣膜疾病、14 天內中風、6 個月內嚴重中風、出血風險增加、活動性肝病、懷孕；腎功能：rivaroxaban、apixaban CrCl <15；edoxaban CrCl <15 或 >95；dabigatran CrCl <30 mL/min。（2026-10-19 依健保署第 2 節條文 PDF 核對）",u:"https://www.nhi.gov.tw/ch/dl-55676-3f0c34a22fda48cb95db47b4807637ab-1.pdf"},
 });
 Object.assign(GLOSS,{
   "AF":"atrial fibrillation，心房顫動",
@@ -2304,10 +2331,27 @@ function chads(){
   return {va:s,vasc:s+(S.sex==="f"?1:0),it,ageMiss:age===null,sexMiss:!S.sex};
 }
 function nhiDoacCheck(){
-  const age=num(S.age), eg=num(S.egfr); const ok=[];
-  if(S.t_stroke) ok.push("曾中風／栓塞"); if(S.t_ef==="low") ok.push("LVEF <40%"); if(S.hx_hf) ok.push("症狀性心衰竭");
-  if(age!==null&&age>=75) ok.push("≥75 歲"); if(age!==null&&age>=65&&age<75&&(S.hx_dm||S.t_htn||S.c_cad||S.t_vasc)) ok.push("65–74 歲合併糖尿病／高血壓／冠心症");
-  return {ok, renal: eg!==null? (eg<15?"eGFR <15：rivaroxaban、apixaban、edoxaban 不符":eg<30?"eGFR <30：dabigatran 不符":"") : ""};
+  /* 健保藥品給付規定 2.1.4.2–2.1.4.4、2.1.5（現行條文）：非瓣膜性 AF，符合適應條件之一；排除條件另需確認 */
+  const age=num(S.age), eg=num(S.egfr), base=[];
+  if(S.t_stroke) base.push("曾中風／栓塞"); if(S.t_ef==="low") base.push("LVEF <40%"); if(S.hx_hf) base.push("症狀性心衰竭");
+  if(age!==null&&age>=75) base.push("≥75 歲");
+  const risk=S.hx_dm||S.t_htn||S.c_cad, rf=[S.hx_dm?"糖尿病":"",S.t_htn?"高血壓":"",S.c_cad?"冠心症":""].filter(Boolean).join("、");
+  const D=[["rivaroxaban",50,15,null,"2.1.4.2"],["apixaban",65,15,null,"2.1.4.3"],["edoxaban",65,15,95,"2.1.4.4"],["dabigatran",65,30,null,"2.1.5"]];
+  const rows=D.map(([n,a0,lo,hi,art])=>{
+    const ageOk=age!==null&&age>=a0&&age<75&&risk;
+    const why=base.concat(ageOk?[`${a0}–<75 歲合併${rf}`]:[]);
+    let st;
+    if(S.g_type) st=nhiNG("消化道出血中（屬排除條件：出血風險增加）");
+    else if(eg!==null&&(eg<lo||(hi!==null&&eg>hi))) st=nhiNG(`腎功能排除：CrCl ${hi!==null?`<${lo} 或 >${hi}`:`<${lo}`}（目前 eGFR ${eg}）`);
+    else if(why.length) st=nhiOK(`適應條件：${why.join("、")}`);
+    else if(age===null) st=nhiQ("缺年齡");
+    else st=nhiNG(`未符合適應條件（年齡條件 ${a0}–<75 歲須合併糖尿病、高血壓或冠心症）`);
+    return `${n}（${art}）：${st}`;
+  });
+  const notes=["排除條件逐項確認：嚴重瓣膜疾病、14 天內中風、6 個月內嚴重中風、出血風險增加、活動性肝病、懷孕",
+    eg!==null?"條文腎功能以 CrCl 計，此處以 eGFR 代入，接近切點時請以 Cockcroft-Gault 確認":"",
+    S.t_vasc&&!S.c_cad?"周邊動脈或主動脈斑塊不在條文適應條件內（條文為冠狀動脈疾病）":""];
+  return ul(rows.concat(notes.filter(Boolean)));
 }
 function tachyCtx(){
   const hr=num(S.hr), sbp=num(S.sbp);
@@ -2355,7 +2399,7 @@ function anticoagCard(c){
     `電擊整流時機：ACC/AHA 2023 — 未抗凝且 <48 小時直接整流之安全性受質疑，症狀 <12 小時且 CHA₂DS₂-VASc 0–1 可不經 TEE（2b）；ESC 2024 — 以 24 小時為界；兩者 ≥48 小時（ESC：≥24 小時）或不明 → 抗凝 3 週或 TEE ${src("accAf23")}${src("escAf24")}${dur!==null?`<br>本次 AF 已 ${dur} 小時${dur>=24?'：<span class="cau">超過 24 小時</span>':""}`:""}`,
     c.po?`<span class="cau">術後：抗凝與出血風險需與主刀團隊討論；術後新發 AF 多與誘因有關，長期抗凝依心臟科</span>`:"",
     S.g_type?`<span class="ng">消化道出血中：暫不抗凝</span>`:""];
-  const nhiTxt = n.ok.length? nhiQ(`依舊條文可能符合（${n.ok.join("、")}）${n.renal?"；"+n.renal:""}`) : nhiQ(`依舊條文未見符合條件${n.renal?"；"+n.renal:""}`);
+  const nhiTxt = n+upd("健保 2.1.4.2 rivaroxaban 115/10/1 修訂；現行年齡條件 rivaroxaban 50–<75 歲、其他 NOAC 65–<75 歲（皆須合併糖尿病、高血壓或冠心症）");
   return optCard({cls:"",title:"中風預防與整流（AF／撲動）",tags:src("escAf24")+src("accAf23")+upd("ESC 2024：改用 CHA₂DS₂-VA（移除女性）；整流時間門檻 24 小時。與 ACC/AHA 2023（CHA₂DS₂-VASc、48 小時）不同，兩者並列"),
     lead:ul(L),rows:[["健保",nhiTxt+src("nhiDoac")]],open:true});
 }
@@ -2898,8 +2942,9 @@ function lyteLab(){
 /* ================= 症狀類：出處 ================= */
 Object.assign(REF,{
   ahaBp24:{t:"AHA 急性照護血壓 2024",f:"Bress AP, Anderson TS, Flack JM, et al. The Management of Elevated Blood Pressure in the Acute Care Setting: A Scientific Statement From the American Heart Association. Hypertension 2024;81:e94–e106. doi:10.1161/HYP.0000000000000238。高血壓急症＝血壓升高合併新發或惡化之標的器官損傷，常需 IV 降壓；無標的器官損傷之無症狀血壓升高：重複正確量測、處理誘因，不以 IV 降壓藥治療（觀察性研究顯示有害）；依器官設定目標：中風、腦出血、高血壓視網膜病變 MAP 立即降 15%；高血壓腦病變 MAP 降 20–25%；主動脈剝離 SBP 迅速 <120；子癲前症 SBP <160；心衰竭 MAP 降 25%；肺水腫或 ACS SBP <140；高血壓腎損傷 MAP 數小時降 20–25%；使用 IV 降壓藥時建議動脈導管（器官目標取自 AAFP 2026 摘要）。",u:"https://professional.heart.org/en/science-news/management-of-elevated-blood-pressure-in-the-acute-care-setting/top-things-to-know"},
-  accHtn17:{t:"ACC/AHA 高血壓 2017",f:"Whelton PK, Carey RM, Aronow WS, et al. 2017 ACC/AHA/AAPA/ABC/ACPM/AGS/APhA/ASH/ASPC/NMA/PCNA Guideline for the Prevention, Detection, Evaluation, and Management of High Blood Pressure in Adults. Hypertension 2018;71:e13–e115。高血壓急症（無強制情況）：第一小時 SBP 下降不超過 25%，穩定後 2–6 小時降至 160/100–110，之後 24–48 小時逐步至正常；強制情況（主動脈剝離、嚴重子癲前症或子癲症、嗜鉻細胞瘤危象）第一小時降更多（主動脈剝離 SBP <120）。本工具引自二手摘要，請以原文確認。"},
-  escHtnEm:{t:"ESC 高血壓急症立場文件 2019",f:"van den Born BJH, Lip GYH, Brguljan-Hitij J, et al. ESC Council on hypertension position document on the management of hypertensive emergencies. Eur Heart J Cardiovasc Pharmacother 2019;5:37–46. doi:10.1093/ehjcvp/pvy032。惡性高血壓：數小時 MAP 降 20–25%（labetalol、nicardipine；替代 nitroprusside、urapidil）；高血壓腦病變：立即 MAP 降 20–25%；急性缺血性中風 BP >220/120：1 小時 MAP 降 15%；溶栓候選 >185/110：降至 <185/110；急性出血性中風 SBP >180：SBP 130–<180；ACS：SBP <140（nitroglycerin、labetalol；替代 urapidil）；急性心因性肺水腫：SBP <140（nitroprusside 或 nitroglycerin ＋ loop 利尿劑；替代 urapidil）；急性主動脈疾病：SBP <120、HR <60（esmolol ＋ 血管擴張劑；替代 labetalol、metoprolol）；子癲症／嚴重子癲前症／HELLP：SBP <160、DBP <105（labetalol 或 nicardipine ＋ magnesium sulfate）。劑量：labetalol 0.25–0.5 mg/kg，2–4 mg/min 至目標後 5–20 mg/h；nicardipine 5 mg/h，每 15–30 分鐘加 2.5 mg/h（5–15 mg/h），達標後減至 3 mg/h；urapidil 12.5–25 mg bolus，5–40 mg/h。（劑量經二手摘要，部分單位印刷有誤，請以原文確認）",u:"https://academic.oup.com/ehjcvp/article/5/1/37/5045336"},
+  accHtn25:{t:"AHA/ACC 高血壓 2025",f:"Jones DW, Ferdinand KC, Taler SJ, et al. 2025 AHA/ACC/AANP/AAPA/ABC/ACCP/ACPM/AGS/AMA/ASPC/NMA/PCNA/SGIM Guideline for the Prevention, Detection, Evaluation and Management of High Blood Pressure in Adults. Hypertension 2025（2025/8/14 線上發表）；J Am Coll Cardiol 2025. doi:10.1161/HYP.0000000000000249。取代 2017 版。第 6.2 節：(1) 高血壓急症（BP >180 及／或 >120 合併急性標的器官損傷）建議收 ICU 連續監測血壓與器官損傷（COR 1；LOE 摘要來源不一致 B-NR／B-R，請確認）；(2) 合併強制情況（例：急性主動脈症候群）第一小時 SBP 降至 <140，主動脈剝離 <120（1, C-LD）；(3) 無強制情況：第一小時 SBP 降 ≤25%，穩定後 2–6 小時 <160/100，之後 24–48 小時謹慎降至 130–140（1, C-LD）；(4) 因非心臟問題住院、BP >180/120 但無急性標的器官損傷：不建議間歇追加 IV 或口服降壓藥以急速降壓（3: Harm, B-NR）。強制情況完整清單與 IV 藥物表（劑量、加量間隔）本版未能開啟全文核對，請確認。（2026-10-19 依 Guideline Central 摘要核對）",u:"https://www.ahajournals.org/doi/10.1161/HYP.0000000000000249"},
+  escHtnEm:{t:"ESC 高血壓急症立場文件 2019",f:"van den Born BJH, Lip GYH, Brguljan-Hitij J, et al. ESC Council on hypertension position document on the management of hypertensive emergencies. Eur Heart J Cardiovasc Pharmacother 2019;5:37–46. doi:10.1093/ehjcvp/pvy032。惡性高血壓：數小時 MAP 降 20–25%（labetalol、nicardipine；替代 nitroprusside、urapidil）；高血壓腦病變：立即 MAP 降 20–25%；急性缺血性中風 BP >220/120：1 小時 MAP 降 15%；溶栓候選 >185/110：降至 <185/110；急性出血性中風 SBP >180：SBP 130–<180；ACS：SBP <140（nitroglycerin、labetalol；替代 urapidil）；急性心因性肺水腫：SBP <140（nitroprusside 或 nitroglycerin ＋ loop 利尿劑；替代 urapidil）；急性主動脈疾病：SBP <120、HR <60（esmolol ＋ 血管擴張劑；替代 labetalol、metoprolol）；子癲症／嚴重子癲前症／HELLP：SBP <160、DBP <105（labetalol 或 nicardipine ＋ magnesium sulfate）。劑量：labetalol 0.25–0.5 mg/kg，2–4 mg/min 至目標後 5–20 mg/h；nicardipine 5 mg/h，每 15–30 分鐘加 2.5 mg/h（5–15 mg/h），達標後減至 3 mg/h；urapidil 12.5–25 mg bolus，5–40 mg/h。（2026-10-19 核對：原文頁面需人機驗證無法讀取；上列劑量與 Medical Dialogues 2019 摘要、Empendium 劑量表〔引 ESC/ESH 2018〕三者一致，含 labetalol 先 mg/min 後 mg/h 之單位）",u:"https://academic.oup.com/ehjcvp/article/5/1/37/5045336"},
+  urapSmPC:{t:"Urapidil 仿單（歐盟）",f:"Urapidil Kalceks 5 mg/mL solución inyectable y para perfusión, Ficha técnica（AEMPS，西班牙）：高血壓急症 10–50 mg 緩慢 IV，持續監測血壓，可依血壓反應重複；輸注起始 2 mg/min，維持平均 9 mg/h；治療期間不超過 7 天。台灣許可證（Ebrantil）劑量請以國內仿單確認。（2026-10-19 核對）",u:"https://cima.aemps.es/cima/pdfs/ft/85873/FT_85873.pdf"},
   ponv20:{t:"PONV 第四版共識 2020",f:"Gan TJ, Belani KG, Bergese S, et al. Fourth Consensus Guidelines for the Management of Postoperative Nausea and Vomiting. Anesth Analg 2020;131:411–448。已預防仍發生 PONV：改用與預防藥不同類別之止吐藥；成人劑量：ondansetron 4 mg IV、dexamethasone 4–8 mg IV（誘導時，預防）、haloperidol 0.5–<2 mg IM/IV、droperidol 0.625 mg IV、amisulpride 5 mg、promethazine 6.25 mg；風險因子：女性、PONV 或暈車病史、不抽菸、年輕、全身麻醉、吸入麻醉與 N₂O、術後 opioid、手術時間長、腹腔鏡、膽囊與婦科手術。",u:"https://www.apsf.org/podcast/142-ponv-updated-guidelines-and-medication-options/"},
   fdaOnd12:{t:"FDA ondansetron QT 2012",f:"U.S. FDA Drug Safety Communication（2012/6/29）：ondansetron 單次 IV 劑量不應超過 16 mg（QT 延長）；先天性長 QT、心衰竭、心搏過緩、併用延長 QT 藥物者風險高；輸注前矯正低血鉀、低血鎂。",u:"https://www.fda.gov/drugs/drug-safety-and-availability/fda-drug-safety-communication-new-information-regarding-qt-prolongation-ondansetron-zofran"},
   emaMcp13:{t:"EMA metoclopramide 2013",f:"European Medicines Agency referral（CHMP 2013/10/24；EC 2013/12/20）：metoclopramide 限短期使用（≤5 天）；成人常規 10 mg 每日最多 3 次，24 小時上限 0.5 mg/kg；IV 緩慢推注 ≥3 分鐘；適應症保留術後、放療、延遲性化療噁心嘔吐與偏頭痛相關噁心；老人與心臟傳導異常者特別注意（錐體外症狀、遲發性運動異常）。",u:"https://www.ema.europa.eu/en/medicines/human/referrals/metoclopramide-containing-medicines"},
@@ -2953,15 +2998,15 @@ function htnAny(){ return !!(S.ht_enceph||S.ht_fundus||S.ht_aki||S.ht_ich||S.ht_
 function htnTargets(c){
   const T=[]; const m=c.map;
   const pct=(p)=> m!==null? `（MAP ${fmt(m,0)} → ${fmt(m*(1-p),0)}）`:"";
-  if(c.organ.includes("主動脈剝離")) T.push(`<b>主動脈剝離</b>：SBP 迅速 <120；HR <60（ESC 立場文件）或 60–80（ACC/AHA 2022）；<b>IV β-blocker 先</b>，不足再加血管擴張劑，見胸痛頁 ${src("ahaBp24")}${src("escHtnEm")}${src("accAorta22")}`);
+  if(c.organ.includes("主動脈剝離")) T.push(`<b>主動脈剝離</b>：SBP 第一小時內 <120（AHA/ACC 2025：1, C-LD）；HR <60（ESC 立場文件）或 60–80（ACC/AHA 2022）；<b>IV β-blocker 先</b>（esmolol、labetalol），不足再加血管擴張劑，見胸痛頁 ${src("accHtn25")}${src("ahaBp24")}${src("escHtnEm")}${src("accAorta22")}`);
   if(c.organ.includes("子癲前症")) T.push(`<b>子癲前症／子癲症</b>：SBP <160、DBP <105；labetalol 或 nicardipine ＋ magnesium sulfate，會診婦產科 ${src("escHtnEm")}`);
   if(c.organ.includes("腦出血")) T.push(`<b>腦出血</b>：SBP >180 → 130–<180（ESC）；見意識改變頁 ${src("escHtnEm")}${src("ahaIch22")}`);
   if(c.organ.includes("中風")) T.push(`<b>缺血性中風</b>：溶栓候選降至 <185/110；非溶栓且 >220/120 → 1 小時 MAP 降 15%${pct(0.15)} ${src("escHtnEm")}${src("ahaAis26")}`);
   if(c.organ.includes("ACS")||c.organ.includes("肺水腫")) T.push(`<b>ACS／急性肺水腫</b>：SBP <140；nitroglycerin（＋ loop 利尿劑），或 labetalol（ACS）${src("ahaBp24")}${src("escHtnEm")}`);
   if(c.organ.includes("腦病變")) T.push(`<b>高血壓腦病變</b>：MAP 降 20–25%${pct(0.225)}；labetalol 或 nicardipine ${src("escHtnEm")}`);
   if(c.organ.includes("急性腎損傷")||c.organ.includes("視網膜出血／乳突水腫")||c.organ.includes("TMA")) T.push(`<b>惡性高血壓／腎損傷／TMA</b>：數小時內 MAP 降 20–25%${pct(0.225)} ${src("escHtnEm")}${src("ahaBp24")}`);
-  if(c.organ.includes("交感危象")) T.push(`<b>嗜鉻細胞瘤或交感藥物（cocaine、amphetamine）</b>：避免單用 β-blocker；α 阻斷（如 urapidil）或 benzodiazepine（藥物）並會診 ${src("accHtn17")}`);
-  if(!T.length) T.push(`無強制情況：<b>第一小時 SBP 降 ≤25%</b>，穩定後 2–6 小時降至 160/100–110，24–48 小時逐步正常 ${src("accHtn17")}`);
+  if(c.organ.includes("交感危象")) T.push(`<b>嗜鉻細胞瘤或交感藥物（cocaine、amphetamine）</b>：避免單用 β-blocker；α 阻斷（phentolamine、urapidil）或 benzodiazepine（藥物引起者）並會診；AHA/ACC 2025 是否列為強制情況、降壓速度與藥物劑量：全文未核對，請確認 ${src("accHtn25")}${src("escHtnEm")}`);
+  if(!T.length) T.push(`無強制情況：<b>第一小時 SBP 降 ≤25%</b>，穩定後 2–6 小時 <160/100，之後 24–48 小時謹慎降至 130–140（AHA/ACC 2025：1, C-LD）${src("accHtn25")}${upd("AHA/ACC 2025：24–48 小時目標由「逐步至正常」改為 SBP 130–140")}`);
   return T;
 }
 function renderHTN(){
@@ -2970,16 +3015,16 @@ function renderHTN(){
     x:ul([c.sbp===null?"填入 SBP、DBP":"",c.high?`SBP ${c.sbp??"—"}／DBP ${c.dbp??"—"}`:""]),why:src("ahaBp24")}));
   if(!c.emerg){
     H.push(st({k:"info",t:c.high?"嚴重血壓升高，無器官損傷證據":"判斷",c:ul([
-      `<b>不要用 IV 降壓藥治療無症狀血壓升高</b>（觀察性研究顯示有害）${src("ahaBp24")}`,
+      `<b>不要用 IV 降壓藥治療無症狀血壓升高</b>（觀察性研究顯示有害）${src("ahaBp24")}；AHA/ACC 2025：非心臟問題住院、>180/120 但無急性器官損傷，<b>不建議間歇追加 IV 或口服</b>降壓藥急速降壓（3: Harm），用常規口服藥並密切追蹤 ${src("accHtn25")}${upd("AHA/ACC 2025 新增 3: Harm：住院無症狀嚴重高血壓不追加 PRN 降壓藥（含口服）")}`,
       "處理誘因：疼痛、尿滯留、焦慮、噁心、低血氧、酒精或藥物戒斷、類固醇",S.ht_missed?"恢復平常口服降壓藥":"恢復或調整平常口服降壓藥",
       "重測並追蹤；若出現器官損傷症狀（頭痛合併意識或視力改變、胸痛、喘、神經症狀、少尿）→ 重新評估為急症"]),
       x:"「Hypertensive urgency」不需 IV 或快速降壓；長期調整宜交由門診。",why:src("ahaBp24")}));
   } else {
-    H.push(st({k:"bx",t:`高血壓急症：${c.organ.join("、")}`,c:ul(htnTargets(c)),x:"建議動脈導管；ICU 或高度照護；依器官會診（神經、心臟、腎臟、婦產）。",why:src("ahaBp24")+src("escHtnEm")+src("accHtn17")}));
+    H.push(st({k:"bx",t:`高血壓急症：${c.organ.join("、")}`,c:ul(htnTargets(c)),x:`收 ICU 連續監測（AHA/ACC 2025：COR 1）；建議動脈導管；依器官會診（神經、心臟、腎臟、婦產）。`,why:src("ahaBp24")+src("escHtnEm")+src("accHtn25")}));
     H.push(optCard({cls:"pref",title:"IV 降壓藥（ESC 立場文件劑量）",tags:src("escHtnEm")+src("labetPI"),open:true,lead:ul([
       `<b>labetalol</b>：20 mg IV 2 分鐘，每 10 分鐘 40–80 mg（總量 ≤300 mg），或 2 mg/min 輸注 ${src("labetPI")}；氣喘、心搏過慢、急性心衰竭避免`,
       `<b>nicardipine</b>：5 mg/h 起，每 15–30 分鐘加 2.5 mg/h（上限 15 mg/h），達標後減量 ${src("escHtnEm")}`,
-      `<b>urapidil</b>：12.5–25 mg IV bolus，5–40 mg/h ${src("escHtnEm")}`,
+      `<b>urapidil</b>：ESC 立場文件 12.5–25 mg IV bolus，5–40 mg/h ${src("escHtnEm")}；歐盟仿單 10–50 mg 緩慢 IV（依血壓可重複），輸注 2 mg/min 起、維持平均 9 mg/h，療程 ≤7 天 ${src("urapSmPC")}（並列）`,
       `<b>nitroglycerin</b>：ACS、肺水腫首選（見喘頁劑量）`,
       c.organ.includes("主動脈剝離")?'<span class="ng">主動脈剝離：不可單用 nicardipine、urapidil 等血管擴張劑（反射性心搏過速），先 β-blocker</span>':""]),rows:[["健保",nhiLic("labetalol、nicardipine、urapidil、nitroglycerin")]]}));
   }
@@ -3157,7 +3202,7 @@ function renderHD(){
 
 /* ================= v0.5 出處 ================= */
 Object.assign(REF,{
-  ssc26hemo:{t:"SSC 2026 血行動力學",f:"Prescott HC, Antonelli M, Alhazzani W, et al. Surviving Sepsis Campaign: International Guidelines for Management of Sepsis and Septic Shock 2026. Crit Care Med 2026;54(4):725–812／Intensive Care Med 2026. 血行動力學部分：低血壓先晶體液 bolus，仍低血壓再升壓劑（conditional；不穩定者可同時開始）；可由周邊開始升壓劑，不需等中心導管（conditional, very low；資料不足以建議時間、劑量或部位）；MAP 65（strong），≥65 歲 60–65（conditional）；norepinephrine 優於 vasopressin、angiotensin II（suggest，2021 為 strong）；norepinephrine 劑量上升時加 vasopressin（suggest，未訂劑量門檻）；norepinephrine＋vasopressin 仍不足再加 epinephrine（suggest）；合併心功能不全：norepinephrine 或 epinephrine 皆可為第一線（conditional, very low；心搏過速者偏 norepinephrine、心搏過慢者偏 epinephrine）；心功能不全且容積與血壓足夠仍低灌流：加強心劑（dobutamine 加於 norepinephrine，或單用 epinephrine）（suggest）；敗血性休克建議 IV 類固醇（suggest，2026 文字未限定仍需升壓劑者）。資料來源：期刊摘要、Guideline Central 與 EMCrit 整理；全文劑量細節未取得。",u:"https://www.sccm.org/clinical-resources/guidelines/guidelines/surviving-sepsis-campaign-international-guidelines-for-management-of-sepsis-and-septic-shock-2026"},
+  ssc26hemo:{t:"SSC 2026 血行動力學",f:"Prescott HC, Antonelli M, Alhazzani W, et al. Surviving Sepsis Campaign: International Guidelines for Management of Sepsis and Septic Shock 2026. Crit Care Med 2026;54(4):725–812／Intensive Care Med 2026. 血行動力學部分：低血壓先晶體液 bolus，仍低血壓再升壓劑（conditional；不穩定者可同時開始）；可由周邊開始升壓劑，不需等中心導管（conditional, very low；資料不足以建議時間、劑量或部位）；MAP 65（strong），≥65 歲 60–65（conditional）；norepinephrine 優於 vasopressin、angiotensin II（suggest，2021 為 strong）；norepinephrine 劑量上升時加 vasopressin（suggest，未訂劑量門檻）；norepinephrine＋vasopressin 仍不足再加 epinephrine（suggest）；合併心功能不全：norepinephrine 或 epinephrine 皆可為第一線（conditional, very low；心搏過速者偏 norepinephrine、心搏過慢者偏 epinephrine）；心功能不全且容積與血壓足夠仍低灌流：加強心劑（dobutamine 加於 norepinephrine，或單用 epinephrine）（suggest）；敗血性休克建議 IV 類固醇（suggest，2026 文字未限定仍需升壓劑者）。專家組實務：vasopressin 開始時 norepinephrine 中位數 0.3 µg/kg/min（HealthManagement.org 整理；IQR 與類固醇實際用量比例本版未能開啟全文核對，請確認）；hydrocortisone 常用 200 mg/日。周邊升壓劑：資料不足以建議時間、劑量或管路位置。（2026-10-19 依 Intensive Care Med 全文〔可讀取部分〕與二手整理核對）",u:"https://www.sccm.org/clinical-resources/guidelines/guidelines/surviving-sepsis-campaign-international-guidelines-for-management-of-sepsis-and-septic-shock-2026"},
   epiPI:{t:"Epinephrine 仿單（敗血性休克）",f:"Epinephrine injection（Pfizer/Hospira）Prescribing Information：敗血性休克低血壓 0.05–2 µg/kg/min 調至目標 MAP，每 10–15 分鐘調整 0.05–0.2 µg/kg/min；穩定後逐步減量（如每 30 分鐘，12–24 小時）；老人由低劑量開始；儘量經大靜脈。仿單示範稀釋 1 mg／1000 mL D5W（1 µg/mL）。",u:"https://labeling.pfizer.com/ShowLabeling.aspx?id=15096"},
   vasoPI:{t:"Vasostrict 仿單",f:"Vasostrict（vasopressin injection）Prescribing Information（US）：血管擴張性休克。敗血性休克起始 0.01 U/min、術後心因性休克 0.03 U/min；每 10–15 分鐘加 0.005 U/min 至目標；>0.07 U/min（敗血）或 >0.1 U/min（術後）資料有限；無兒茶酚胺維持 8 小時後每小時減 0.005 U/min。稀釋 0.1 U/mL（50 U／500 mL）或限水時 1 U/mL（100 U／100 mL）。",u:"https://www.drugs.com/pro/vasostrict.html"},
   pitTW:{t:"必壓生 Pitressin 台灣仿單",f:"必壓生注射液 20 單位／毫升（Pitressin，衛署藥製字第 033429 號）台灣仿單適應症：食道靜脈曲張出血、尿崩症、手術後腹部膨脹、排除腹部氣影；未列休克適應症（休克使用屬仿單外）。",u:"https://labeling.pfizer.com/ShowLabeling.aspx?id=14004"},
@@ -3264,7 +3309,7 @@ function prStatus(){
   R.push(`<div class="ng">使用升壓藥（${L.map(x=>PR[x.k].n).join("、")}）：ICU 層級照護、動脈導管監測</div>`);
   R.push(ul(L.map(x=>{ const rr=prRate(x.k,x.v); return `${PR[x.k].n} ${x.v} ${PR[x.k].u}${rr!==null?`：${fmt(rr,1)} mL/h（${fmt(prDil(x.k).amt,1)} ${PR[x.k].amtU}／${fmt(prDil(x.k).vol,0)} mL）`:""}`; })));
   const vaso=num(S.pr_vaso);
-  if(ne!==null&&ne>=0.25&&(vaso===null||vaso===0)) R.push(`NE ${ne} µg/kg/min 且未加 vasopressin：敗血性休克劑量上升時加 vasopressin（SSC 2026 suggest；SSC 2021 內文常於 NE 0.25–0.5 時加）${src("ssc26hemo")}${src("ssc21")}`);
+  if(ne!==null&&ne>=0.25&&(vaso===null||vaso===0)) R.push(`NE ${ne} µg/kg/min 且未加 vasopressin：敗血性休克劑量上升時加 vasopressin（SSC 2026 suggest；專家組實務中位數 NE 0.3，請確認）${src("ssc26hemo")}${src("ssc21")}`);
   if(ne!==null&&ne>=0.25) R.push(`敗血性休克：IV 類固醇（SSC 2026 suggest），hydrocortisone 200 mg/日（50 mg q6h）${src("ssc26hemo")}${src("ssc21")}`);
   if(vaso!==null&&vaso>0.04) R.push(`<span class="cau">vasopressin ${vaso} U/min 高於常用 0.03；仿單 >0.07 資料有限</span> ${src("vasoPI")}`);
   if(prList().some(x=>x.k==="dopa")) R.push(`dopamine：心律不整較多，敗血性休克不作第一線 ${src("ssc21")}`);
@@ -3317,7 +3362,8 @@ function hypoX(page){
   const septicPage = ["fev","abd","uo"].includes(page) && (c.fever||S.s_infx||S.f_resp||S.f_uri||S.f_line||S.f_wound||S.b_perit||num(S.anc)!==null&&num(S.anc)<500);
   if(c.hypot){
     if(septicPage){
-      L.push(`<b>疑敗血性休克</b>：血液培養後 1 小時內抗生素；3 小時內至少 <b>30 mL/kg 晶體液</b>${w!==null?`（${Math.round(30*w/100)*100} mL）`:""}，balanced 優於 NS ${src("ssc26")}`);
+      L.push(`<b>疑敗血性休克</b>：血液培養後 1 小時內抗生素；3 小時內至少 <b>30 mL/kg 晶體液</b>${fluid30().vol}，balanced 優於 NS ${src("ssc26")}`);
+      fluid30().notes.forEach(x=>L.push(x));
       L.push(`液體後仍低血壓 → <b>norepinephrine</b>（可先周邊）：${neStartTxt()} ${src("ssc26hemo")}${src("levoPI")}`);
       L.push(`MAP 目標 <b>${c.mapTgt}</b>；NE 劑量上升加 vasopressin，仍不足加 epinephrine；IV 類固醇（hydrocortisone 50 mg q6h）${src("ssc26hemo")}${src("ssc21")}`);
     } else if(page==="gib"){
@@ -3415,7 +3461,7 @@ function o2Plan(){
 function o2Res(){
   const p=o2Plan(), e=o2Eff(); const H=[];
   const sf = (e.fio2!==null&&p.sp!==null&&p.sp<=97)? p.sp/(e.fio2/100) : null;
-  H.push(`<div class="kv"><div><div class="k">SpO₂ 目標</div><b>${p.tg.txt}</b></div>
+  H.push(`<div class="kv"><div><div class="k">SpO₂ 目標</div><b>${p.tg.txt}</b>${p.tg.alt?`<div class="small muted">${p.tg.why}</div>`:""}</div>
     <div><div class="k">FiO₂</div><b>${e.fio2!==null?fmt(e.fio2,0)+"%":"—"}</b>${e.est?`<span class="unit">估算</span>`:""}${e.unk?`<div class="small muted">此裝置 FiO₂ 不穩定，不計 S/F</div>`:""}${e.need?`<div class="small muted">需${e.need}</div>`:""}</div>
     <div><div class="k">S/F</div><b>${sf!==null?fmt(sf,0):"—"}</b> ${sf!==null&&sf<=315?tag(sf<=235?"≤235（約 P/F ≤200）":"≤315（約 P/F ≤300）","t-high"):""}${p.sp!==null&&p.sp>97&&e.fio2!==null?`<div class="small muted">SpO₂ >97% 不適用</div>`:""}</div>
     ${p.rox?`<div><div class="k">ROX</div><b>${fmt(p.rox.v,2)}</b> ${tag(p.rox.lvl==="ok"?"≥4.88":p.rox.lvl==="bad"?"失敗風險":"觀察",p.rox.lvl==="ok"?"t-low":p.rox.lvl==="bad"?"t-high":"t-mid")}</div>`:""}</div>`);
@@ -3423,6 +3469,7 @@ function o2Res(){
   H.push(`<div style="margin:4px 0">${stTxt}${p.d&&DEV[p.d]?`（目前：${DEV[p.d].n}${num(S.o2_flow)!==null&&["nc","sm","nrm","hfnc"].includes(p.d)?" "+num(S.o2_flow)+" L/min":""}）`:""}</div>`);
   if(p.up.length) H.push(ul(p.up));
   if(p.down.length) H.push(ul(p.down));
+  if(p.tg.alt) H.push(`<div class="small">${p.tg.alt}</div>`);
   if(p.rox) H.push(`<div class="small">ROX ${fmt(p.rox.v,2)}：${p.rox.txt} ${src("rox19")}</div>`);
   if(p.esc.length) H.push(`<div class="alert a-bad">${p.esc.join("<br>")}</div>`);
   H.push(`<details style="margin-top:6px;border-top:0"><summary style="padding-left:0">裝置與 FiO₂ 對照、升降階梯</summary><div class="small" style="padding-top:4px">
@@ -3444,8 +3491,9 @@ function o2Card(){
 function o2X(page){
   if(page==="dysp"||page==="acls") return "";
   const p=o2Plan(); if(p.st!=="low"&&p.st!=="high"&&!p.esc.length) return "";
-  if(p.st==="high"&&!p.esc.length) return `<div class="opt"><div class="opt-h"><b>氧氣</b>${src("bts")}</div><div class="opt-b">SpO₂ ${p.sp}% 高於目標 ${p.tg.txt}：逐步下調給氧 <span class="small">${jump("dysp","dysp-o2","氧氣升降")}</span></div></div>`;
-  return `<div class="opt must"><div class="opt-h"><b>氧氣</b>${src("bts")}</div><div class="opt-b">${p.st==="low"?`<div><b>SpO₂ ${p.sp}% 低於目標 ${p.tg.txt}</b>：</div>`:""}${ul(p.up.concat(p.esc))}<div class="small" style="margin-top:4px">${jump("dysp","dysp-o2","氧氣：裝置、FiO₂、ROX")}</div></div></div>`;
+  const rf=p.tg.refs.map(k=>src(k)).join(""), why=p.tg.alt?`（${p.tg.why}）`:"";
+  if(p.st==="high"&&!p.esc.length) return `<div class="opt"><div class="opt-h"><b>氧氣</b>${rf}</div><div class="opt-b">SpO₂ ${p.sp}% 高於目標 ${p.tg.txt}${why}：逐步下調給氧 <span class="small">${jump("dysp","dysp-o2","氧氣升降")}</span></div></div>`;
+  return `<div class="opt must"><div class="opt-h"><b>氧氣</b>${rf}</div><div class="opt-b">${p.st==="low"?`<div><b>SpO₂ ${p.sp}% 低於目標 ${p.tg.txt}</b>${why}：</div>`:""}${ul(p.up.concat(p.esc))}<div class="small" style="margin-top:4px">${jump("dysp","dysp-o2","氧氣：裝置、FiO₂、ROX")}</div></div></div>`;
 }
 
 /* ================= RSI ================= */
@@ -3456,10 +3504,14 @@ function rsiCard(){
   const K=num(S.k);
   const R=[];
   R.push(`<b>預給氧</b>：嚴重低血氧（P/F <150）用 NIV 預給氧；預期困難喉鏡用 HFNO ${src("sccmRsi23")}；NIV 預給氧使插管中 SpO₂ <85% 由 18.5% 降至 9.1% ${src("preoxi24")}${upd("PREOXI（NEJM 2024）：緊急插管以 NIV 預給氧，低血氧較氧氣面罩少一半，吸入未增加")}`);
-  R.push(`<b>誘導</b>（擇一；使用誘導藥須併用肌肉鬆弛劑，strong）${src("sccmRsi23")}${hypo?`<div class="cau">目前低血壓／shock index ≥1／使用升壓藥：先輸液、升壓藥備妥（NE 輸注），誘導藥取低劑量</div>`:""}`+ul([
-    `<b>Etomidate</b>（Etomidate-Lipuro）0.3 mg/kg（仿單 0.2–0.6）${d(0.3,null,2)} ${src("etoPI")}`,
-    `<b>Ketamine</b>（Ketalar）1–2 mg/kg ${d(1,2,50)}；仿單 1–4.5 mg/kg ${src("ketPI")}`,
-    `<b>Propofol</b>（Diprivan、Fresofol）老人、虛弱或 ASA III–IV 1–1.5 mg/kg ${d(1,1.5,10)}；健康 <55 歲 2–2.5 mg/kg；低血壓（老人、ASA III–IV 不可快速 bolus）${src("propPI")}`]));
+  const propTxt=`<b>Propofol</b>（Diprivan、Fresofol）老人、虛弱或 ASA III–IV 1–1.5 mg/kg ${d(1,1.5,10)}；健康 <55 歲 2–2.5 mg/kg；低血壓（老人、ASA III–IV 不可快速 bolus）${src("propPI")}`;
+  R.push(`<b>誘導</b>（擇一；使用誘導藥須併用肌肉鬆弛劑，strong）${src("sccmRsi23")}${hypo?`<div class="cau">目前低血壓／shock index ≥1／使用升壓藥：升壓藥備妥（NE 輸注）；下列 etomidate、ketamine 改取仿單劑量下限（指引未訂低血壓時的具體減量數值，此為本工具取法）</div>`:""}`+ul([
+    hypo?`<b>Etomidate</b>（Etomidate-Lipuro）0.2 mg/kg（仿單下限；範圍 0.2–0.6）${d(0.2,null,2)} ${src("etoPI")}`
+        :`<b>Etomidate</b>（Etomidate-Lipuro）0.3 mg/kg（仿單 0.2–0.6）${d(0.3,null,2)} ${src("etoPI")}`,
+    hypo?`<b>Ketamine</b>（Ketalar）1 mg/kg（仿單 IV 下限；範圍 1–4.5）${d(1,null,50)}${src("ketPI")}`
+        :`<b>Ketamine</b>（Ketalar）1–2 mg/kg ${d(1,2,50)}；仿單 1–4.5 mg/kg ${src("ketPI")}`,
+    hypo?"":propTxt]));
+  if(hypo) R.push(`<span class="cau">Propofol 列為次選</span>：仿單——老人、虛弱或 ASA III–IV 須減量且不可快速 bolus ${src("propPI")}<div class="small muted">${propTxt}</div>`);
   R.push(`etomidate vs 其他誘導藥：死亡率與低血壓無差異（SCCM conditional）${src("sccmRsi23")}；RSI trial：ketamine 與 etomidate 28 天死亡無差異，ketamine 插管期間心血管崩解較多（22.1% vs 17.0%）${src("rsiTrial25")}${upd("RSI trial（NEJM 2025/12）：ketamine 未降低死亡，插管期間低血壓／升壓劑需求較 etomidate 多")}`);
   const sccNo = K!==null&&K>=5.5;
   R.push(`<b>肌肉鬆弛</b>（rocuronium、succinylcholine 擇一，conditional）${src("sccmRsi23")}`+ul([
@@ -3642,7 +3694,7 @@ function dutyNoteEN(tabId){
   if(sc.length) L.push("- "+sc.join("; "));
   const fl=[]; const c=shockCtx(); const tg=o2Target(); const sp=n0("spo2"); const k=n0("k"), glu=n0("glu"), t=n0("temp"), hr=n0("hr");
   if(c.hypot) fl.push(`hypotension (${sbp!==null?"SBP "+sbp:""}${m!==null?(sbp!==null?", ":"")+"MAP "+fmt(m,0):""})`);
-  if(sp!==null&&sp<tg.lo) fl.push(`hypoxemia, SpO2 ${sp}% (target ${tg.txt})`);
+  if(sp!==null&&sp<tg.lo) fl.push(`hypoxemia, SpO2 ${sp}% (target ${tg.en})`);
   if(n0("ph")!==null&&n0("pco2")!==null&&n0("ph")<7.35&&n0("pco2")>45) fl.push(`respiratory acidosis (pH ${n0("ph")}, PaCO2 ${n0("pco2")})`);
   if(t!==null&&t>=38) fl.push(`fever ${fmt(t,1)}°C`); if(t!==null&&t<=35) fl.push(`hypothermia ${fmt(t,1)}°C`);
   if(hr!==null&&(hr>=131||hr<=40)) fl.push(`HR ${hr}`);
@@ -3662,8 +3714,8 @@ function dutyNoteEN(tabId){
   const P=[];
   if(c.hypot) P.push(`Fluid bolus and reassess; norepinephrine if hypotension persists, MAP target ${c.mapTgt}`);
   if(prInUse()) P.push("On vasopressor - ICU consult, arterial line");
-  if(sp!==null&&sp<tg.lo) P.push(`Titrate O2 to SpO2 ${tg.txt}${hypercapRisk()?"; ABG in 30-60 min":""}`);
-  if(sp!==null&&sp>tg.hi&&onO2()) P.push(`Wean O2 to SpO2 ${tg.txt}`);
+  if(sp!==null&&sp<tg.lo) P.push(`Titrate O2 to SpO2 ${tg.en}${hypercapRisk()?"; ABG in 30-60 min":""}`);
+  if(sp!==null&&sp>tg.hi&&onO2()) P.push(`Wean O2 to SpO2 ${tg.en}`);
   if(g!==null&&g<=8&&S.dnr!=="dni"&&S.dnr!=="comfort") P.push("Airway assessment, call senior / anesthesia");
   if(glu!==null&&glu<70) P.push("Treat hypoglycemia, recheck glucose in 15 min");
   if(t!==null&&t>=38) P.push("Blood cultures x2 before antibiotics; look for source");
@@ -3778,7 +3830,7 @@ const DRUGS = [
  {id:"pb",cls:"neuro",name:"Phenobarbital",brand:"",type:"Barbiturate",
   dose:"癲癇重積（其他第二線藥物不可用時）：15 mg/kg IV。",adj:"—",caut:"呼吸抑制、低血壓。",guide:src("aes16"),nhi:nhiLic()},
  {id:"hal",cls:"neuro",name:"Haloperidol",brand:"Haldol",type:"典型抗精神病藥",
-  dose:"譫妄且痛苦或危及安全、降溫無效時：短期（≤1 週）最低劑量起謹慎調整。",adj:"老人、肝病減量。",
+  dose:"譫妄且痛苦或危及安全、降溫無效時：短期（≤1 週）0.5–1 mg 口服或 0.5 mg IM（24 小時 ≤2 mg），最低劑量起、每 24 小時重新評估（蘇格蘭譫妄協會路徑）；Parkinson 病／Lewy body 失智不用。",adj:"老人、肝病減量。",
   caut:"QTc 延長（ECG）、錐體外症狀、NMS；Parkinson 病、Lewy body 失智避免。",guide:src("niceDel")+src("mhraHal"),nhi:nhiLic()},
  {id:"thia",cls:"metab",name:"Thiamine",brand:"維生素 B1 注射劑",type:"維生素",
   dose:"疑 Wernicke：EFNS 200 mg IV 每日三次；ASAM：常用 100 mg IV/IM 每日 × 3–5 天（預防）。含醣輸液前或同時給。",adj:"—",caut:"罕見過敏反應。",
@@ -3825,10 +3877,10 @@ const DRUGS = [
   caut:"每 5 g 含鈉約 400 mg：水腫、心衰竭惡化；低血鉀。",guide:src("ukkaK23")+src("szcPI"),nhi:nhiQ("給付條件請確認")},
  {id:"ppi",cls:"gi",name:"Esomeprazole／Pantoprazole（IV）",brand:"Nexium、Pantoloc",type:"PPI",
   dose:"消化性潰瘍出血內視鏡治療後：80 mg IV bolus ＋ 8 mg/h × 72 小時，或每日 ≥2 次高劑量間歇 bolus；之後 BID 至 2 週（高風險）。",adj:"—",
-  caut:"內視鏡前 PPI：ACG 2021 不作建議。長期使用與 C. difficile 相關。",guide:src("acgUgib21"),nhi:nhiQ("2013 年版 7.1 條文：針劑限消化道出血不能口服之病人急性期替代療法"+src("cdeDex13")+"，現行條文請確認")},
+  caut:"內視鏡前 PPI：ACG 2021 不作建議。長期使用與 C. difficile 相關。",guide:src("acgUgib21"),nhi:nhiOK("針劑：消化道出血不能口服之急性期替代療法（7.1 2.(3)）；壓力性潰瘍預防限不能口服之短期替代（7.1 2.(9)）"+src("nhi71"))},
  {id:"octr",cls:"gi",name:"Octreotide",brand:"Sandostatin",type:"Somatostatin 類似物",
   dose:"靜脈瘤出血：50 µg IV bolus → 50 µg/h，持續至 5 天（常用方案，請以仿單確認）。",adj:"—",caut:"高血糖或低血糖、心搏過緩。",
-  guide:src("esgeVar22"),nhi:nhiQ("2009 院內藥訊引述：胃食道靜脈曲張出血最長以三天為原則"+src("cmuVar09")+"，現行條文請確認")},
+  guide:src("esgeVar22"),nhi:nhiOK("胃、食道靜脈曲張出血，最長以三天為原則（5.4.3）"+src("nhi543"))},
  {id:"terli",cls:"gi",name:"Terlipressin",brand:"Glypressin",type:"Vasopressin 類似物",
   dose:"靜脈瘤出血：2 mg IV q4h，止血後 1 mg q4h，至 5 天（常用方案，請以仿單確認）；HRS-AKI 依腸胃科。",adj:"—",
   caut:"心肌、腸繫膜、肢端缺血；低血鈉；液體過量與呼吸衰竭。",guide:src("esgeVar22")+src("easlCirr18"),nhi:nhiQ("給付條件請確認")},
@@ -3853,7 +3905,7 @@ const DRUGS = [
   dose:"仿單起始 8–12 µg/min，維持常見 2–4 µg/min，依 MAP 調整；敗血性休克第一線，可先由周邊開始。換算見低血壓／休克頁或計算工具。",adj:"—",
   caut:"外滲組織壞死（phentolamine 局部浸潤）；心律不整；低血容時先補液。",guide:src("ssc26hemo")+src("levoPI"),nhi:nhiLic()},
  {id:"vaso",cls:"cardio",name:"Vasopressin",brand:"Pitressin 必壓生",type:"升壓劑",
-  dose:"敗血性休克 norepinephrine 劑量上升時加用（SSC 2026 suggest；SSC 2021 內文常於 NE 0.25–0.5 µg/kg/min 時加，常用至 0.03 U/min）；US 仿單 0.01 U/min 起，每 10–15 分鐘加 0.005。",adj:"—",caut:"指端與腸繫膜缺血；台灣仿單無休克適應症（仿單外使用）。",guide:src("ssc26hemo")+src("ssc21")+src("vasoPI")+src("pitTW"),nhi:nhiQ("休克屬仿單外用途，給付請確認")},
+  dose:"敗血性休克 norepinephrine 劑量上升時加用（SSC 2026 suggest；專家組實務 NE 中位數 0.3 µg/kg/min 時加〔請確認〕；常用至 0.03 U/min）；US 仿單 0.01 U/min 起，每 10–15 分鐘加 0.005。",adj:"—",caut:"指端與腸繫膜缺血；台灣仿單無休克適應症（仿單外使用）。",guide:src("ssc26hemo")+src("ssc21")+src("vasoPI")+src("pitTW"),nhi:nhiQ("休克屬仿單外用途，給付請確認")},
  {id:"epiinf",cls:"cardio",name:"Epinephrine（輸注）",brand:"Bosmin",type:"升壓／強心",
   dose:"敗血性休克：0.05–2 µg/kg/min，每 10–15 分鐘調 0.05–0.2（仿單）；心搏過慢：2–10 µg/min（AHA）。過敏性休克先 IM（見 Adrenaline 條目）。",adj:"老人由低劑量開始。",caut:"心搏過速、心律不整、lactate 上升、高血糖；經大靜脈。",guide:src("epiPI")+src("ssc26hemo")+src("ahaAcls25"),nhi:nhiLic()},
  {id:"phen",cls:"cardio",name:"Phenylephrine",brand:"",type:"升壓劑（純 α）",
@@ -3897,7 +3949,7 @@ const DRUGS = [
  {id:"nicar",cls:"cardio",name:"Nicardipine（IV）",brand:"Perdipine",type:"Dihydropyridine CCB",
   dose:"高血壓急症：5 mg/h 起，每 15–30 分鐘加 2.5 mg/h（上限 15 mg/h），達標後減量。",adj:"—",caut:"反射性心搏過速、靜脈炎；嚴重主動脈瓣狹窄謹慎。",guide:src("escHtnEm"),nhi:nhiLic()},
  {id:"urap",cls:"cardio",name:"Urapidil",brand:"Ebrantil",type:"α1 阻斷劑",
-  dose:"高血壓急症：12.5–25 mg IV bolus，5–40 mg/h 輸注。",adj:"老人減量。",caut:"低血壓。",guide:src("escHtnEm"),nhi:nhiLic()},
+  dose:"高血壓急症：ESC 立場文件 12.5–25 mg IV bolus，5–40 mg/h 輸注；歐盟仿單 10–50 mg 緩慢 IV，輸注 2 mg/min 起、維持平均 9 mg/h，療程 ≤7 天。",adj:"老人減量。",caut:"低血壓。",guide:src("escHtnEm")+src("urapSmPC"),nhi:nhiLic()},
  {id:"ond",cls:"gi",name:"Ondansetron",brand:"Zofran",type:"5-HT3 拮抗劑",
   dose:"4 mg IV（PONV）；單次 IV 不超過 16 mg。",adj:"重度肝病每日上限降低（依仿單）。",caut:"QT 延長（先矯正 K、Mg；長 QT、心衰竭、心搏過緩）；便秘。",guide:src("ponv20")+src("fdaOnd12"),nhi:nhiLic()},
  {id:"mcp",cls:"gi",name:"Metoclopramide",brand:"Primperan",type:"多巴胺拮抗劑",
@@ -4135,7 +4187,7 @@ function renderRefPanel(){
     ["共用：預警與敗血症",["news2","ssc26","ssc21","sepsis3"]],
     ["喘：指引",["bts","iota","btsIcsNiv","ersNiv","ersHfnc","ards24","rox19","rice07","o2dev","gold26","gina26","escHf","hfaDiur","ahaPe26","escPe19","btsPleural","rcukAna","asciaAna","taco18","escAcs","atsCap19"]],
     ["喘：評分與文獻",["berend","wells","years","slice","naloxPI","enoxPI"]],
-    ["意識改變：指引",["ahaAis26","twStroke","ahaIch22","aes16","niceDel","mhraHal","esaic24","eurHypoNa","dka24","adaHosp","easlHe","aasldHe","asamAws","efnsWe"]],
+    ["意識改變：指引",["ahaAis26","twStroke","ahaIch22","aes16","niceDel","sdaDel","mhraHal","esaic24","eurHypoNa","dka24","adaHosp","easlHe","aasldHe","asamAws","efnsWe"]],
     ["意識改變：評分、試驗與仿單",["gcs","at4","esett","adrogue","cerebyxPI","altePI","tnkPI","idaPI"]],
     ["胸痛",["accAcs25","accAorta22","acepAd15","advised","escPeri25","escNcs22","labetPI"]],
     ["發燒",["icuFever23","idsaFn10","esmoFn16","crbsi09","cdiff17","cdiff21","mavros11","easlCirr18"]],
@@ -4148,9 +4200,9 @@ function renderRefPanel(){
     ["計算工具：類固醇、輸血",["litflSt","eseGiai24","woodcock20","aabbPlt25","chestTx25","vghBlood"]],
     ["高血糖",["dkaCcjm"]],
     ["電解質",["spsK","spsMg","sfeHypoCa","sfeHyperCa","ukmiP","eurHypoNaSl","usHypoNa13"]],
-    ["高血壓急症、頭痛",["ahaBp24","accHtn17","escHtnEm","acepHa19","ahs16","pdph24"]],
+    ["高血壓急症、頭痛",["ahaBp24","accHtn25","escHtnEm","urapSmPC","acepHa19","ahs16","pdph24"]],
     ["噁心嘔吐、疼痛、失眠",["ponv20","fdaOnd12","emaMcp13","asaAps16","cdcMme22","nhsPara","beers23","aasm17","zolpPI","belsPI","alosa24","hypDose","zopiSmPC"]],
-    ["健保",["nhi","cdeDex13","cmuVar09","nhiDoac"]]
+    ["健保",["nhi","nhi71","nhi543","nhiDoac"]]
   ];
   const list=groups.map(([h,ks])=>`<div class="sec">${h}</div><div class="card"><div class="cb small">${ks.map(k=>`<p style="margin:0 0 8px"><b>${esc(REF[k].t)}</b>　${esc(REF[k].f)}${REF[k].u?` <a href="${REF[k].u}" target="_blank" rel="noopener">連結</a>`:""}</p>`).join("")}</div></div>`).join("");
   return `<div class="card"><h2>版本</h2><div class="cb">
@@ -4159,7 +4211,16 @@ function renderRefPanel(){
     <div class="note">建議強度標示：AHA/ACC、AHA/ASA＝Class 1／2a／2b／3 ＋ LOE；ESC＝I／IIa／IIb／III；ERS/ATS、GRADE＝strong／conditional；BTS＝Grade A–D。「依輸入推導」的鑑別排序為本工具的規則，不是指引分類。</div>
   </div></div>
   <div class="card"><h2>Changelog</h2><div class="cb small">
-    <p style="margin:0 0 6px"><b>v0.6（${CHECKED}）</b></p>
+    <p style="margin:0 0 6px"><b>v0.7（${CHECKED}）</b></p>
+    <ul class="tight"><li>氧氣目標依情境：COPD／CO₂ 滯留 88–92%；疑 ACS（STEMI、缺血 ECG、troponin 上升或升高、典型胸痛）SpO₂ <90% 才給氧；氣喘 92–95%（GINA 2026）；其餘 94–98%（BTS）。與 BTS 不同處並列。跨頁氧氣卡、喘頁、胸痛頁與 SBAR 一致。</li>
+    <li>敗血症 30 mL/kg：病人資料新增身高；BMI >30 改顯示調整體重與理想體重的量（SSC 2026）；心衰竭、透析時並列 SSC 2026（未另訂減量）與 ESC HF（避免大量輸液）。</li>
+    <li>RSI：低血壓、shock index ≥1 或使用升壓藥時，etomidate 0.2 mg/kg、ketamine 1 mg/kg（仿單下限），propofol 降為次選。</li>
+    <li>高血壓急症：改以 AHA/ACC 2025 為主（第一小時 ≤25%、2–6 小時 <160/100、24–48 小時 130–140；主動脈剝離第一小時 <120；住院無器官損傷不追加 PRN 降壓藥，3: Harm）；urapidil 並列 ESC 與歐盟仿單劑量。</li>
+    <li>健保：NOAC 改依現行 2.1.4.2–2.1.5 逐藥判定（rivaroxaban 年齡條件 50–<75 歲，115/10/1 修訂）；PPI 針劑依 7.1（113/8/1）；octreotide 依 5.4.3。</li>
+    <li>譫妄：haloperidol 0.5–1 mg 口服或 0.5 mg IM（24 小時 ≤2 mg）；Parkinson 病／Lewy body 失智不用 haloperidol，抗精神病藥禁忌時 lorazepam 0.5–1 mg 口服（SIGN 157／SDA）。</li>
+    <li>出處：GINA 2026、ESC AF 2024、SSC 2026（30 mL/kg 與體重）重新核對；未能取得原文的項目在出處內標「請確認」。</li>
+    <li>測試：新增 tests/fuzz.js（組合模擬＋臨床不變式：氧氣目標一致、RSI 低血壓劑量、BMI >30 體重、NOAC 判定、Parkinson 不給 haloperidol、步驟編號）。3,000 組隨機病人 0 失敗；同一組不變式對 v0.6 抓到 21 種錯誤。</li></ul>
+    <p style="margin:8px 0 6px"><b>v0.6（2026-10-18）</b></p>
     <ul class="tight"><li>外觀改用臨床 app 共用樣式：深青綠單一強調色、淺深色 token、數值等寬字；步驟卡改為立即處置紅底、等待黃底（不再用彩色左側色條）；出處標籤改等寬框線。排版與臨床內容不變。</li>
     <li>測試：新增 tests/（靜態檢查、文字快照、Playwright）。v0.5 → v0.6 文字快照除本段外完全相同；390 px 深淺色＋1280 px 所有分頁無橫向溢出、無 console 錯誤、零網路請求。</li></ul>
     <p style="margin:8px 0 6px"><b>v0.5</b></p>
