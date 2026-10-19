@@ -78,7 +78,22 @@ for(const [lab,fn] of [['score',A.scoreBox],['red',A.redBanner],['abg',A.abgRes]
 // v0.9 住院血糖、降壓藥（舊版無此函式時略過）
 if(A.renderGluc&&(!MODSEL.length||MODSEL.includes('gluc'))) outs.push(['gluc',A.renderGluc,(t,h,o)=>{
   const c=A.glCtx(); const rc=A.rv('crcl'), age=num(o.age); const lowD=(age!==null&&age>=70)||!!(rc&&(rc.hd||rc.v<60));
-  if(c.crisis&&/排程起始每日總量/.test(t)) return 'DKA／HHS 中仍給皮下排程起始劑量';
+  if(c.crisis&&/insulin glargine（長效）\d/.test(t)) return 'DKA／HHS 中仍給皮下 insulin 醫囑';
+  // 明確醫囑：獨立計算 basal 劑量
+  if(!c.crisis&&!c.homeIns&&c.wt!==null&&c.hi!==null&&c.hi>=180&&c.hi<=400&&o.gl_ster!=='am'&&(c.dm||(c.a1c!==null&&c.a1c>=6.5))){
+    let tdd = o.gl_t1? 0.3*c.wt : (lowD? 0.3 : (c.hi>200?0.5:0.4))*c.wt; let bas = o.gl_t1? 0.15*c.wt : tdd/2;
+    if(c.lo!==null&&c.lo<70){ tdd*=0.8; bas*=0.8; }
+    const B=Math.max(1,Math.round(bas));
+    if(!new RegExp('insulin glargine（長效）'+B+' U SC 每日一次').test(t)) return 'basal 醫囑劑量不符（預期 '+B+' U）';
+    if((o.gl_eat===''||o.gl_eat==='eat')&&!/三餐\s*，隨餐或餐後立即給/.test(t)) return '進食者缺餐前 insulin 醫囑';
+    if(o.gl_eat==='npo'&&/三餐\s*，隨餐或餐後立即給/.test(t)) return 'NPO 仍給餐前 insulin';
+    if(o.gl_eat==='tfc'&&!/q4h.{0,40}管灌中斷即停/.test(t)) return '連續管灌缺營養 insulin q4h';
+    if(!/矯正量表/.test(t)) return '缺矯正量表';
+  }
+  if(!c.crisis&&!c.homeIns&&o.gl_ster==='am'&&c.hi!==null&&c.hi>=180&&c.hi<=400&&!/NPH（中效）10 U SC 早上/.test(t)) return '早上類固醇缺 NPH 10 U 醫囑';
+  if(!c.crisis&&!c.homeIns&&!o.gl_t1&&c.dm&&c.hi!==null&&c.hi>=140&&c.hi<180){
+    const e=A.rv('egfr'); const d= e&&(e.hd||e.v<30)?25 : e&&e.v<45?50 : 100;
+    if(!new RegExp('sitagliptin（DPP-4i）'+d+' mg PO 每日一次').test(t)) return 'sitagliptin 劑量與 eGFR 不符（預期 '+d+'）'; }
   if(c.lo!==null&&c.lo<70&&!/低血糖（<70）/.test(t)) return '低血糖未提示';
   if(!c.crisis&&c.wt!==null&&c.hi!==null&&c.hi>=180&&c.hi<=400&&!c.homeIns&&!o.gl_t1&&lowD&&!/0\.3 U\/kg：老人或腎功能不全/.test(t)) return '老人或腎功能不全未用 ≤0.3 U/kg';
   if(!c.crisis&&c.wt!==null&&c.hi!==null&&c.hi>=180&&c.hi<=400&&!c.homeIns&&!o.gl_t1&&!lowD&&/0\.3 U\/kg：老人或腎功能不全/.test(t)) return '非老人非腎差卻用 0.3';
@@ -111,6 +126,8 @@ if(!MODSEL.length||MODSEL.includes('drug')) outs.push(['drugs',()=>{ A.S.dflt='a
 
 for(let i=0;i<N;i++){
   const o={}; for(const f of Object.keys(F)) o[f]=rnd(f);
+  // 30% 回合偏向住院血糖情境（糖尿病、血糖 140–400、有體重），提高血糖模組覆蓋
+  if(Math.random()<.3&&F.gl_hi){ o.hx_dm=Math.random()<.85; o.gl_hi=Math.round(140+Math.random()*260); if(o.wt===null) o.wt=Math.round(45+Math.random()*60); if(Math.random()<.5) o.gm_tdd=null; }
   set(o); const g=A.gcsCalc(); if(g!==null) A.S.gcs=g;
   for(const [lab,fn,inv] of outs){
     let h; try{ h=fn(); }catch(e){ fail(lab+' | EXC '+e.message,o); continue; }
@@ -123,6 +140,6 @@ const keys=Object.keys(fails);
 console.log(`FUZZ ${n} 次輸出，${keys.length} 種失敗`);
 for(const k of keys.sort((a,b)=>fails[b].length-fails[a].length).slice(0,25)){
   const ex=fails[k][0]; const short=Object.fromEntries(Object.entries(ex).filter(([f,v])=>v!==null&&v!==''&&v!==false));
-  console.log(`  ${fails[k].length}× ${k}\n     例：${JSON.stringify(short).slice(0,260)}`);
+  console.log(`  ${fails[k].length}× ${k}\n     例：${JSON.stringify(short).slice(0,process.env.FULL?99999:260)}`);
 }
 process.exitCode=keys.length?1:0;

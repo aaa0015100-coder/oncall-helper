@@ -402,7 +402,7 @@ const S0 = {
   st_drug:"", st_dose:null, st_wk:null, st_stress:"",
   tx_grp:"", tx_proc:"", tx_bleed:false,
   // v0.9 住院血糖
-  gm_met:false, gm_dpp4:false, gm_glp1:false, gm_su:false, gm_tdd:null, gl_a1c:null, gl_eat:"", gl_ster:"", gl_lo:null, gl_hi:null, gl_icu:false, gl_t1:false, sx_plan:false,
+  gm_met:false, gm_dpp4:false, gm_glp1:false, gm_su:false, gm_tdd:null, gm_bas:null, gl_a1c:null, gl_eat:"", gl_ster:"", gl_lo:null, gl_hi:null, gl_icu:false, gl_t1:false, sx_plan:false,
   // v0.9 血壓用藥
   bp_acei:false, bp_arb:false, bp_ccb:false, bp_thz:false, bp_bb:false, bp_mra:false, bp_ab:false, bp_alb:false, bp_preg:false, bp_gout:false, bp_aki:false,
   // 藥物頁
@@ -2726,11 +2726,82 @@ function glTdd(c){
   const f = c.lowDose? 0.3 : (c.hi!==null&&c.hi>200? 0.5 : 0.4);
   return {f, u:f*c.wt};
 }
-function glSplit(tdd,c){
-  const b=Math.round(tdd/2), m=Math.round(tdd/6);
-  if(c.eat) return `<b>basal ${b} U</b> 每日一次 ＋ <b>餐前 ${m} U</b> × 3 餐 ＋ 矯正（basal-bolus）`;
-  if(c.tf&&S.gl_eat==="tfc") return `<b>basal ${b} U</b> 每日一次 ＋ 營養 insulin <b>${fmt(tdd/12,0)} U q4h</b>（管灌中，中斷即停）＋ 矯正`;
-  return `<b>basal ${b} U</b> 每日一次 ＋ 矯正（進食差或 NPO：basal＋矯正，不給餐前）`;
+/* 矯正量表（Endotext 2026 Table 1）：[下限, 上限, 敏感, 一般, 阻抗, 睡前／2AM] */
+const GL_SCALE=[[131,150,0,1,2,0],[151,200,1,2,3,0],[201,250,2,4,6,1],[251,300,3,6,9,2],[301,350,4,8,12,3],[351,400,5,10,15,3],[401,null,6,12,18,3]];
+function glCol(c,tdd){
+  const ht=num(S.ht); const bmi=(c.wt!==null&&ht!==null&&ht>=120)? c.wt/Math.pow(ht/100,2) : null;
+  if(bmi!==null) return bmi<25? {i:2,n:"敏感",why:`BMI ${fmt(bmi,0)} <25`} : bmi<=30? {i:3,n:"一般",why:`BMI ${fmt(bmi,0)}（25–30）`} : {i:4,n:"阻抗",why:`BMI ${fmt(bmi,0)} >30`};
+  if(tdd!==null) return tdd<50? {i:2,n:"敏感",why:`每日 insulin ${fmt(tdd,0)} U <50`} : tdd<=90? {i:3,n:"一般",why:`每日 insulin ${fmt(tdd,0)} U（50–90）`} : {i:4,n:"阻抗",why:`每日 insulin ${fmt(tdd,0)} U >90`};
+  return {i:2,n:"敏感",why:"無身高與每日總量，先用敏感欄（本工具預設）"};
+}
+function glScaleTbl(col,hs){
+  return `<div class="tscroll"><table class="t"><tr><th>血糖</th><th>${hs?"餐前／定時":"每次"}（${col.n}）</th>${hs?"<th>睡前／2 AM</th>":""}</tr>${GL_SCALE.map(r=>`<tr><td>${r[1]===null?">400":r[0]+"–"+r[1]}</td><td><b>${r[col.i]} U</b></td>${hs?`<td>${r[5]} U</td>`:""}</tr>`).join("")}</table></div><div class="small muted">欄位：${col.why}（Endotext：BMI <25 或 <50 U/日 敏感；25–30 或 50–90 一般；>30 或 >90 阻抗）${src("endotext26")}</div>`;
+}
+const GL_RAPID="insulin aspart／lispro／glulisine（速效）";
+/* 依進食狀態把每日總量轉成醫囑。bas＝basal 劑量（U），tdd＝每日總量（U） */
+function glRx(c,tdd,bas){
+  const O=[]; const B=Math.max(1,Math.round(bas)), N=Math.round(Math.max(0,tdd-bas)), meal=Math.max(1,Math.round(N/3)), tf4=Math.max(1,Math.round(tdd/12));
+  const basal=`<b>insulin glargine（長效）${B} U SC 每日一次</b>（固定時間，早上或睡前；或 degludec 同劑量）`;
+  const eatState = S.gl_eat||"eat";
+  if(eatState==="eat"||eatState==="poor"){
+    O.push(basal);
+    if(eatState==="eat") O.push(`<b>${GL_RAPID} ${meal} U SC 三餐</b>，隨餐或餐後立即給；該餐未進食則不給 ${src("endotext26")}${src("rabbit2")}<br><span class="small">或 regular insulin（短效）${meal} U SC 三餐前 30 分鐘（矯正也改用 regular）${src("endotext26")}</span>`);
+    else O.push(`進食差：<b>暫不排餐前 insulin</b>（basal＋矯正）${src("endotext26")}；可依實際進食量於餐後給速效 insulin ${src("endotext26")}`);
+    O.push(`<b>矯正：同一種速效 insulin</b>，三餐前依下表加在餐前劑量上；睡前依睡前欄`);
+    return {O, mon:"POC 血糖：三餐前＋睡前（至少每日 4 次）", hs:true};
+  }
+  if(eatState==="npo"){
+    O.push(basal); O.push(`<b>不給餐前 insulin</b>`); O.push(`<b>矯正：${GL_RAPID}</b>，每次測血糖時依下表（Endotext 未訂 NPO 時給藥頻次；本工具配合每 4–6 小時測量）`);
+    return {O, mon:"POC 血糖：至少每 4–6 小時", hs:false};
+  }
+  if(eatState==="tfc"){
+    O.push(basal); O.push(`<b>營養 insulin：${GL_RAPID} ${tf4} U SC q4h</b>（管灌進行中才給，<b>管灌中斷即停</b>）；或 regular insulin 同劑量 ${src("endotext26")}`);
+    O.push(`<b>矯正</b>：每 4 小時依下表加在營養 insulin 上`);
+    return {O, mon:"POC 血糖：每 4 小時（配合營養 insulin）", hs:false};
+  }
+  // 間歇管灌
+  O.push(basal); O.push(`<b>NPH（中效）${Math.max(1,N)} U SC 管灌開始時</b>（Endotext：12–16 小時管灌於開始時給 NPH；劑量未訂，本工具以每日總量扣除 basal 後的量帶入）${src("endotext26")}`);
+  O.push(`<b>矯正：${GL_RAPID}</b>，管灌期間每 4–6 小時依下表`);
+  return {O, mon:"POC 血糖：管灌期間每 4–6 小時", hs:false};
+}
+function glOrders(c,plan){
+  const egv=c.eg&&!c.eg.hd? c.eg.v : null, hd=!!(c.eg&&c.eg.hd);
+  const sitaD = hd||egv!==null&&egv<30? 25 : egv!==null&&egv<45? 50 : 100;
+  const O=[]; let mon="", tbl="", col=null, hs=true;
+  const tddForCol = plan? plan.tdd : (c.tdd!==null&&c.tdd>0? c.tdd : null);
+  const ster=S.gl_ster, eat=S.gl_eat||"eat";
+  // 早上類固醇、未用 insulin：JBDS 方案
+  if(ster==="am"&&!c.homeIns&&c.hi!==null&&c.hi>=180&&c.hi<=400){
+    O.push(`<b>NPH（中效）10 U SC 早上</b>，與類固醇同時；依晚餐前血糖每日調 10–20%；類固醇減量時同步減量 ${src("jbdsSter23")}`);
+    if(eat==="eat"&&!c.lowDose) O.push(`<span class="small">替代：gliclazide 40 mg PO 早上，每日調整至最多 240 mg（JBDS）${src("jbdsSter23")}；Endotext 不建議住院新開始 SU（並列）${src("endotext26")}</span>`);
+    O.push(`<b>矯正：${GL_RAPID}</b>，三餐前與睡前依下表`);
+    mon="POC 血糖：三餐前＋睡前；午餐後到晚餐前最高"; col=glCol(c,10); tbl=glScaleTbl(col,true);
+    return optCard({cls:"pref",title:"醫囑建議（早上類固醇高血糖）",tags:src("jbdsSter23")+src("endoSoc22"),lead:ul(O),rows:[["矯正量表",tbl],["監測",mon],["另一做法",`basal-bolus 亦可（Endocrine Society 2.1）${src("endoSoc22")}`]],open:true});
+  }
+  if(plan){
+    if(plan.corrFirst){
+      O.push(`<b>先只用矯正：${GL_RAPID}</b>，三餐前與睡前依下表（Endocrine Society 10.1）${src("endoSoc22")}`);
+      const r=glRx(c,plan.tdd,plan.bas);
+      O.push(`<span class="small">若 24 小時內 ≥2 次 ≥180，加排程：</span>`+ul(r.O.filter(x=>!/矯正/.test(x))));
+      col=glCol(c,plan.tdd); tbl=glScaleTbl(col,true); mon=r.mon;
+    } else {
+      const r=glRx(c,plan.tdd,plan.bas); O.push(...r.O); mon=r.mon; col=glCol(c,plan.tdd); tbl=glScaleTbl(col,r.hs);
+      if(ster==="am"&&c.homeIns) O.push(`早上類固醇：家中晚上的長效改<b>早上</b>給，依晚餐前血糖每日加 10–20%；類固醇減量時同步減量 ${src("jbdsSter23")}`);
+      const B=Math.max(1,Math.round(plan.bas));
+      if(S.sx_plan) O.push(`<b>手術當天（NPO）：insulin glargine ${Math.max(1,Math.round(B*0.75))} U SC</b>（前 24 小時劑量 ${B} U 減 25%）；停餐前 insulin，矯正續用；若用 NPH：早上減 50%、睡前照給 ${src("endotext26")}`);
+      else if(eat==="npo"&&c.homeIns) O.push(`<span class="small">NPO：上列長效已為家中劑量減 25%（Endotext NPO 減量）；若家中用 NPH：早上減 50%、睡前照給 ${src("endotext26")}</span>`);
+    }
+    if(!S.gl_t1&&S.gm_met&&!(hd||egv!==null&&egv<30)&&eat==="eat") O.push(`<span class="small">metformin：病情穩定、腎肝心風險低可沿用家中劑量 ${src("endotext26")}${src("metPI")}</span>`);
+    return optCard({cls:"pref",title:`醫囑建議（${{eat:"正常進食",poor:"進食差",npo:"NPO",tfc:"連續管灌",tfi:"間歇管灌"}[eat]}${S.gl_eat?"":"，未填進食狀態，以正常進食估算"}）`,tags:src("endotext26")+src("rabbit2")+src("endoSoc22"),lead:ul(O),rows:[["矯正量表",tbl],["監測",mon],["低血糖","<70：清醒可吞嚥 15–20 g 葡萄糖 PO，15 分鐘複測；無法口服 D50W 20–50 mL IV（10–25 g）或 glucagon 1 mg IM／SC "+src("adaHosp")]],open:true});
+  }
+  // 輕度：DPP-4i＋矯正
+  if(!c.homeIns&&!S.gl_t1&&c.dm&&c.hi!==null&&c.hi<180&&c.hi>=140){
+    O.push(`<b>sitagliptin（DPP-4i）${sitaD} mg PO 每日一次</b>${sitaD<100?`（${hd?"透析":"eGFR "+egv}）`:""} ${src("sitaPI")}${S.hx_hf?'；<span class="cau">心衰竭：權衡風險，saxagliptin、alogliptin 不用</span>'+src("endotext26"):""}`);
+    O.push(`<b>矯正：${GL_RAPID}</b>，三餐前與睡前依下表；持續 >180 改排程 insulin ${src("endoSoc22")}`);
+    col=glCol(c,null); tbl=glScaleTbl(col,true);
+    return optCard({cls:"pref",title:"醫囑建議（輕度高血糖、第二型）",tags:src("endoSoc22")+src("sitaPI"),lead:ul(O),rows:[["矯正量表",tbl],["監測","POC 血糖：三餐前＋睡前"],["健保",nhiQ("5.1：DPP-4i 限已用最大耐受劑量 metformin 仍控制不佳者")+src("nhi51")]],open:true});
+  }
+  return "";
 }
 function renderGluc(){
   const c=glCtx(); const H=[]; const st=stepper();
@@ -2755,31 +2826,36 @@ function renderGluc(){
   if(show(S.gm_glp1)) M.push(`<b>GLP-1 RA</b>：住院不建議新開始 ${src("endotext26")}`);
   if(show(S.gm_su)) M.push(`<b>sulfonylurea</b>：住院不建議新開始 ${src("endotext26")}${(c.poor||c.npo||c.tf)?'；<span class="cau">進食差、NPO 或管灌時低血糖風險高（本工具提示）</span>':""}`);
   if(M.length) H.push(st({k:"info",t:"平常口服藥（入院時）",c:ul(M),x:`一般以排程 insulin 取代非 insulin 藥物（Endocrine Society 7.1，conditional）。`,why:src("endoSoc22")+src("endotext26")}));
-  // 3. insulin
-  const I=[]; const w=glTdd(c);
+  // 3. insulin：判斷
+  const I=[]; const w=glTdd(c); let plan=null; // plan={tdd,bas,why}
+  const hypoAdj = c.lo!==null&&c.lo<70;
   if(S.gl_t1) I.push(`<span class="ng">第一型糖尿病：NPO 時仍需 basal insulin，不可只用矯正</span> ${src("endotext26")}`);
   if(c.homeIns){
-    if(c.tdd!==null&&c.tdd>0){ const a=c.tdd*0.7, b=c.tdd*0.8;
-      I.push(`<b>沿用家中 insulin，依營養與病情調整</b>（Endocrine Society 10.3，strong）${src("endoSoc22")}；控制良好者考慮總量減 20–30% → <b>${fmt(a,0)}–${fmt(b,0)} U/日</b> ${src("endotext26")}`);
-      I.push(glSplit((a+b)/2,c)+`（以減量後中位數 ${fmt((a+b)/2,0)} U 估算）`);
-    } else I.push(`已用 basal insulin：沿用並依營養調整（10.3）；填家中每日總量可估算 ${src("endoSoc22")}`);
+    if(c.tdd!==null&&c.tdd>0){
+      const t=c.tdd*0.75, b=num(S.gm_bas)!==null&&num(S.gm_bas)>0? num(S.gm_bas)*0.75 : t/2;
+      I.push(`<b>沿用家中 insulin，依營養與病情調整</b>（Endocrine Society 10.3，strong）${src("endoSoc22")}；控制良好者總量減 20–30%（${fmt(c.tdd*0.7,0)}–${fmt(c.tdd*0.8,0)} U），以減 25% 計 → <b>${fmt(t,0)} U/日</b> ${src("endotext26")}${num(S.gm_bas)===null?"；未填長效劑量，以一半為 basal 估算":""}`);
+      plan={tdd:t,bas:b};
+    } else I.push(`已用 basal insulin：沿用並依營養調整（10.3）；<b>填家中每日總量與長效劑量</b>以產生醫囑 ${src("endoSoc22")}`);
   } else if(c.hi!==null&&c.hi>400){
     I.push(`<span class="cau">最高 ${c.hi} >400：先排除 DKA／HHS（β-OHB、血氣、滲透壓），排除後再依體重計算排程 insulin（0.5 U/kg）</span> ${src("dka24")}${src("rabbit2")}`);
   } else if(c.hi!==null&&c.hi>=180){
-    if(c.dm||c.a1c!==null&&c.a1c>=6.5){
-      I.push(`糖尿病、入院確認血糖 ≥180：<b>開始排程 insulin</b>（Endocrine Society 10.2，conditional；或先矯正、持續 ≥180 再加排程）${src("endoSoc22")}`);
-    } else {
-      I.push(`無糖尿病史、血糖 ≥180：<b>先矯正 insulin</b>，24 小時內 ≥2 次 ≥180 再加排程（Endocrine Society 10.1）${src("endoSoc22")}`);
-    }
-    if(w&&S.gl_t1){ const a=0.2*c.wt, b=0.4*c.wt; I.push(`第一型：每日總量約 0.2–0.4 U/kg → <b>${fmt(a,0)}–${fmt(b,0)} U</b>（以 0.3 U/kg 估算分配）${src("endotext26")}`); I.push(glSplit(0.3*c.wt,c)); }
-    else if(w){ I.push(`排程起始每日總量 <b>${fmt(w.u,0)} U</b>（${w.f} U/kg：${c.lowDose?"老人或腎功能不全 ≤0.3":c.hi>200?"血糖 201–400 → 0.5":"血糖 ≤200 → 0.4"}）${src("rabbit2")}${src("endotext26")}`); I.push(glSplit(w.u,c)); }
-    else I.push(`填體重以計算起始劑量（0.4 U/kg；血糖 >200：0.5；老人或腎功能不全 ≤0.3）${src("rabbit2")}`);
+    const dm = c.dm||c.a1c!==null&&c.a1c>=6.5;
+    I.push(dm? `糖尿病、入院確認血糖 ≥180：<b>開始排程 insulin</b>（Endocrine Society 10.2，conditional）${src("endoSoc22")}`
+             : `無糖尿病史、血糖 ≥180：<b>先只用矯正 insulin</b>；24 小時內 ≥2 次 ≥180 再加排程（Endocrine Society 10.1）${src("endoSoc22")}`);
+    if(w&&S.gl_t1){ plan={tdd:0.3*c.wt,bas:0.15*c.wt}; I.push(`第一型：每日總量約 0.2–0.4 U/kg（${fmt(0.2*c.wt,0)}–${fmt(0.4*c.wt,0)} U），以 0.3 U/kg 計 <b>${fmt(0.3*c.wt,0)} U</b> ${src("endotext26")}`); }
+    else if(w){ plan={tdd:w.u,bas:w.u/2}; I.push(`起始每日總量 <b>${fmt(w.u,0)} U</b>（${w.f} U/kg：${c.lowDose?"老人或腎功能不全 ≤0.3":c.hi>200?"血糖 201–400 → 0.5":"血糖 ≤200 → 0.4"}），一半 basal、一半餐前 ${src("rabbit2")}${src("endotext26")}`); }
+    else I.push(`<span class="cau">填體重以計算排程劑量</span>（0.4 U/kg；血糖 >200：0.5；老人或腎功能不全 ≤0.3）${src("rabbit2")}`);
     if(c.lowDose) I.push(`<span class="small">≤0.3 U/kg 的條件：Endotext 未訂年齡與腎功能切點，本工具以 ≥70 歲或 CrCl／eGFR <60（或透析）帶入</span>`);
+    if(plan&&!dm) plan.corrFirst=true;
   } else if(c.hi!==null){
-    I.push(`最高 ${c.hi} <180：目前不需排程 insulin；輕度 T2DM 可 DPP-4i ＋ 矯正 ${src("endoSoc22")}`);
+    I.push(`最高 ${c.hi} <180：目前不需排程 insulin ${src("endoSoc22")}`);
   } else I.push(`<span class="muted">填最近 24 小時最高血糖以判斷是否需要排程 insulin</span>`);
-  I.push(`調整：RABBIT 2 空腹或餐前 >140 時 basal 加 20%、<70 減 20%（試驗目標較嚴）${src("rabbit2")}；單用矯正（sliding scale）不作為已知糖尿病的長期方案 ${src("endoSoc22")}`);
-  H.push(st({k:"go",t:"Insulin",c:ul(I),why:src("endoSoc22")+src("rabbit2")+src("endotext26")}));
+  if(hypoAdj&&plan){ plan.tdd*=0.8; plan.bas*=0.8; I.push(`<span class="cau">最近有 <70：basal 與總量先減 20%</span> ${src("rabbit2")}`); }
+  I.push(`之後調整：空腹或餐前 >140 時 basal 加 20%、<70 減 20%（RABBIT 2，試驗目標較嚴）${src("rabbit2")}；單用矯正（sliding scale）不作為已知糖尿病的長期方案 ${src("endoSoc22")}`);
+  H.push(st({k:"go",t:"Insulin 判斷",c:ul(I),why:src("endoSoc22")+src("rabbit2")+src("endotext26")}));
+  // 3b. 醫囑
+  const rxOut = glOrders(c,plan);
+  if(rxOut) H.push(rxOut);
   // 4. 特殊情境
   const X=[];
   if(c.npo||S.sx_plan) X.push(`<b>NPO／手術</b>：早上 NPH 減 50%；glargine、degludec 前 24 小時劑量減 25%；睡前 NPH 照給；停餐前 insulin，矯正續用 ${src("endotext26")}；圍術期目標 100–180 ${src("endoSoc22")}${S.h_sglt2?`；<span class="ng">SGLT2i 術前 ≥3 天停</span> ${src("fdaSglt2")}`:""}`);
@@ -4401,7 +4477,7 @@ function buildPanels(){
   <div class="card"><h3>背景</h3><div class="cb"><div class="chks">${chk("hx_dm","已知糖尿病")}${chk("h_sglt2","使用 SGLT2i")}${chk("h_basal","已使用 basal insulin")}${chk("hx_hf","心衰竭")}${chk("hx_ckd","慢性腎病")}</div></div></div>
   <div class="card"><h2>處置流程（DKA／HHS）</h2><div class="cb" id="r-dka"></div></div>
   <div class="card" id="dka-gluc"><h3>住院血糖控制 <span class="sub">非危急高血糖、平常用藥、insulin 起始</span></h3><div class="cb">
-    <div class="grid">${fld("gl_hi","最近 24 h 最高血糖")}${fld("gl_lo","最近 24 h 最低血糖")}${fld("gl_a1c","HbA1c（%）")}${fld("gm_tdd","家中 insulin 每日總量（U）")}
+    <div class="grid">${fld("gl_hi","最近 24 h 最高血糖")}${fld("gl_lo","最近 24 h 最低血糖")}${fld("gl_a1c","HbA1c（%）")}${fld("gm_tdd","家中 insulin 每日總量（U）")}${fld("gm_bas","其中長效 insulin（U/日）")}
       ${sel("gl_eat","進食",[["","—"],["eat","正常進食"],["poor","進食差"],["npo","NPO"],["tfc","連續管灌"],["tfi","間歇管灌"]])}${sel("gl_ster","類固醇",[["","無"],["am","早上一次口服（prednisolone 等）"],["multi","每日多次或長效（dexamethasone）"]])}</div>
     <div class="sec">平常用藥與情境</div>
     <div class="chks">${chk("hx_dm","已知糖尿病")}${chk("gl_t1","第一型糖尿病")}${chk("gm_met","metformin")}${chk("h_sglt2","SGLT2i")}${chk("gm_dpp4","DPP-4i")}${chk("gm_glp1","GLP-1 RA")}${chk("gm_su","sulfonylurea")}${chk("h_basal","basal insulin")}${chk("gl_icu","ICU／重症")}${chk("sx_plan","預計 72 小時內手術")}</div>
@@ -4501,6 +4577,7 @@ function renderRefPanel(){
   <div class="card"><h2>Changelog</h2><div class="cb small">
     <p style="margin:0 0 6px"><b>v0.9（${CHECKED}）</b></p>
     <ul class="tight"><li>「高血糖」頁改名「高血糖／血糖控制」，新增住院血糖控制：目標（非重症 100–180、重症 140–180、圍術期 100–180）、低血糖提示、平常口服藥（metformin、SGLT2i、DPP-4i、GLP-1 RA、SU）入院時停續與腎調整、insulin 起始（家中 insulin 減 20–30%；未用 insulin 依體重 0.4／0.5 U/kg，老人或腎功能不全 ≤0.3；第一型 0.2–0.4），自動拆 basal／餐前／管灌劑量；NPO 與手術、早上類固醇（NPH）、連續或間歇管灌。依據 Endocrine Society 2022、Endotext 2026、RABBIT 2、JBDS 2023、FDA。</li>
+    <li>住院血糖改為<b>明確醫囑</b>：insulin glargine（長效）X U SC 每日一次、insulin aspart／lispro／glulisine（速效）Y U SC 三餐隨餐或餐後立即（或 regular 三餐前 30 分鐘）、連續管灌速效 Z U q4h、間歇管灌 NPH、早上類固醇 NPH 10 U 早上（或 gliclazide 40 mg）、輕度高血糖 sitagliptin（依 eGFR 100／50／25 mg）；附 Endotext 矯正量表（依 BMI 或每日總量選敏感／一般／阻抗欄，含睡前欄）、POC 監測頻次、低血糖處置；手術當天長效減 25% 並算出劑量；新增「其中長效 insulin」欄位。</li>
     <li>「高血壓急症」頁改名「高血壓」，新增降壓藥選擇與調整：低血壓、AKI、手術前、高血鉀時先停哪些；ACEi＋ARB、懷孕用 RAAS 抑制劑提示；住院血壓偏高（非急症）不追加 PRN、依目前用藥給下一步（第一線 → 兩類 → 三類 → spironolactone）；依共病選藥（CKD＋albuminuria、糖尿病、中風後、心衰竭、冠心症、懷孕、痛風）；長期目標 AHA/ACC 2025、ESC 2024、台灣 2022 並列。</li>
     <li>藥物頁新增 basal 與餐前 insulin、metformin、SGLT2i、sitagliptin、gliclazide、amlodipine、losartan、hydrochlorothiazide、spironolactone（含腎功能列）。AHA/ACC 2025 出處補慢性治療建議；IV 藥物表仍未能讀取全文。</li>
     <li>測試：fuzz.js 新增住院血糖與降壓藥不變式（DKA 中不給皮下起始劑量、低血糖提示、老人／腎差 ≤0.3 U/kg、家中 insulin 沿用、metformin eGFR <30 禁用、SGLT2i 術前停、第一型不停 basal；ACEi＋ARB、懷孕、低血壓、急症互斥）；3,000 組 0 失敗，故意改壞 4 處皆被抓到。</li></ul>
