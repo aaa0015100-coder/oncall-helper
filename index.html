@@ -3252,7 +3252,7 @@ const BPD=[
  {id:"inda",c:"D",lab:"Indapamide",st:["1.25 mg QD","2.5 mg QD","5 mg QD"],s0:0,ref:"indaPI",note:"早上服；每 4 週可調；合併初期其他降壓藥減半"},
  {id:"biso",c:"B",lab:"Bisoprolol",st:["2.5 mg QD","5 mg QD","10 mg QD","20 mg QD"],s0:1,ref:"bisoPI",note:"CrCl <40、肝炎或肝硬化 2.5 mg 起始；支氣管痙攣疾病一般不用"},
  {id:"carv",c:"B",lab:"Carvedilol",st:["3.125 mg BID","6.25 mg BID","12.5 mg BID","25 mg BID"],s0:1,ref:"carvPI",note:"高血壓 6.25 mg BID 起始，隨餐；每 7–14 天調整，上限 25 mg BID"},
- {id:"labe",c:"B",lab:"Labetalol 口服",st:["100 mg BID","200 mg BID","300 mg BID","400 mg BID"],s0:0,ref:"labePO",note:"每 2–3 天加 100 mg BID；常用維持 200–400 mg BID（重度可至每日 1,200–2,400 mg）"},
+ {id:"labe",c:"B",lab:"Labetalol 口服",st:["100 mg BID","200 mg BID","300 mg BID","400 mg BID"],s0:0,ref:"labePO",top:"已達常用維持上限（仿單：重度可至每日 1,200–2,400 mg 分次，加量前請上級確認）",note:"每 2–3 天加 100 mg BID；常用維持 200–400 mg BID（重度可至每日 1,200–2,400 mg）"},
  {id:"spir",c:"M",lab:"Spironolactone",st:["25 mg QD","50 mg QD","100 mg QD"],s0:0,ref:"spiroPI",note:"高血壓每日 25–100 mg；>100 mg 通常無額外降壓"},
  {id:"doxa",c:"AB",lab:"Doxazosin",st:["1 mg QD","2 mg QD","4 mg QD","8 mg QD","16 mg QD"],s0:0,ref:"doxaPI",note:"首劑與每次加量後 6 小時內注意姿勢性低血壓"}
 ];
@@ -3307,7 +3307,7 @@ function renderBPmed(){
   if(c.on.length){
     const L=c.on.map(x=>{ const up=bpUp(x,c), stop=bpStop(x,c);
       const noUp = x.d.c==="D"&&S.bp_gout ? "痛風：不增量，可行時改 losartan" : x.d.c==="B"&&S.hx_asthma ? "氣喘：不增量（β-blocker 見下方）" : "";
-      return `${bpName(x)}（${BPC[x.d.c]}）：${stop?`<span class="ng">${stop}</span>`:noUp?`<span class="cau">${noUp}</span>`:up?`可增至 ${up}`:'<span class="cau">已達仿單上限'+(x.d.id==="rami"&&c.lowCr?"（CrCl <40：5 mg）":"")+'</span>'} ${src(x.d.ref)}`; });
+      return `${bpName(x)}（${BPC[x.d.c]}）：${stop?`<span class="ng">${stop}</span>`:noUp?`<span class="cau">${noUp}</span>`:up?`可增至 ${up}`:'<span class="cau">'+(x.d.top||'已達仿單上限')+(x.d.id==="rami"&&c.lowCr?"（CrCl <40：5 mg）":"")+'</span>'} ${src(x.d.ref)}`; });
     const dup=Object.keys(BPC).filter(k=>c.on.filter(x=>x.d.c===k).length>1);
     if(dup.length) L.push(`<span class="ng">同類藥重複：${dup.map(k=>BPC[k]).join("、")}</span>`);
     H.push(st({k:"info",t:"目前降壓藥",c:ul(L)}));
