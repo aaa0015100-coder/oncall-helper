@@ -404,6 +404,7 @@ const S0 = {
   // v0.9 住院血糖
   gm_met:false, gm_dpp4:false, gm_glp1:false, gm_su:false, gm_tdd:null, gm_bas:null, gl_a1c:null, gl_eat:"", gl_ster:"", gl_lo:null, gl_hi:null, gl_icu:false, gl_t1:false, sx_plan:false,
   // v0.9 血壓用藥
+  bpd_amlo:"", bpd_nife:"", bpd_losa:"", bpd_vals:"", bpd_olme:"", bpd_rami:"", bpd_hctz:"", bpd_inda:"", bpd_biso:"", bpd_carv:"", bpd_labe:"", bpd_spir:"", bpd_doxa:"",
   bp_acei:false, bp_arb:false, bp_ccb:false, bp_thz:false, bp_bb:false, bp_mra:false, bp_ab:false, bp_alb:false, bp_preg:false, bp_gout:false, bp_aki:false,
   // 藥物頁
   dflt:"all", _gcsLast:null
@@ -3238,52 +3239,130 @@ function renderHTN(){
 function htnLab(){ const c=htnCtx(); return `<div class="kv"><div><div class="k">BP</div><b>${c.sbp??"—"}／${c.dbp??"—"}</b></div><div><div class="k">MAP</div><b>${c.map!==null?fmt(c.map,0):"—"}</b></div><div><div class="k">判定</div>${c.emerg?tag("高血壓急症","t-high"):c.high?tag("嚴重升高、無器官損傷","t-mid"):tag("—","t-gray")}</div></div>`; }
 
 /* ================= 降壓藥選擇與調整（v0.9） ================= */
+/* 常用口服降壓藥：劑量階梯（仿單），s0＝一般起始 */
+const BPC={ACEI:"ACEi",ARB:"ARB",C:"CCB",D:"thiazide 類",B:"β-blocker",M:"MRA",AB:"α-blocker"};
+const BPD=[
+ {id:"amlo",c:"C",lab:"Amlodipine",st:["2.5 mg QD","5 mg QD","10 mg QD"],s0:1,ref:"amloPI",note:"老人、虛弱或肝功能不全 2.5 mg 起始"},
+ {id:"nife",c:"C",lab:"Nifedipine 長效錠",st:["30 mg QD","60 mg QD","90 mg QD","120 mg QD"],s0:0,ref:"nifePI",note:"整顆吞；30 或 60 mg 起始，每 7–14 天調整，>120 mg 不建議"},
+ {id:"losa",c:"ARB",lab:"Losartan",st:["25 mg QD","50 mg QD","100 mg QD"],s0:1,ref:"losPI",note:"使用利尿劑（可能容積不足）或肝功能不全 25 mg 起始"},
+ {id:"vals",c:"ARB",lab:"Valsartan",st:["80 mg QD","160 mg QD","320 mg QD"],s0:0,ref:"valsPI",note:"容積或鹽分不足先矯正"},
+ {id:"olme",c:"ARB",lab:"Olmesartan",st:["20 mg QD","40 mg QD"],s0:0,ref:"olmePI",note:"可能容積不足（利尿劑、腎功能差）考慮較低起始；2 週後可增至 40 mg"},
+ {id:"rami",c:"ACEI",lab:"Ramipril",st:["1.25 mg QD","2.5 mg QD","5 mg QD","10 mg QD","20 mg QD"],s0:1,ref:"ramiPI",note:"CrCl <40 或疑容積不足 1.25 mg 起始；CrCl <40 每日上限 5 mg"},
+ {id:"hctz",c:"D",lab:"Hydrochlorothiazide",st:["12.5 mg QD","25 mg QD","50 mg QD"],s0:1,ref:"hctzPI",note:"仿單起始 25 mg；>50 mg 低血鉀明顯"},
+ {id:"inda",c:"D",lab:"Indapamide",st:["1.25 mg QD","2.5 mg QD","5 mg QD"],s0:0,ref:"indaPI",note:"早上服；每 4 週可調；合併初期其他降壓藥減半"},
+ {id:"biso",c:"B",lab:"Bisoprolol",st:["2.5 mg QD","5 mg QD","10 mg QD","20 mg QD"],s0:1,ref:"bisoPI",note:"CrCl <40、肝炎或肝硬化 2.5 mg 起始；支氣管痙攣疾病一般不用"},
+ {id:"carv",c:"B",lab:"Carvedilol",st:["3.125 mg BID","6.25 mg BID","12.5 mg BID","25 mg BID"],s0:1,ref:"carvPI",note:"高血壓 6.25 mg BID 起始，隨餐；每 7–14 天調整，上限 25 mg BID"},
+ {id:"labe",c:"B",lab:"Labetalol 口服",st:["100 mg BID","200 mg BID","300 mg BID","400 mg BID"],s0:0,ref:"labePO",note:"每 2–3 天加 100 mg BID；常用維持 200–400 mg BID（重度可至每日 1,200–2,400 mg）"},
+ {id:"spir",c:"M",lab:"Spironolactone",st:["25 mg QD","50 mg QD","100 mg QD"],s0:0,ref:"spiroPI",note:"高血壓每日 25–100 mg；>100 mg 通常無額外降壓"},
+ {id:"doxa",c:"AB",lab:"Doxazosin",st:["1 mg QD","2 mg QD","4 mg QD","8 mg QD","16 mg QD"],s0:0,ref:"doxaPI",note:"首劑與每次加量後 6 小時內注意姿勢性低血壓"}
+];
+const BPD_ID=Object.fromEntries(BPD.map(d=>[d.id,d]));
+function bpOn(){ return BPD.map(d=>({d,i:S["bpd_"+d.id]===""?null:+S["bpd_"+d.id]})).filter(x=>x.i!==null&&!isNaN(x.i)); }
 function bpCtx(){
-  const h=htnCtx(); const k=num(S.k), eg=rv("egfr");
-  const meds={A:S.bp_acei||S.bp_arb, C:S.bp_ccb, D:S.bp_thz};
+  const h=htnCtx(); const k=num(S.k), eg=rv("egfr"), rc=rv("crcl");
+  const on=bpOn();
+  const has=c=> on.some(x=>x.d.c===c);
+  const cls={ACEI:has("ACEI")||S.bp_acei, ARB:has("ARB")||S.bp_arb, C:has("C")||S.bp_ccb, D:has("D")||S.bp_thz, B:has("B")||S.bp_bb, M:has("M")||S.bp_mra, AB:has("AB")||S.bp_ab};
+  const meds={A:cls.ACEI||cls.ARB, C:cls.C, D:cls.D};
   const nAcd=(meds.A?1:0)+(meds.C?1:0)+(meds.D?1:0);
-  const anyMed=S.bp_acei||S.bp_arb||S.bp_ccb||S.bp_thz||S.bp_bb||S.bp_mra||S.bp_ab;
+  const anyMed=Object.values(cls).some(Boolean);
   const hypot = h.sbp!==null&&h.sbp<90 || h.map!==null&&h.map<65;
   const ckdAlb = (eg&&!eg.hd&&eg.v<60&&S.bp_alb) || (S.hx_ckd&&S.bp_alb);
   const dmCkd = S.hx_dm&&((eg&&!eg.hd&&eg.v<60)||S.bp_alb);
+  const lowCr = !!(rc&&(rc.hd||rc.v<40));
   const any = h.sbp!==null||anyMed||S.bp_alb||S.bp_preg||S.bp_gout||S.bp_aki||S.sx_plan;
-  return Object.assign({},h,{k,eg,meds,nAcd,anyMed,hypot,ckdAlb,dmCkd,any});
+  return Object.assign({},h,{k,eg,rc,on,cls,meds,nAcd,anyMed,hypot,ckdAlb,dmCkd,lowCr,any});
+}
+const bpPO=t=>t.replace(/ (QD|BID)$/," PO $1");
+const bpName=x=>`${x.d.lab.replace(" 口服","")} ${x.d.st[x.i]}`;
+function bpNames(c,codes){ const L=c.on.filter(x=>codes.includes(x.d.c)).map(bpName); const oth={ACEI:S.bp_acei?"其他 ACEi":"",ARB:S.bp_arb?"其他 ARB":"",C:S.bp_ccb?"其他 CCB":"",D:S.bp_thz?"其他 thiazide":"",B:S.bp_bb?"其他 β-blocker":"",M:S.bp_mra?"其他 MRA":"",AB:S.bp_ab?"其他 α-blocker":""}; codes.forEach(k=>{ if(oth[k]) L.push(oth[k]); }); return L; }
+/* 新加藥的起始劑量（依仿單調整條件） */
+function bpStart(id,c){
+  const d=BPD_ID[id]; let i=d.s0, why="";
+  if(id==="losa"&&(c.cls.D||S.hx_cirr)){ i=0; why=c.cls.D?"（已用利尿劑）":"（肝功能不全）"; }
+  if(id==="rami"&&(c.lowCr||c.cls.D)){ i=0; why=c.lowCr?`（${c.rc.hd?"透析":c.rc.lab} <40）`:"（已用利尿劑）"; }
+  if(id==="amlo"&&S.hx_cirr){ i=0; why="（肝功能不全）"; }
+  if(id==="biso"&&(c.lowCr||S.hx_cirr)){ i=0; why=c.lowCr?"（CrCl <40）":"（肝硬化）"; }
+  return `<b>${d.lab.replace(" 口服","")} ${bpPO(d.st[i])}</b>${why} ${src(d.ref)}`;
+}
+/* 增量：下一階；已達上限回 null */
+function bpUp(x,c){
+  if(x.d.id==="rami"&&c.lowCr&&x.i>=2) return null; // CrCl <40 上限 5 mg
+  return x.i<x.d.st.length-1? x.d.st[x.i+1] : null;
+}
+/* 該藥目前是否應停／暫停（回傳原因或空字串） */
+function bpStop(x,c){
+  const ras=x.d.c==="ACEI"||x.d.c==="ARB";
+  if(c.hypot) return "低血壓：暫停";
+  if(S.bp_preg&&(ras||x.d.c==="M")) return "懷孕：停用";
+  if(S.bp_aki&&(ras||x.d.c==="D")) return "AKI／脫水：暫停";
+  if(c.k!==null&&c.k>=5.5&&(ras||x.d.c==="M")) return `K ${c.k}：暫停或減量`;
+  if(ras&&c.cls.ACEI&&c.cls.ARB) return "ACEi＋ARB：停其一";
+  return "";
 }
 function renderBPmed(){
   const c=bpCtx(); const H=[]; const st=stepper();
-  if(!c.any) return `<span class="muted">勾選平常降壓藥、共病或填血壓後顯示。</span>`;
+  if(!c.any) return `<span class="muted">選平常降壓藥與劑量、勾共病，或填血壓後顯示。</span>`;
+  // 0. 目前用藥
+  if(c.on.length){
+    const L=c.on.map(x=>{ const up=bpUp(x,c), stop=bpStop(x,c);
+      const noUp = x.d.c==="D"&&S.bp_gout ? "痛風：不增量，可行時改 losartan" : x.d.c==="B"&&S.hx_asthma ? "氣喘：不增量（β-blocker 見下方）" : "";
+      return `${bpName(x)}（${BPC[x.d.c]}）：${stop?`<span class="ng">${stop}</span>`:noUp?`<span class="cau">${noUp}</span>`:up?`可增至 ${up}`:'<span class="cau">已達仿單上限'+(x.d.id==="rami"&&c.lowCr?"（CrCl <40：5 mg）":"")+'</span>'} ${src(x.d.ref)}`; });
+    const dup=Object.keys(BPC).filter(k=>c.on.filter(x=>x.d.c===k).length>1);
+    if(dup.length) L.push(`<span class="ng">同類藥重複：${dup.map(k=>BPC[k]).join("、")}</span>`);
+    H.push(st({k:"info",t:"目前降壓藥",c:ul(L)}));
+  }
   // 1. 先停／衝突
-  const P=[];
-  if(c.hypot) P.push(`<span class="ng">低血壓（${c.sbp!==null?"SBP "+c.sbp:""}${c.map!==null?" MAP "+fmt(c.map,0):""}）：${c.anyMed?"暫停降壓藥":"如有使用降壓藥：暫停"}</span>，依休克處置 ${jump("hypo","hypo-pr","低血壓頁")}`);
-  if(S.bp_aki) P.push(`<b>AKI、脫水或進食差</b>：確認容積與灌流壓、停腎毒性藥物 ${src("kdigoAki12")}；ACEi／ARB 與利尿劑暫停（本工具依此原則延伸），腎功能與容積恢復後逐一恢復`);
-  if(c.k!==null&&c.k>=5.5&&(S.bp_acei||S.bp_arb||S.bp_mra)) P.push(`<span class="cau">K ${c.k} 且使用 ${[S.bp_acei?"ACEi":"",S.bp_arb?"ARB":"",S.bp_mra?"MRA":""].filter(Boolean).join("、")}</span>：見高血鉀頁 ${jump("hk","p-hk","高血鉀")}`);
-  if(S.sx_plan&&(S.bp_acei||S.bp_arb)) P.push(`<b>預計手術、使用 ACEi／ARB</b>：停或續個別決定（AHA/ACC 2024）${src("ahaPeri24")}；STOP-or-NOT：術前 48 小時停用與持續，28 天心血管事件相同（22%），停用者術中低血壓較少（41% vs 54%）${src("stopOrNot24")}；ESC 2022 建議等級本版未能核對`);
-  if(S.bp_acei&&S.bp_arb) P.push(`<span class="ng">ACEi ＋ ARB 同時使用：不建議（3: Harm, A）</span> ${src("accHtn25")}`);
-  if(S.bp_preg&&(S.bp_acei||S.bp_arb||S.bp_mra)) P.push(`<span class="ng">懷孕：停 ${[S.bp_acei?"ACEi":"",S.bp_arb?"ARB":"",S.bp_mra?"MRA":""].filter(Boolean).join("、")}（胎兒傷害，3: Harm）</span> ${src("accHtn25")}${src("losPI")}`);
-  if(P.length) H.push(st({k:c.hypot||(S.bp_acei&&S.bp_arb)||S.bp_preg&&(S.bp_acei||S.bp_arb||S.bp_mra)?"bx":"wait",t:"先停／需調整",c:ul(P),why:src("accHtn25")+(S.bp_aki?src("kdigoAki12"):"")+(S.sx_plan?src("stopOrNot24"):"")}));
-  // 2. 住院血壓偏高（非急症）
+  const P=[], ras=bpNames(c,["ACEI","ARB"]), rasM=bpNames(c,["ACEI","ARB","M"]), dia=bpNames(c,["D"]), all=bpNames(c,Object.keys(BPC));
+  if(c.hypot) P.push(`<span class="ng">低血壓（${c.sbp!==null?"SBP "+c.sbp:""}${c.map!==null?" MAP "+fmt(c.map,0):""}）：${all.length?"暫停 "+all.join("、"):"如有使用降壓藥：暫停"}</span>，依休克處置 ${jump("hypo","hypo-pr","低血壓頁")}`);
+  if(S.bp_aki) P.push(`<b>AKI、脫水或進食差</b>：確認容積與灌流壓、停腎毒性藥物 ${src("kdigoAki12")}；${ras.concat(dia).length?"暫停 <b>"+ras.concat(dia).join("、")+"</b>":"ACEi／ARB 與利尿劑暫停"}（本工具依此原則延伸），腎功能與容積恢復後逐一恢復`);
+  if(c.k!==null&&c.k>=5.5&&rasM.length) P.push(`<span class="cau">K ${c.k}：${rasM.join("、")} 暫停或減量</span>，見高血鉀頁 ${jump("hk","p-hk","高血鉀")}`);
+  if(S.sx_plan&&ras.length) P.push(`<b>預計手術：${ras.join("、")}</b> 停或續個別決定（AHA/ACC 2024）${src("ahaPeri24")}；STOP-or-NOT：術前 48 小時停用與持續，28 天心血管事件相同（22%），停用者術中低血壓較少（41% vs 54%）${src("stopOrNot24")}`);
+  if(c.cls.ACEI&&c.cls.ARB) P.push(`<span class="ng">ACEi ＋ ARB 同時使用：不建議（3: Harm, A）→ 停其一</span> ${src("accHtn25")}`);
+  if(S.bp_preg&&rasM.length) P.push(`<span class="ng">懷孕：停 ${rasM.join("、")}（胎兒傷害，3: Harm）</span> ${src("accHtn25")}${src("losPI")}`);
+  if(S.hx_asthma&&c.on.some(x=>x.d.c==="B")) P.push(`<span class="cau">氣喘：β-blocker 一般不用；必要時 bisoprolol 2.5 mg 起始、備支氣管擴張劑</span> ${src("bisoPI")}`);
+  if(P.length) H.push(st({k:c.hypot||(c.cls.ACEI&&c.cls.ARB)||S.bp_preg&&rasM.length?"bx":"wait",t:"先停／需調整",c:ul(P),why:src("accHtn25")+(S.bp_aki?src("kdigoAki12"):"")+(S.sx_plan?src("stopOrNot24"):"")}));
+  // 2. 非急症血壓偏高：明確醫囑
   const elev = !c.emerg && !c.hypot && ((c.sbp!==null&&c.sbp>=140)||(c.dbp!==null&&c.dbp>=90));
+  const kHi = c.k!==null&&c.k>=5.5, kOk5 = c.k===null||c.k<=5.0;
   if(c.emerg) H.push(st({k:"info",t:"高血壓急症",c:"依上方急症處置；口服藥調整待急性期後。"}));
   else if(elev){
-    const L=[`<b>不追加 PRN 降壓藥</b>（IV 或口服）急速降壓（住院、無急性器官損傷，3: Harm）${src("accHtn25")}；處理誘因、恢復平常口服藥 ${src("ahaBp24")}`];
-    const nx=[];
-    if(S.bp_preg) nx.push(`懷孕：<b>labetalol</b> 或<b>長效 nifedipine</b>（1, A）${src("accHtn25")}`);
-    else if(c.nAcd===0){
-      nx.push(`未用 ACEi／ARB、CCB、thiazide：第一線 thiazide 類、長效 DHP CCB、ACEi 或 ARB（1, A）；${c.sbp>=140||c.dbp>=90?"第 2 期（≥140/90）以<b>兩種不同類、最好單一錠</b>起始（1, B-R）":"第 1 期單藥合理"} ${src("accHtn25")}`);
-      nx.push(`ESC 2024：多數病人低劑量兩藥單一錠——RAS 阻斷劑 ＋ DHP CCB 或利尿劑 ${src("esc24htn")}`);
-      nx.push(`台灣 2022：ACEi、ARB、β-blocker、CCB、thiazide 五類皆第一線；高於目標 ≥20/10 起始合併 ${src("tw22htn")}`);
-    } else if(c.nAcd===1){
-      const has=c.meds.A?"ACEi／ARB":c.meds.C?"CCB":"thiazide", add=c.meds.A?(S.bp_gout?"CCB":"CCB 或 thiazide 類"):c.meds.C?"ACEi 或 ARB":"ACEi 或 ARB";
-      nx.push(`目前 ${has}：加 <b>${add}</b>（不同類合併，ESC 起始組合為 RAS 阻斷劑＋CCB 或利尿劑）${src("esc24htn")}${src("accHtn25")}`);
-    } else if(c.nAcd===2){
-      const miss=!c.meds.A?"ACEi 或 ARB":!c.meds.C?"CCB":(S.bp_gout?"（痛風：thiazide 慎用，見下方）":"thiazide 類");
-      nx.push(`目前兩類：加第三類 <b>${miss}</b>（RAS 阻斷劑＋CCB＋利尿劑）${src("esc24htn")}`);
+    const add=[], ups=[];
+    if(S.bp_preg){
+      const lab=c.on.find(x=>x.d.id==="labe"), nif=c.on.find(x=>x.d.id==="nife");
+      if(lab&&bpUp(lab,c)) ups.push(`labetalol ${lab.d.st[lab.i]} → <b>${bpPO(bpUp(lab,c))}</b> ${src("labePO")}`);
+      if(nif&&bpUp(nif,c)) ups.push(`nifedipine 長效錠 ${nif.d.st[nif.i]} → <b>${bpPO(bpUp(nif,c))}</b> ${src("nifePI")}`);
+      if(!lab) add.push(`${bpStart("labe",c)}（懷孕優先，1, A）${src("accHtn25")}`);
+      if(!nif) add.push(`${bpStart("nife",c)}（懷孕優先，1, A）${src("accHtn25")}`);
     } else {
-      nx.push(`已用 ACEi／ARB ＋ CCB ＋ thiazide：頑固性高血壓 → <b>加 spironolactone</b> 應考慮（ESC 2024，不再為 Class I；PATHWAY-2 降壓優於 bisoprolol、doxazosin）${src("esc24htn")}；起始見藥物頁（K、eGFR）${src("spiroPI")}`);
+      // 加藥順序：A → C → D（共病調整）
+      const wantA = !c.meds.A && !kHi;
+      const order=[];
+      if(wantA && (c.ckdAlb||c.dmCkd)) order.push("A");
+      if(!c.meds.C) order.push("C");
+      if(wantA && !order.includes("A")) order.push("A");
+      if(!c.meds.D && !S.bp_gout) order.push("D");
+      for(const k of order){
+        if(k==="A") add.push(`${bpStart("losa",c)}${S.bp_gout?"（痛風首選 ARB）"+src("acrGout20"):""}，或 ${bpStart("rami",c)}（擇一，不合併）${c.ckdAlb||c.dmCkd?"；CKD 合併 albuminuria、或糖尿病合併 eGFR <60／albuminuria：首選":""}`);
+        if(k==="C") add.push(bpStart("amlo",c)+`<span class="small">（老人、虛弱 2.5 mg）</span>`);
+        if(k==="D") add.push(`${bpStart("inda",c)}（合併初期其他降壓藥減半），或 ${bpStart("hctz",c)}`);
+      }
+      if(c.nAcd===3 && !c.cls.M){
+        if(kOk5&&!(c.eg&&(c.eg.hd||c.eg.v<30))) add.push(`${bpStart("spir",c)}：頑固性高血壓（已用 RAS 阻斷劑＋CCB＋利尿劑）應考慮（ESC 2024，非 Class I）${src("esc24htn")}；需 K ≤5.0，eGFR 30–50 考慮隔日 ${src("spiroPI")}`);
+        else add.push(`<span class="cau">頑固性高血壓：spironolactone 因 K 或腎功能不宜</span>；會診心臟或腎臟科`);
+      }
+      if(c.meds.D&&S.bp_gout) add.push(`<span class="small">痛風：thiazide 可行時改 losartan ${src("acrGout20")}</span>`);
+      // 可增量者
+      c.on.forEach(x=>{ if(bpStop(x,c)) return; if(x.d.c==="D"&&S.bp_gout) return; if(x.d.c==="B"&&S.hx_asthma) return; const up=bpUp(x,c); if(up) ups.push(`${x.d.lab.replace(" 口服","")} ${x.d.st[x.i]} → <b>${bpPO(up)}</b> ${src(x.d.ref)}`); });
     }
-    L.push(...nx);
-    L.push(`<span class="small">長期調整宜在病情穩定後進行或交由門診 ${src("ahaBp24")}</span>`);
-    H.push(st({k:"go",t:`血壓偏高、非急症（${c.sbp??"—"}／${c.dbp??"—"}）`,c:ul(L),why:src("accHtn25")+src("esc24htn")+src("tw22htn")}));
+    const L=[`<b>不追加 PRN 降壓藥</b>（IV 或口服）急速降壓（住院、無急性器官損傷，3: Harm）${src("accHtn25")}；先處理誘因、恢復平常口服藥 ${src("ahaBp24")}`];
+    const start2 = c.nAcd===0&&!S.bp_preg&&!c.anyMed;
+    if(add.length) L.push(`<b>${start2?"起始：下列兩類各選一（第 2 期 ≥140/90 以兩種不同類、最好單一錠起始，1, B-R）":S.bp_preg?"懷孕：選一":"加一種不同類（依序優先，擇一）"}</b>：`+ul(start2?add.slice(0,2):add.slice(0,3)));
+    if(ups.length) L.push(`<b>${add.length?"或":""}增量現有藥物</b>：`+ul(ups));
+    if(!add.length&&!ups.length) L.push(`<span class="cau">目前用藥皆已達上限或受限</span>：檢查服藥順從性、誘因、次發性高血壓；會診心臟或腎臟科`);
+    L.push(`${S.bp_preg?"":"加 ACEi／ARB、MRA 或利尿劑後追蹤 K、Cr；"}新開或加量後每月追蹤至控制（1, B-R）${src("accHtn25")}${S.bp_preg?"":src("spiroPI")}`);
+    L.push(`<span class="small">ESC 2024：多數病人起始即低劑量兩藥合併（RAS 阻斷劑＋CCB 或利尿劑）${src("esc24htn")}；台灣 2022：五類皆第一線（含 β-blocker）${src("tw22htn")}；長期調整宜在病情穩定後或交由門診 ${src("ahaBp24")}</span>`);
+    H.push(optCard({cls:"pref",title:`醫囑建議：血壓 ${c.sbp??"—"}／${c.dbp??"—"}（非急症）`,tags:src("accHtn25")+src("esc24htn"),lead:ul(L),rows:[],open:true}));
   }
   // 3. 依共病
   const R=[];
@@ -3291,16 +3370,16 @@ function renderBPmed(){
   if(c.dmCkd) R.push(`<b>糖尿病合併 eGFR <60 或 albuminuria</b>：ACEi 或 ARB（1, A）；SBP <130，鼓勵 <120 ${src("accHtn25")}`);
   if(S.t_stroke) R.push(`<b>中風後</b>：thiazide 類、ACEi 或 ARB（1, A）；目標 <130/80（1, B-R）${src("accHtn25")}`);
   if(S.hx_hf) R.push(`<b>心衰竭</b>：SBP <130（1, B-R）${src("accHtn25")}；HFrEF 依心衰竭指引用藥 ${src("escHf")}`);
-  if(S.c_cad) R.push(`<b>冠心症／心絞痛</b>：β-blocker 屬強制適應症，任何步驟皆可加入 ${src("esc24htn")}`);
+  if(S.c_cad) R.push(`<b>冠心症／心絞痛</b>：β-blocker（bisoprolol 5 mg QD 或 carvedilol 6.25 mg BID 起始）屬強制適應症 ${src("esc24htn")}${src("bisoPI")}${src("carvPI")}`);
   if(S.bp_preg) R.push(`<b>懷孕</b>：labetalol、長效 nifedipine 優先（1, A）；不用 atenolol、ACEi、ARB、DRI、nitroprusside、MRA（3: Harm）${src("accHtn25")}`);
   if(S.bp_gout) R.push(`<b>痛風</b>：可行時 hydrochlorothiazide 改 losartan ${src("acrGout20")}`);
-  if((S.bp_acei||S.bp_arb||S.bp_mra)) R.push(`ACEi、ARB、MRA：追蹤 K 與 Cr ${src("accHtn25")}${src("spiroPI")}`);
-  if(R.length) H.push(optCard({cls:"pref",title:"依共病選擇",tags:src("accHtn25"),lead:ul(R),rows:[["健保",nhiLic("ACEi、ARB、CCB、thiazide、β-blocker、spironolactone")]],open:false}));
-  // 4. 目標血壓（三方並列）
+  if(c.cls.B&&!S.c_cad&&!S.hx_hf) R.push(`<span class="small">β-blocker 無強制適應症時非常規第一線（ESC 2024）；台灣 2022 列為第一線之一（並列）${src("esc24htn")}${src("tw22htn")}</span>`);
+  if(R.length) H.push(optCard({cls:"",title:"依共病選擇",tags:src("accHtn25"),lead:ul(R),rows:[["健保",nhiLic("ACEi、ARB、CCB、thiazide、β-blocker、spironolactone、doxazosin")]],open:false}));
+  // 4. 目標
   H.push(optCard({cls:"",title:"長期目標血壓（三方並列）",tags:src("accHtn25")+src("esc24htn")+src("tw22htn"),lead:ul([
     `AHA/ACC 2025：所有成人 <130/80；CVD 風險（PREVENT ≥7.5%）SBP 至少 <130、鼓勵 <120（1, A）${src("accHtn25")}`,
     `ESC 2024：可耐受時 SBP 120–129、DBP 70–79；≥85 歲或症狀性姿勢性低血壓者放寬 ${src("esc24htn")}`,
-    `台灣 2022：722 居家血壓 <130/80 ${src("tw22htn")}`]),rows:[],open:true}));
+    `台灣 2022：722 居家血壓 <130/80 ${src("tw22htn")}`]),rows:[],open:false}));
   return H.join("");
 }
 
@@ -4073,6 +4152,15 @@ Object.assign(REF,{
   amloPI:{t:"Amlodipine 仿單",f:"Amlodipine besylate tablets Prescribing Information（Pfizer）2.1：高血壓起始 5 mg 每日一次，最大 10 mg；體型小、虛弱、老人或肝功能不全可 2.5 mg 起始。（2026-10-20 核對）",u:"https://labeling.pfizer.com/ShowLabeling.aspx?id=794"},
   losPI:{t:"Losartan 仿單（Cozaar）",f:"Cozaar Prescribing Information：高血壓一般起始 50 mg 每日一次，最大 100 mg；可能血管內容積不足（如使用利尿劑）25 mg 起始；輕中度肝功能不全 25 mg 起始；Boxed warning：發現懷孕儘速停用（胎兒毒性）。（2026-10-20 核對）",u:"https://www.drugs.com/pro/cozaar.html"},
   hctzPI:{t:"Hydrochlorothiazide 仿單",f:"Hydrochlorothiazide tablets Prescribing Information：成人高血壓起始 25 mg 每日一次，可增至 50 mg（單次或分兩次）；>50 mg 常伴明顯血鉀下降。（2026-10-20 核對）",u:"https://medlibrary.org/lib/rx/meds/hydrochlorothiazide-98/page/3/"},
+  valsPI:{t:"Valsartan 仿單（Diovan）",f:"Diovan Prescribing Information：高血壓 80 mg 每日一次起始（未容積不足者），範圍 80–320 mg 每日一次；容積或鹽分不足先矯正或密切監測下開始。（2026-10-20 核對）",u:"https://www.drugs.com/pro/diovan.html"},
+  olmePI:{t:"Olmesartan 仿單（Benicar）",f:"Benicar Prescribing Information：高血壓 20 mg 每日一次起始，2 週後可增至 40 mg（上限）；可能容積不足（利尿劑、腎功能差）者密切監測並考慮較低起始。（2026-10-20 核對）",u:"https://www.drugs.com/pro/benicar.html"},
+  ramiPI:{t:"Ramipril 仿單",f:"Ramipril capsules Prescribing Information：高血壓（未用利尿劑）2.5 mg 每日一次起始，維持 2.5–20 mg/日（每日一次或分兩次）；CrCl <40：1.25 mg 每日一次起始，每日上限 5 mg；疑容積不足或腎動脈狹窄 1.25 mg 起始。（2026-10-20 核對）",u:"https://www.drugs.com/pro/ramipril.html"},
+  indaPI:{t:"Indapamide 仿單",f:"Indapamide tablets Prescribing Information：高血壓 1.25 mg 每日一次（早上），4 週反應不足增至 2.5 mg，再 4 週增至 5 mg；≥5 mg 未見額外降壓；與其他降壓藥合併初期，其他藥常規劑量減 50%。（2026-10-20 核對）",u:"https://www.drugs.com/pro/indapamide.html"},
+  nifePI:{t:"Nifedipine ER 仿單（Procardia XL）",f:"Procardia XL Prescribing Information：高血壓 30 或 60 mg 每日一次起始，整顆吞服；一般每 7–14 天調整；>120 mg 不建議。（2026-10-20 核對）",u:"https://www.drugs.com/pro/procardia-xl.html"},
+  bisoPI:{t:"Bisoprolol 仿單",f:"Bisoprolol fumarate tablets Prescribing Information：高血壓 5 mg 每日一次起始（部分病人 2.5 mg），可增至 10、20 mg 每日一次；CrCl <40 或肝炎、肝硬化 2.5 mg 起始；支氣管痙攣疾病一般不用 β-blocker，必要時 2.5 mg 起始並備 β2 agonist。（2026-10-20 核對）",u:"https://www.drugs.com/pro/bisoprolol.html"},
+  carvPI:{t:"Carvedilol 仿單",f:"Carvedilol tablets Prescribing Information 2.3：高血壓 6.25 mg BID 起始，隨餐；7–14 天後可增至 12.5 mg BID，再 7–14 天至 25 mg BID；每日總量上限 50 mg。（2026-10-20 核對）",u:"https://www.drugs.com/pro/carvedilol.html"},
+  labePO:{t:"Labetalol 口服錠仿單",f:"Labetalol tablets Prescribing Information：高血壓 100 mg BID 起始，每 2–3 天依站立血壓以 100 mg BID 調整（每次 ≤200 mg BID）；常用維持 200–400 mg BID；重度可需每日 1,200–2,400 mg。（2026-10-20 核對）",u:"https://www.drugs.com/pro/labetalol-tablets.html"},
+  doxaPI:{t:"Doxazosin 仿單（Cardura）",f:"Cardura Prescribing Information：高血壓 1 mg 每日一次起始，依需要調整，上限 16 mg 每日一次；首劑與每次加量後至少 6 小時監測血壓（姿勢性低血壓、暈厥）；停藥數天後重新從起始劑量開始。（2026-10-20 核對）",u:"https://www.drugs.com/pro/cardura.html"},
   spiroPI:{t:"Spironolactone 仿單（Aldactone）",f:"Aldactone Prescribing Information：高血壓起始每日 25–100 mg（單次或分次），每 2 週可調整，>100 mg 通常無額外降壓；心衰竭：K ≤5.0 且 eGFR >50 時 25 mg 每日一次，可增至 50 mg，發生高血鉀改 25 mg 隔日；eGFR 30–50 考慮 25 mg 隔日起始。（2026-10-20 核對）",u:"https://www.pfizermedical.com/aldactone/dosage-admin"}
 });
 const DRUGS = [
@@ -4094,6 +4182,16 @@ const DRUGS = [
  {id:"glic",cls:"metab",name:"Gliclazide（SU）",brand:"Diamicron",type:"Sulfonylurea",
   dose:"類固醇高血糖（JBDS）：40 mg 早上，每日調整至最多 240 mg。",adj:"腎功能：請依仿單確認。",
   caut:"低血糖（進食差、NPO、腎功能差）；Endotext 不建議住院新開始 SU。",guide:src("jbdsSter23")+src("endotext26"),nhi:nhiLic()},
+ {id:"rami",cls:"cardio",name:"Ramipril（ACEi）",brand:"Tritace",type:"ACEi",ren:{b:"crcl",t:[[null,40,"1.25 mg 每日一次起始，每日上限 5 mg"],[40,null,"不需調整（2.5 mg 起始）"]],hd:"1.25 mg 起始（CrCl <40 規則），請確認",r:["ramiPI"]},
+  dose:"高血壓 2.5 mg 每日一次起始，維持 2.5–20 mg/日。",adj:"疑容積不足或腎動脈狹窄 1.25 mg 起始；腎功能見腎功能列。",caut:"懷孕禁用；不與 ARB 合併；高血鉀、血管性水腫。",guide:src("ramiPI")+src("accHtn25"),nhi:nhiLic()},
+ {id:"valsa",cls:"cardio",name:"Valsartan（ARB）",brand:"Diovan",type:"ARB",dose:"高血壓 80 mg 每日一次起始，範圍 80–320 mg。",adj:"容積不足先矯正。",caut:"懷孕禁用；不與 ACEi 合併；追蹤 K、Cr。",guide:src("valsPI")+src("accHtn25"),nhi:nhiLic()},
+ {id:"olmes",cls:"cardio",name:"Olmesartan（ARB）",brand:"Olmetec",type:"ARB",dose:"高血壓 20 mg 每日一次起始，2 週後可增至 40 mg（上限）。",adj:"可能容積不足考慮較低起始。",caut:"懷孕禁用；不與 ACEi 合併。",guide:src("olmePI")+src("accHtn25"),nhi:nhiLic()},
+ {id:"nifer",cls:"cardio",name:"Nifedipine 長效錠",brand:"Adalat OROS",type:"DHP CCB",dose:"高血壓 30 或 60 mg 每日一次起始，每 7–14 天調整，>120 mg 不建議；整顆吞。",adj:"—",caut:"水腫、頭痛；懷孕可用（AHA/ACC 1, A）。",guide:src("nifePI")+src("accHtn25"),nhi:nhiLic()},
+ {id:"indap",cls:"cardio",name:"Indapamide",brand:"Natrilix",type:"Thiazide-like 利尿劑",dose:"高血壓 1.25 mg 每日一次（早上），4 週後可 2.5、再 5 mg。",adj:"合併初期其他降壓藥減半。",caut:"低血鉀、低血鈉、高尿酸。",guide:src("indaPI")+src("accHtn25"),nhi:nhiLic()},
+ {id:"bisop",cls:"cardio",name:"Bisoprolol",brand:"Concor",type:"β1-selective blocker",ren:{b:"crcl",t:[[null,40,"2.5 mg 起始，謹慎調整"],[40,null,"5 mg 起始"]],hd:"2.5 mg 起始（CrCl <40 規則），請確認",r:["bisoPI"]},
+  dose:"高血壓 5 mg 每日一次起始（部分 2.5 mg），可至 10、20 mg。",adj:"肝炎、肝硬化 2.5 mg 起始；腎功能見腎功能列。",caut:"支氣管痙攣疾病一般不用；心搏過慢。",guide:src("bisoPI")+src("esc24htn"),nhi:nhiLic()},
+ {id:"carve",cls:"cardio",name:"Carvedilol",brand:"Dilatrend",type:"α／β blocker",dose:"高血壓 6.25 mg BID 起始，隨餐，7–14 天後 12.5 mg BID，再至 25 mg BID（每日 ≤50 mg）。",adj:"—",caut:"姿勢性低血壓、心搏過慢；氣喘避免。",guide:src("carvPI"),nhi:nhiLic()},
+ {id:"doxaz",cls:"cardio",name:"Doxazosin",brand:"Doxaben",type:"α1-blocker",dose:"高血壓 1 mg 每日一次起始，上限 16 mg。",adj:"—",caut:"首劑與加量後 6 小時內姿勢性低血壓、暈厥。",guide:src("doxaPI"),nhi:nhiLic()},
  {id:"amlo",cls:"cardio",name:"Amlodipine",brand:"Norvasc",type:"DHP CCB",
   dose:"高血壓 5 mg 每日一次，最大 10 mg。",adj:"體型小、虛弱、老人或肝功能不全 2.5 mg 起始。",caut:"下肢水腫。",guide:src("amloPI")+src("accHtn25"),nhi:nhiLic()},
  {id:"losa",cls:"cardio",name:"Losartan（ARB）",brand:"Cozaar",type:"ARB",
@@ -4511,8 +4609,10 @@ function buildPanels(){
   </div><div class="res" id="r-lab-htn"></div></div>
   <div class="card"><h2>處置流程（急症判斷）</h2><div class="cb" id="r-htn"></div></div>
   <div class="card" id="htn-med"><h3>降壓藥選擇與調整 <span class="sub">非急症、共病、先停哪些</span></h3><div class="cb">
-    <div class="sec">平常降壓藥</div>
-    <div class="chks">${chk("bp_acei","ACEi")}${chk("bp_arb","ARB")}${chk("bp_ccb","CCB")}${chk("bp_thz","thiazide 類")}${chk("bp_bb","β-blocker")}${chk("bp_mra","MRA（spironolactone）")}${chk("bp_ab","α-blocker")}</div>
+    <div class="sec">平常降壓藥（選目前劑量；複方錠請分開選各成分）</div>
+    <div class="grid">${BPD.map(d=>sel("bpd_"+d.id,`${d.lab}（${BPC[d.c]}）`,[["","—"]].concat(d.st.map((x,i)=>[String(i),x])))).join("")}</div>
+    <div class="sec">其他未列出的降壓藥（只選類別）</div>
+    <div class="chks">${chk("bp_acei","其他 ACEi")}${chk("bp_arb","其他 ARB")}${chk("bp_ccb","其他 CCB")}${chk("bp_thz","其他 thiazide 類")}${chk("bp_bb","其他 β-blocker")}${chk("bp_mra","其他 MRA")}${chk("bp_ab","其他 α-blocker")}</div>
     <div class="sec">共病與情境</div>
     <div class="chks">${chk("hx_dm","糖尿病")}${chk("hx_ckd","慢性腎病")}${chk("bp_alb","albuminuria ≥30 mg/g")}${chk("hx_hf","心衰竭")}${chk("c_cad","冠心症")}${chk("t_stroke","曾中風／TIA")}${chk("bp_preg","懷孕中")}${chk("bp_gout","痛風")}${chk("bp_aki","AKI、脫水或進食差")}${chk("sx_plan","預計 72 小時內手術")}</div>
   </div></div>
@@ -4558,7 +4658,7 @@ function renderRefPanel(){
     ["低血壓／休克、升壓藥",["ssc26hemo","levoPI","epiPI","vasoPI","pitTW","dopaPI","dobuPI","pheniPI","sfeAdrenal"]],
     ["心搏過速／過慢、ACLS",["ahaAcls25","ahaAlg25","rcuk25","escAf24","accAf23","escSvt19","diltPI","metoPI"]],
     ["住院血糖",["endoSoc22","endotext26","endotextDU","rabbit2","jbdsSter23","fdaSglt2","metPI","sitaPI","nhi51"]],
-    ["降壓藥選擇",["esc24htn","tw22htn","ahaPeri24","stopOrNot24","acrGout20","amloPI","losPI","hctzPI","spiroPI"]],
+    ["降壓藥選擇",["esc24htn","tw22htn","ahaPeri24","stopOrNot24","acrGout20","amloPI","nifePI","losPI","valsPI","olmePI","ramiPI","hctzPI","indaPI","bisoPI","carvPI","labePO","spiroPI","doxaPI"]],
     ["腎功能劑量（仿單）",["levPI","mcpPI","mgPI","apapIV","colchPI","zolPI","ddavpPI","tramPI","hmPI","morPI","ketoPI"]],
     ["RSI 插管",["sccmRsi23","rsiTrial25","preoxi24","etoPI","ketPI","propPI","rocPI","sccPI","sugPI"]],
     ["計算工具：類固醇、輸血",["litflSt","eseGiai24","woodcock20","aabbPlt25","chestTx25","vghBlood"]],
@@ -4578,6 +4678,7 @@ function renderRefPanel(){
     <p style="margin:0 0 6px"><b>v0.9（${CHECKED}）</b></p>
     <ul class="tight"><li>「高血糖」頁改名「高血糖／血糖控制」，新增住院血糖控制：目標（非重症 100–180、重症 140–180、圍術期 100–180）、低血糖提示、平常口服藥（metformin、SGLT2i、DPP-4i、GLP-1 RA、SU）入院時停續與腎調整、insulin 起始（家中 insulin 減 20–30%；未用 insulin 依體重 0.4／0.5 U/kg，老人或腎功能不全 ≤0.3；第一型 0.2–0.4），自動拆 basal／餐前／管灌劑量；NPO 與手術、早上類固醇（NPH）、連續或間歇管灌。依據 Endocrine Society 2022、Endotext 2026、RABBIT 2、JBDS 2023、FDA。</li>
     <li>住院血糖改為<b>明確醫囑</b>：insulin glargine（長效）X U SC 每日一次、insulin aspart／lispro／glulisine（速效）Y U SC 三餐隨餐或餐後立即（或 regular 三餐前 30 分鐘）、連續管灌速效 Z U q4h、間歇管灌 NPH、早上類固醇 NPH 10 U 早上（或 gliclazide 40 mg）、輕度高血糖 sitagliptin（依 eGFR 100／50／25 mg）；附 Endotext 矯正量表（依 BMI 或每日總量選敏感／一般／阻抗欄，含睡前欄）、POC 監測頻次、低血糖處置；手術當天長效減 25% 並算出劑量；新增「其中長效 insulin」欄位。</li>
+    <li>高血壓用藥改為<b>點選平常用藥與劑量</b>（13 種常用藥：amlodipine、nifedipine ER、losartan、valsartan、olmesartan、ramipril、hydrochlorothiazide、indapamide、bisoprolol、carvedilol、labetalol、spironolactone、doxazosin）：逐一顯示可增至的下一劑量或已達仿單上限、同類重複、需暫停的藥名（低血壓、AKI、K ≥5.5、懷孕、ACEi ＋ ARB、手術）；非急症血壓 ≥140/90 給明確醫囑：未用的類別依 A → C → D 順序加藥並附起始劑量（已用利尿劑或 CrCl <40 時 RAS 抑制劑從低劑量起始），或現用藥增量；A ＋ C ＋ D 仍不足且 K ≤5.0、eGFR ≥30 才加 spironolactone；痛風不加或增 thiazide、氣喘不增 β-blocker；懷孕改 labetalol／nifedipine ER。</li>
     <li>「高血壓急症」頁改名「高血壓」，新增降壓藥選擇與調整：低血壓、AKI、手術前、高血鉀時先停哪些；ACEi＋ARB、懷孕用 RAAS 抑制劑提示；住院血壓偏高（非急症）不追加 PRN、依目前用藥給下一步（第一線 → 兩類 → 三類 → spironolactone）；依共病選藥（CKD＋albuminuria、糖尿病、中風後、心衰竭、冠心症、懷孕、痛風）；長期目標 AHA/ACC 2025、ESC 2024、台灣 2022 並列。</li>
     <li>藥物頁新增 basal 與餐前 insulin、metformin、SGLT2i、sitagliptin、gliclazide、amlodipine、losartan、hydrochlorothiazide、spironolactone（含腎功能列）。AHA/ACC 2025 出處補慢性治療建議；IV 藥物表仍未能讀取全文。</li>
     <li>測試：fuzz.js 新增住院血糖與降壓藥不變式（DKA 中不給皮下起始劑量、低血糖提示、老人／腎差 ≤0.3 U/kg、家中 insulin 沿用、metformin eGFR <30 禁用、SGLT2i 術前停、第一型不停 basal；ACEi＋ARB、懷孕、低血壓、急症互斥）；3,000 組 0 失敗，故意改壞 4 處皆被抓到。</li></ul>

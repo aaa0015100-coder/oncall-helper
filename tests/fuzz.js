@@ -105,10 +105,22 @@ if(A.renderGluc&&(!MODSEL.length||MODSEL.includes('gluc'))) outs.push(['gluc',A.
   return ''; }]);
 if(A.renderBPmed&&(!MODSEL.length||MODSEL.includes('bpmed'))) outs.push(['bpmed',A.renderBPmed,(t,h,o)=>{
   const c=A.bpCtx();
-  if(o.bp_acei&&o.bp_arb&&!/ACEi ＋ ARB 同時使用：不建議/.test(t)) return 'ACEi＋ARB 未提示';
-  if(o.bp_preg&&(o.bp_acei||o.bp_arb||o.bp_mra)&&!/懷孕：停/.test(t)) return '懷孕用 RAAS 未提示停';
+  const K=c.cls||{ACEI:o.bp_acei,ARB:o.bp_arb,M:o.bp_mra};
+  if(K.ACEI&&K.ARB&&!/ACEi ＋ ARB 同時使用：不建議/.test(t)) return 'ACEi＋ARB 未提示';
+  if(o.bp_preg&&(K.ACEI||K.ARB||K.M)&&!/懷孕：停/.test(t)) return '懷孕用 RAAS 未提示停';
+  if(A.bpOn){ // v0.9 具體藥物
+    const on=A.bpOn(), k=num(o.k);
+    for(const x of on){ const top = x.i>=x.d.st.length-1 || (x.d.id==='rami'&&c.lowCr&&x.i>=2);
+      if(top&&new RegExp(x.d.lab.replace(' 口服','')+' '+x.d.st[x.i].replace(/[.]/g,'\\.')+' → ').test(t)) return x.d.id+' 已達上限仍建議增量'; }
+    if(o.bp_preg&&/(Losartan|Ramipril|Spironolactone|Valsartan|Olmesartan) [\d.]+ mg PO/.test(t)) return '懷孕建議 RAAS／MRA';
+    if(o.bp_gout&&/(Indapamide|Hydrochlorothiazide) [\d.]+ mg PO|Hydrochlorothiazide [\d.]+ mg QD → /.test(t)) return '痛風建議 thiazide';
+    if(k!==null&&k>=5.5&&/(Losartan|Ramipril|Spironolactone) [\d.]+ mg PO|(Losartan|Valsartan|Olmesartan|Ramipril|Spironolactone) [\d.]+ mg QD → /.test(t)) return 'K ≥5.5 仍建議 RAAS／MRA';
+    if(c.cls.D&&/Losartan 50 mg PO/.test(t)) return '已用利尿劑 losartan 未 25 mg 起始';
+    if(c.lowCr&&/Ramipril 2\.5 mg PO/.test(t)) return 'CrCl <40 ramipril 未 1.25 mg 起始';
+    if(c.hypot) for(const x of on) if(!new RegExp('暫停[^<]*'+x.d.lab.replace(' 口服','')).test(t)&&!/暫停 /.test(t)) return '低血壓未列出暫停藥名';
+  }
   if(o.bp_preg&&/加 <b>(ACEi|ARB|CCB 或 thiazide)/.test(h)) return '懷孕仍建議加 ACEi／ARB';
-  if(c.hypot&&!/暫停降壓藥|如有使用降壓藥：暫停/.test(t)) return '低血壓未提示暫停';
+  if(c.hypot&&!/暫停降壓藥|如有使用降壓藥：暫停|低血壓（[^）]*）：暫停 /.test(t)) return '低血壓未提示暫停';
   if(c.hypot&&/不追加 PRN/.test(t)) return '低血壓仍出現血壓偏高建議';
   if(c.emerg&&/不追加 PRN/.test(t)) return '急症卻給非急症建議';
   const ns=[...h.matchAll(/class="st-n">(\d+)</g)].map(x=>+x[1]); for(let j=0;j<ns.length;j++) if(ns[j]!==j+1) return '步驟編號不連續';
@@ -128,6 +140,10 @@ for(let i=0;i<N;i++){
   const o={}; for(const f of Object.keys(F)) o[f]=rnd(f);
   // 30% 回合偏向住院血糖情境（糖尿病、血糖 140–400、有體重），提高血糖模組覆蓋
   if(Math.random()<.3&&F.gl_hi){ o.hx_dm=Math.random()<.85; o.gl_hi=Math.round(140+Math.random()*260); if(o.wt===null) o.wt=Math.round(45+Math.random()*60); if(Math.random()<.5) o.gm_tdd=null; }
+  // 另 25% 回合偏向住院高血壓用藥情境（BP 偏高、選 2 種平時用藥、K 與 AKI 多數正常），提高 bpmed 覆蓋
+  else if(Math.random()<.25&&F.bpd_amlo){ o.sbp=Math.round(140+Math.random()*60); o.dbp=Math.round(70+Math.random()*40); if(Math.random()<.7) o.bp_aki=false; if(Math.random()<.7) o.k=+(3.5+Math.random()*1.4).toFixed(1);
+    const bf=Object.keys(F).filter(f=>f.startsWith('bpd_')); for(const f of bf) o[f]=''; if(Math.random()<.3){ o.cr=+(2.5+Math.random()*3).toFixed(1); o.age=Math.round(60+Math.random()*30); o.wt=Math.round(45+Math.random()*30); }
+    for(let j=0;j<2;j++){ const f=pick(bf); o[f]=pick(F[f].v.filter(Boolean)); } }
   set(o); const g=A.gcsCalc(); if(g!==null) A.S.gcs=g;
   for(const [lab,fn,inv] of outs){
     let h; try{ h=fn(); }catch(e){ fail(lab+' | EXC '+e.message,o); continue; }
