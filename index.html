@@ -196,8 +196,8 @@ textarea.sbar{width:100%;font:13.5px/1.55 var(--f-mono);color:var(--ink);backgro
 <script>
 "use strict";
 /* ================= 基本設定 ================= */
-const APP_VERSION="0.8";
-const CHECKED = "2026-10-19";
+const APP_VERSION="0.9";
+const CHECKED = "2026-10-20";
 
 /* ================= 出處 ================= */
 const REF = {
@@ -401,6 +401,10 @@ const S0 = {
   dr_amt:null, dr_amtU:"mg", dr_vol:null, dr_dose:null, dr_unit:"µg/kg/min", dr_rate:null, dr_tvol:null, dr_th:null,
   st_drug:"", st_dose:null, st_wk:null, st_stress:"",
   tx_grp:"", tx_proc:"", tx_bleed:false,
+  // v0.9 住院血糖
+  gm_met:false, gm_dpp4:false, gm_glp1:false, gm_su:false, gm_tdd:null, gl_a1c:null, gl_eat:"", gl_ster:"", gl_lo:null, gl_hi:null, gl_icu:false, gl_t1:false, sx_plan:false,
+  // v0.9 血壓用藥
+  bp_acei:false, bp_arb:false, bp_ccb:false, bp_thz:false, bp_bb:false, bp_mra:false, bp_ab:false, bp_alb:false, bp_preg:false, bp_gout:false, bp_aki:false,
   // 藥物頁
   dflt:"all", _gcsLast:null
 };
@@ -2701,6 +2705,98 @@ function renderDKA(){
   H.push(escStep(st,[c.sev==="severe"||(c.dka&&c.hhs)?"重度 DKA 或 DKA＋HHS：ICU":"",c.hhs?"HHS：多需 ICU 或高度監測":"",c.sev==="moderate"?"中度 DKA：step-down／加護層級":"",c.k!==null&&c.k<3.0?`K ${c.k}：心電監測`:""],c.sev==="severe"||c.hhs));
   return H.join("");
 }
+/* ================= 住院血糖控制（v0.9） ================= */
+function glCtx(){
+  const wt=num(S.wt), age=num(S.age), glu=num(S.glu), ghi=num(S.gl_hi), lo=num(S.gl_lo), a1c=num(S.gl_a1c), tdd=num(S.gm_tdd);
+  const hi = ghi!==null? ghi : glu;
+  const rc=rv("crcl"), eg=rv("egfr");
+  const renLow = !!(rc&&(rc.hd||rc.v<60));
+  const lowDose = (age!==null&&age>=70) || renLow;
+  const homeIns = (tdd!==null&&tdd>0) || S.h_basal;
+  const oral = S.gm_met||S.h_sglt2||S.gm_dpp4||S.gm_glp1||S.gm_su;
+  const dm = !!(S.hx_dm||S.gl_t1||oral||homeIns||(a1c!==null&&a1c>=6.5));
+  const d=dkaCtx(); const crisis=d.dka||d.hhs;
+  const tf = S.gl_eat==="tfc"||S.gl_eat==="tfi", npo=S.gl_eat==="npo", eat=S.gl_eat==="eat", poor=S.gl_eat==="poor";
+  const any = hi!==null||lo!==null||a1c!==null||homeIns||oral||!!S.gl_eat||!!S.gl_ster||S.gl_t1||S.sx_plan;
+  return {wt,age,glu,hi,lo,a1c,tdd,rc,eg,renLow,lowDose,homeIns,oral,dm,crisis,tf,npo,eat,poor,any};
+}
+/* 依體重的起始每日總量：RABBIT 2（0.4／0.5 U/kg）；老人、腎功能不全 ≤0.3（Endotext） */
+function glTdd(c){
+  if(c.wt===null) return null;
+  const f = c.lowDose? 0.3 : (c.hi!==null&&c.hi>200? 0.5 : 0.4);
+  return {f, u:f*c.wt};
+}
+function glSplit(tdd,c){
+  const b=Math.round(tdd/2), m=Math.round(tdd/6);
+  if(c.eat) return `<b>basal ${b} U</b> 每日一次 ＋ <b>餐前 ${m} U</b> × 3 餐 ＋ 矯正（basal-bolus）`;
+  if(c.tf&&S.gl_eat==="tfc") return `<b>basal ${b} U</b> 每日一次 ＋ 營養 insulin <b>${fmt(tdd/12,0)} U q4h</b>（管灌中，中斷即停）＋ 矯正`;
+  return `<b>basal ${b} U</b> 每日一次 ＋ 矯正（進食差或 NPO：basal＋矯正，不給餐前）`;
+}
+function renderGluc(){
+  const c=glCtx(); const H=[]; const st=stepper();
+  if(!c.any) return `<span class="muted">填入最近 24 小時血糖、平常用藥或進食狀態後顯示。</span>`;
+  // 1. 目標
+  const tgt = c.npo&&S.sx_plan? "100–180（圍術期）" : S.gl_icu? "140–180（重症）" : "100–180（非重症）";
+  const stat = [];
+  if(c.lo!==null&&c.lo<70) stat.push(`<span class="ng">最低 ${c.lo}：低血糖（<70）→ 依低血糖流程處理（清醒可吞嚥 15–20 g 葡萄糖，15 分鐘複測），並檢討、減少 insulin 或 SU</span> ${src("adaHosp")}`);
+  if(c.hi!==null) stat.push(c.hi>400? `<span class="ng">最高 ${c.hi} >400：先排除 DKA／HHS（驗 β-OHB、血氣、滲透壓）</span>` : c.hi>180? `<span class="cau">最高 ${c.hi}：高於 180</span>` : `最高 ${c.hi}：未超過 180`);
+  H.push(st({k:c.lo!==null&&c.lo<70?"bx":"info",t:`目標 ${tgt.replace("（"," mg/dL（")}`,c:ul(stat.concat([
+    `非重症 100–180、重症 140–180 ${src("endotextDU")}${src("endotext26")}；擇期手術 100–180、術前 HbA1c <8% ${src("endoSoc22")}`,
+    `JBDS（英國）：6.0–10.0 mmol/L（約 108–180），可接受 6.0–12.0 ${src("jbdsSter23")}`])),
+    x:"ADA 2026 第 16 章原文本版未能開啟；非重症 100–180 依 Endotext 引述 ADA 2025，請確認。",why:src("endotextDU")+src("endoSoc22")}));
+  if(c.crisis){ H.push(st({k:"bx",t:"DKA／HHS 處理中",c:`依上方處置流程；緩解後轉皮下見上方「監測與緩解」。${S.h_sglt2?'<span class="ng">SGLT2i：停用</span>':""}`,why:src("dka24")})); return H.join(""); }
+  // 2. 平常口服藥
+  const egv=c.eg&&!c.eg.hd? c.eg.v : null, hd=!!(c.eg&&c.eg.hd);
+  const M=[];
+  const show=(f)=> f || (!c.oral&&!c.homeIns&&!S.gl_t1&&c.dm);
+  if(show(S.gm_met)) M.push(`<b>metformin</b>：${hd||egv!==null&&egv<30?`<span class="ng">${hd?"透析":"eGFR "+egv}：禁用</span>`:egv!==null&&egv<45?`<span class="cau">eGFR ${egv}：不建議新開始，已用者評估續用</span>`:"腎肝心風險低、病情穩定可考慮續用"}；碘顯影（eGFR 30–60、肝病、酒精、心衰竭、動脈內）前停，48 小時後再評估 eGFR ${src("metPI")}${src("endotext26")}`);
+  if(show(S.h_sglt2)) M.push(`<b>SGLT2i</b>：急性病、進食差或 NPO 期間暫停（酮酸中毒風險），急性病與酮症緩解且無手術或長時間禁食預期時，可為心衰竭續用 ${src("endotext26")}；${S.sx_plan?"<b>":""}手術前至少 3 天停（ertugliflozin 4 天）${S.sx_plan?"</b>":""} ${src("fdaSglt2")}${src("ahaPeri24")}`);
+  if(show(S.gm_dpp4)) M.push(`<b>DPP-4i</b>：輕度高血糖之 T2DM 可 DPP-4i ＋ 矯正 insulin（持續 >180 改排程 insulin）${src("endoSoc22")}；sitagliptin 依 eGFR 調整（≥45：100 mg；30–<45：50 mg；<30：25 mg）${src("sitaPI")}${S.hx_hf?'；<span class="cau">心衰竭：saxagliptin、alogliptin 停用</span>':""} ${src("endotext26")}`);
+  if(show(S.gm_glp1)) M.push(`<b>GLP-1 RA</b>：住院不建議新開始 ${src("endotext26")}`);
+  if(show(S.gm_su)) M.push(`<b>sulfonylurea</b>：住院不建議新開始 ${src("endotext26")}${(c.poor||c.npo||c.tf)?'；<span class="cau">進食差、NPO 或管灌時低血糖風險高（本工具提示）</span>':""}`);
+  if(M.length) H.push(st({k:"info",t:"平常口服藥（入院時）",c:ul(M),x:`一般以排程 insulin 取代非 insulin 藥物（Endocrine Society 7.1，conditional）。`,why:src("endoSoc22")+src("endotext26")}));
+  // 3. insulin
+  const I=[]; const w=glTdd(c);
+  if(S.gl_t1) I.push(`<span class="ng">第一型糖尿病：NPO 時仍需 basal insulin，不可只用矯正</span> ${src("endotext26")}`);
+  if(c.homeIns){
+    if(c.tdd!==null&&c.tdd>0){ const a=c.tdd*0.7, b=c.tdd*0.8;
+      I.push(`<b>沿用家中 insulin，依營養與病情調整</b>（Endocrine Society 10.3，strong）${src("endoSoc22")}；控制良好者考慮總量減 20–30% → <b>${fmt(a,0)}–${fmt(b,0)} U/日</b> ${src("endotext26")}`);
+      I.push(glSplit((a+b)/2,c)+`（以減量後中位數 ${fmt((a+b)/2,0)} U 估算）`);
+    } else I.push(`已用 basal insulin：沿用並依營養調整（10.3）；填家中每日總量可估算 ${src("endoSoc22")}`);
+  } else if(c.hi!==null&&c.hi>400){
+    I.push(`<span class="cau">最高 ${c.hi} >400：先排除 DKA／HHS（β-OHB、血氣、滲透壓），排除後再依體重計算排程 insulin（0.5 U/kg）</span> ${src("dka24")}${src("rabbit2")}`);
+  } else if(c.hi!==null&&c.hi>=180){
+    if(c.dm||c.a1c!==null&&c.a1c>=6.5){
+      I.push(`糖尿病、入院確認血糖 ≥180：<b>開始排程 insulin</b>（Endocrine Society 10.2，conditional；或先矯正、持續 ≥180 再加排程）${src("endoSoc22")}`);
+    } else {
+      I.push(`無糖尿病史、血糖 ≥180：<b>先矯正 insulin</b>，24 小時內 ≥2 次 ≥180 再加排程（Endocrine Society 10.1）${src("endoSoc22")}`);
+    }
+    if(w&&S.gl_t1){ const a=0.2*c.wt, b=0.4*c.wt; I.push(`第一型：每日總量約 0.2–0.4 U/kg → <b>${fmt(a,0)}–${fmt(b,0)} U</b>（以 0.3 U/kg 估算分配）${src("endotext26")}`); I.push(glSplit(0.3*c.wt,c)); }
+    else if(w){ I.push(`排程起始每日總量 <b>${fmt(w.u,0)} U</b>（${w.f} U/kg：${c.lowDose?"老人或腎功能不全 ≤0.3":c.hi>200?"血糖 201–400 → 0.5":"血糖 ≤200 → 0.4"}）${src("rabbit2")}${src("endotext26")}`); I.push(glSplit(w.u,c)); }
+    else I.push(`填體重以計算起始劑量（0.4 U/kg；血糖 >200：0.5；老人或腎功能不全 ≤0.3）${src("rabbit2")}`);
+    if(c.lowDose) I.push(`<span class="small">≤0.3 U/kg 的條件：Endotext 未訂年齡與腎功能切點，本工具以 ≥70 歲或 CrCl／eGFR <60（或透析）帶入</span>`);
+  } else if(c.hi!==null){
+    I.push(`最高 ${c.hi} <180：目前不需排程 insulin；輕度 T2DM 可 DPP-4i ＋ 矯正 ${src("endoSoc22")}`);
+  } else I.push(`<span class="muted">填最近 24 小時最高血糖以判斷是否需要排程 insulin</span>`);
+  I.push(`調整：RABBIT 2 空腹或餐前 >140 時 basal 加 20%、<70 減 20%（試驗目標較嚴）${src("rabbit2")}；單用矯正（sliding scale）不作為已知糖尿病的長期方案 ${src("endoSoc22")}`);
+  H.push(st({k:"go",t:"Insulin",c:ul(I),why:src("endoSoc22")+src("rabbit2")+src("endotext26")}));
+  // 4. 特殊情境
+  const X=[];
+  if(c.npo||S.sx_plan) X.push(`<b>NPO／手術</b>：早上 NPH 減 50%；glargine、degludec 前 24 小時劑量減 25%；睡前 NPH 照給；停餐前 insulin，矯正續用 ${src("endotext26")}；圍術期目標 100–180 ${src("endoSoc22")}${S.h_sglt2?`；<span class="ng">SGLT2i 術前 ≥3 天停</span> ${src("fdaSglt2")}`:""}`);
+  if(S.gl_ster==="am") X.push(`<b>早上單次口服類固醇</b>：NPH 為主或 basal-bolus（Endocrine Society 2.1）${src("endoSoc22")}；JBDS：<b>NPH 10 U 早上</b>（與類固醇同時），依晚餐前血糖每日調 10–20%，或 gliclazide 40 mg 早上（最多 240 mg）；已用晚上 basal 者改早上給；<b>類固醇減量時同步減量</b> ${src("jbdsSter23")}<br><span class="small">不同處：Endotext 不建議住院新開始 SU，JBDS 將 gliclazide 列為選項（並列）</span>`);
+  if(S.gl_ster==="multi") X.push(`<b>每日多次或長效類固醇</b>：basal-bolus 或 NPH 為主皆可（Endocrine Society 2.1）${src("endoSoc22")}；類固醇減量時同步減量 ${src("jbdsSter23")}`);
+  if(S.gl_eat==="tfc") X.push(`<b>連續管灌</b>：basal 為每日總量 50%；營養 insulin＝每日總量／12，管灌中每 4 小時給，<b>管灌中斷即停營養 insulin</b> ${src("endotext26")}；NPH 為主或 basal-bolus（Endocrine Society 6.1）${src("endoSoc22")}`);
+  if(S.gl_eat==="tfi") X.push(`<b>間歇管灌（12–16 小時）</b>：管灌開始時給 NPH ${src("endotext26")}；NPH 為主或 basal-bolus（Endocrine Society 6.1）${src("endoSoc22")}`);
+  if(X.length) H.push(st({k:"wait",t:"特殊情境",c:ul(X),why:src("endotext26")+src("endoSoc22")+src("jbdsSter23")}));
+  // 5. 監測與出院
+  H.push(st({k:"info",t:"監測與出院",c:ul([
+    c.a1c===null?"入院時 HbA1c（3 個月內未驗者）":`HbA1c ${c.a1c}%`,
+    "insulin 治療、低血糖高風險：資源許可時 CGM 加床邊血糖確認（Endocrine Society 1.1）",
+    `出院規劃含住院衛教（4.1）${src("endoSoc22")}`]),
+    why:src("endoSoc22")}));
+  H.push(optCard({cls:"",title:"健保（降血糖藥）",tags:src("nhi51"),rows:[["健保",nhiQ("DPP-4i、SGLT2i：限已用最大耐受劑量 metformin 仍控制不佳之 T2DM，兩類擇一；口服成分最多四種（5.1，105/5/1 版文字；最新修訂請確認）")+"<br>"+nhiLic("insulin、metformin")]],open:true}));
+  return H.join("");
+}
 function dkaLab(){
   const c=dkaCtx(); const dx=dkaDx(c);
   return `<div class="kv"><div><div class="k">判定</div>${tag(dx.t,dx.cls)}</div>
@@ -2974,7 +3070,7 @@ function lyteLab(){
 /* ================= 症狀類：出處 ================= */
 Object.assign(REF,{
   ahaBp24:{t:"AHA 急性照護血壓 2024",f:"Bress AP, Anderson TS, Flack JM, et al. The Management of Elevated Blood Pressure in the Acute Care Setting: A Scientific Statement From the American Heart Association. Hypertension 2024;81:e94–e106. doi:10.1161/HYP.0000000000000238。高血壓急症＝血壓升高合併新發或惡化之標的器官損傷，常需 IV 降壓；無標的器官損傷之無症狀血壓升高：重複正確量測、處理誘因，不以 IV 降壓藥治療（觀察性研究顯示有害）；依器官設定目標：中風、腦出血、高血壓視網膜病變 MAP 立即降 15%；高血壓腦病變 MAP 降 20–25%；主動脈剝離 SBP 迅速 <120；子癲前症 SBP <160；心衰竭 MAP 降 25%；肺水腫或 ACS SBP <140；高血壓腎損傷 MAP 數小時降 20–25%；使用 IV 降壓藥時建議動脈導管（器官目標取自 AAFP 2026 摘要）。",u:"https://professional.heart.org/en/science-news/management-of-elevated-blood-pressure-in-the-acute-care-setting/top-things-to-know"},
-  accHtn25:{t:"AHA/ACC 高血壓 2025",f:"Jones DW, Ferdinand KC, Taler SJ, et al. 2025 AHA/ACC/AANP/AAPA/ABC/ACCP/ACPM/AGS/AMA/ASPC/NMA/PCNA/SGIM Guideline for the Prevention, Detection, Evaluation and Management of High Blood Pressure in Adults. Hypertension 2025（2025/8/14 線上發表）；J Am Coll Cardiol 2025. doi:10.1161/HYP.0000000000000249。取代 2017 版。第 6.2 節：(1) 高血壓急症（BP >180 及／或 >120 合併急性標的器官損傷）建議收 ICU 連續監測血壓與器官損傷（COR 1；LOE 摘要來源不一致 B-NR／B-R，請確認）；(2) 合併強制情況（例：急性主動脈症候群）第一小時 SBP 降至 <140，主動脈剝離 <120（1, C-LD）；(3) 無強制情況：第一小時 SBP 降 ≤25%，穩定後 2–6 小時 <160/100，之後 24–48 小時謹慎降至 130–140（1, C-LD）；(4) 因非心臟問題住院、BP >180/120 但無急性標的器官損傷：不建議間歇追加 IV 或口服降壓藥以急速降壓（3: Harm, B-NR）。強制情況完整清單與 IV 藥物表（劑量、加量間隔）本版未能開啟全文核對，請確認。（2026-10-19 依 Guideline Central 摘要核對）",u:"https://www.ahajournals.org/doi/10.1161/HYP.0000000000000249"},
+  accHtn25:{t:"AHA/ACC 高血壓 2025",f:"Jones DW, Ferdinand KC, Taler SJ, et al. 2025 AHA/ACC/AANP/AAPA/ABC/ACCP/ACPM/AGS/AMA/ASPC/NMA/PCNA/SGIM Guideline for the Prevention, Detection, Evaluation and Management of High Blood Pressure in Adults. Hypertension 2025（2025/8/14 線上發表）；J Am Coll Cardiol 2025. doi:10.1161/HYP.0000000000000249。取代 2017 版。第 6.2 節：(1) 高血壓急症（BP >180 及／或 >120 合併急性標的器官損傷）建議收 ICU 連續監測血壓與器官損傷（COR 1；LOE 摘要來源不一致 B-NR／B-R，請確認）；(2) 合併強制情況（例：急性主動脈症候群）第一小時 SBP 降至 <140，主動脈剝離 <120（1, C-LD）；(3) 無強制情況：第一小時 SBP 降 ≤25%，穩定後 2–6 小時 <160/100，之後 24–48 小時謹慎降至 130–140（1, C-LD）；(4) 因非心臟問題住院、BP >180/120 但無急性標的器官損傷：不建議間歇追加 IV 或口服降壓藥以急速降壓（3: Harm, B-NR）。慢性治療：目標所有成人 <130/80；PREVENT 10 年風險 ≥7.5% 者 SBP 至少 <130、鼓勵 <120（1, A），DBP <80（1, B-R）；第一線 thiazide 類、長效 DHP CCB、ACEi 或 ARB（1, A）；第 2 期（≥140/90）以兩種不同類第一線藥物起始，最好單一錠（1, B-R），第 1 期單藥合理（2a, C-EO）；CKD（eGFR <60 且 albuminuria ≥30 mg/g）用 ACEi 或 ARB 擇一（1, B-R）；糖尿病合併 eGFR <60 或 albuminuria ≥30 用 ACEi 或 ARB（1, A）；中風後 thiazide、ACEi 或 ARB（1, A），目標 <130/80（1, B-R）；預防心衰竭 SBP <130（1, B-R）；懷孕：labetalol、長效 nifedipine 優先（1, A），不用 atenolol、ACEi、ARB、DRI、nitroprusside、MRA（3: Harm, C-LD）；ACEi、ARB、renin 抑制劑不合併使用（3: Harm, A）。強制情況完整清單與 IV 藥物表（劑量、加量間隔）：2026-10-20 再查仍未能開啟全文（JACC、AHA 期刊、Medscape 均無法讀取），請確認。（2026-10-20 依 Guideline Central 摘要核對）",u:"https://www.ahajournals.org/doi/10.1161/HYP.0000000000000249"},
   escHtnEm:{t:"ESC 高血壓急症立場文件 2019",f:"van den Born BJH, Lip GYH, Brguljan-Hitij J, et al. ESC Council on hypertension position document on the management of hypertensive emergencies. Eur Heart J Cardiovasc Pharmacother 2019;5:37–46. doi:10.1093/ehjcvp/pvy032。惡性高血壓：數小時 MAP 降 20–25%（labetalol、nicardipine；替代 nitroprusside、urapidil）；高血壓腦病變：立即 MAP 降 20–25%；急性缺血性中風 BP >220/120：1 小時 MAP 降 15%；溶栓候選 >185/110：降至 <185/110；急性出血性中風 SBP >180：SBP 130–<180；ACS：SBP <140（nitroglycerin、labetalol；替代 urapidil）；急性心因性肺水腫：SBP <140（nitroprusside 或 nitroglycerin ＋ loop 利尿劑；替代 urapidil）；急性主動脈疾病：SBP <120、HR <60（esmolol ＋ 血管擴張劑；替代 labetalol、metoprolol）；子癲症／嚴重子癲前症／HELLP：SBP <160、DBP <105（labetalol 或 nicardipine ＋ magnesium sulfate）。劑量：labetalol 0.25–0.5 mg/kg，2–4 mg/min 至目標後 5–20 mg/h；nicardipine 5 mg/h，每 15–30 分鐘加 2.5 mg/h（5–15 mg/h），達標後減至 3 mg/h；urapidil 12.5–25 mg bolus，5–40 mg/h。（2026-10-19 核對：原文頁面需人機驗證無法讀取；上列劑量與 Medical Dialogues 2019 摘要、Empendium 劑量表〔引 ESC/ESH 2018〕三者一致，含 labetalol 先 mg/min 後 mg/h 之單位）",u:"https://academic.oup.com/ehjcvp/article/5/1/37/5045336"},
   urapSmPC:{t:"Urapidil 仿單（歐盟）",f:"Urapidil Kalceks 5 mg/mL solución inyectable y para perfusión, Ficha técnica（AEMPS，西班牙）：高血壓急症 10–50 mg 緩慢 IV，持續監測血壓，可依血壓反應重複；輸注起始 2 mg/min，維持平均 9 mg/h；治療期間不超過 7 天。台灣許可證（Ebrantil）劑量請以國內仿單確認。（2026-10-19 核對）",u:"https://cima.aemps.es/cima/pdfs/ft/85873/FT_85873.pdf"},
   ponv20:{t:"PONV 第四版共識 2020",f:"Gan TJ, Belani KG, Bergese S, et al. Fourth Consensus Guidelines for the Management of Postoperative Nausea and Vomiting. Anesth Analg 2020;131:411–448。已預防仍發生 PONV：改用與預防藥不同類別之止吐藥；成人劑量：ondansetron 4 mg IV、dexamethasone 4–8 mg IV（誘導時，預防）、haloperidol 0.5–<2 mg IM/IV、droperidol 0.625 mg IV、amisulpride 5 mg、promethazine 6.25 mg；風險因子：女性、PONV 或暈車病史、不抽菸、年輕、全身麻醉、吸入麻醉與 N₂O、術後 opioid、手術時間長、腹腔鏡、膽囊與婦科手術。",u:"https://www.apsf.org/podcast/142-ponv-updated-guidelines-and-medication-options/"},
@@ -3064,6 +3160,73 @@ function renderHTN(){
   return H.join("");
 }
 function htnLab(){ const c=htnCtx(); return `<div class="kv"><div><div class="k">BP</div><b>${c.sbp??"—"}／${c.dbp??"—"}</b></div><div><div class="k">MAP</div><b>${c.map!==null?fmt(c.map,0):"—"}</b></div><div><div class="k">判定</div>${c.emerg?tag("高血壓急症","t-high"):c.high?tag("嚴重升高、無器官損傷","t-mid"):tag("—","t-gray")}</div></div>`; }
+
+/* ================= 降壓藥選擇與調整（v0.9） ================= */
+function bpCtx(){
+  const h=htnCtx(); const k=num(S.k), eg=rv("egfr");
+  const meds={A:S.bp_acei||S.bp_arb, C:S.bp_ccb, D:S.bp_thz};
+  const nAcd=(meds.A?1:0)+(meds.C?1:0)+(meds.D?1:0);
+  const anyMed=S.bp_acei||S.bp_arb||S.bp_ccb||S.bp_thz||S.bp_bb||S.bp_mra||S.bp_ab;
+  const hypot = h.sbp!==null&&h.sbp<90 || h.map!==null&&h.map<65;
+  const ckdAlb = (eg&&!eg.hd&&eg.v<60&&S.bp_alb) || (S.hx_ckd&&S.bp_alb);
+  const dmCkd = S.hx_dm&&((eg&&!eg.hd&&eg.v<60)||S.bp_alb);
+  const any = h.sbp!==null||anyMed||S.bp_alb||S.bp_preg||S.bp_gout||S.bp_aki||S.sx_plan;
+  return Object.assign({},h,{k,eg,meds,nAcd,anyMed,hypot,ckdAlb,dmCkd,any});
+}
+function renderBPmed(){
+  const c=bpCtx(); const H=[]; const st=stepper();
+  if(!c.any) return `<span class="muted">勾選平常降壓藥、共病或填血壓後顯示。</span>`;
+  // 1. 先停／衝突
+  const P=[];
+  if(c.hypot) P.push(`<span class="ng">低血壓（${c.sbp!==null?"SBP "+c.sbp:""}${c.map!==null?" MAP "+fmt(c.map,0):""}）：${c.anyMed?"暫停降壓藥":"如有使用降壓藥：暫停"}</span>，依休克處置 ${jump("hypo","hypo-pr","低血壓頁")}`);
+  if(S.bp_aki) P.push(`<b>AKI、脫水或進食差</b>：確認容積與灌流壓、停腎毒性藥物 ${src("kdigoAki12")}；ACEi／ARB 與利尿劑暫停（本工具依此原則延伸），腎功能與容積恢復後逐一恢復`);
+  if(c.k!==null&&c.k>=5.5&&(S.bp_acei||S.bp_arb||S.bp_mra)) P.push(`<span class="cau">K ${c.k} 且使用 ${[S.bp_acei?"ACEi":"",S.bp_arb?"ARB":"",S.bp_mra?"MRA":""].filter(Boolean).join("、")}</span>：見高血鉀頁 ${jump("hk","p-hk","高血鉀")}`);
+  if(S.sx_plan&&(S.bp_acei||S.bp_arb)) P.push(`<b>預計手術、使用 ACEi／ARB</b>：停或續個別決定（AHA/ACC 2024）${src("ahaPeri24")}；STOP-or-NOT：術前 48 小時停用與持續，28 天心血管事件相同（22%），停用者術中低血壓較少（41% vs 54%）${src("stopOrNot24")}；ESC 2022 建議等級本版未能核對`);
+  if(S.bp_acei&&S.bp_arb) P.push(`<span class="ng">ACEi ＋ ARB 同時使用：不建議（3: Harm, A）</span> ${src("accHtn25")}`);
+  if(S.bp_preg&&(S.bp_acei||S.bp_arb||S.bp_mra)) P.push(`<span class="ng">懷孕：停 ${[S.bp_acei?"ACEi":"",S.bp_arb?"ARB":"",S.bp_mra?"MRA":""].filter(Boolean).join("、")}（胎兒傷害，3: Harm）</span> ${src("accHtn25")}${src("losPI")}`);
+  if(P.length) H.push(st({k:c.hypot||(S.bp_acei&&S.bp_arb)||S.bp_preg&&(S.bp_acei||S.bp_arb||S.bp_mra)?"bx":"wait",t:"先停／需調整",c:ul(P),why:src("accHtn25")+(S.bp_aki?src("kdigoAki12"):"")+(S.sx_plan?src("stopOrNot24"):"")}));
+  // 2. 住院血壓偏高（非急症）
+  const elev = !c.emerg && !c.hypot && ((c.sbp!==null&&c.sbp>=140)||(c.dbp!==null&&c.dbp>=90));
+  if(c.emerg) H.push(st({k:"info",t:"高血壓急症",c:"依上方急症處置；口服藥調整待急性期後。"}));
+  else if(elev){
+    const L=[`<b>不追加 PRN 降壓藥</b>（IV 或口服）急速降壓（住院、無急性器官損傷，3: Harm）${src("accHtn25")}；處理誘因、恢復平常口服藥 ${src("ahaBp24")}`];
+    const nx=[];
+    if(S.bp_preg) nx.push(`懷孕：<b>labetalol</b> 或<b>長效 nifedipine</b>（1, A）${src("accHtn25")}`);
+    else if(c.nAcd===0){
+      nx.push(`未用 ACEi／ARB、CCB、thiazide：第一線 thiazide 類、長效 DHP CCB、ACEi 或 ARB（1, A）；${c.sbp>=140||c.dbp>=90?"第 2 期（≥140/90）以<b>兩種不同類、最好單一錠</b>起始（1, B-R）":"第 1 期單藥合理"} ${src("accHtn25")}`);
+      nx.push(`ESC 2024：多數病人低劑量兩藥單一錠——RAS 阻斷劑 ＋ DHP CCB 或利尿劑 ${src("esc24htn")}`);
+      nx.push(`台灣 2022：ACEi、ARB、β-blocker、CCB、thiazide 五類皆第一線；高於目標 ≥20/10 起始合併 ${src("tw22htn")}`);
+    } else if(c.nAcd===1){
+      const has=c.meds.A?"ACEi／ARB":c.meds.C?"CCB":"thiazide", add=c.meds.A?(S.bp_gout?"CCB":"CCB 或 thiazide 類"):c.meds.C?"ACEi 或 ARB":"ACEi 或 ARB";
+      nx.push(`目前 ${has}：加 <b>${add}</b>（不同類合併，ESC 起始組合為 RAS 阻斷劑＋CCB 或利尿劑）${src("esc24htn")}${src("accHtn25")}`);
+    } else if(c.nAcd===2){
+      const miss=!c.meds.A?"ACEi 或 ARB":!c.meds.C?"CCB":(S.bp_gout?"（痛風：thiazide 慎用，見下方）":"thiazide 類");
+      nx.push(`目前兩類：加第三類 <b>${miss}</b>（RAS 阻斷劑＋CCB＋利尿劑）${src("esc24htn")}`);
+    } else {
+      nx.push(`已用 ACEi／ARB ＋ CCB ＋ thiazide：頑固性高血壓 → <b>加 spironolactone</b> 應考慮（ESC 2024，不再為 Class I；PATHWAY-2 降壓優於 bisoprolol、doxazosin）${src("esc24htn")}；起始見藥物頁（K、eGFR）${src("spiroPI")}`);
+    }
+    L.push(...nx);
+    L.push(`<span class="small">長期調整宜在病情穩定後進行或交由門診 ${src("ahaBp24")}</span>`);
+    H.push(st({k:"go",t:`血壓偏高、非急症（${c.sbp??"—"}／${c.dbp??"—"}）`,c:ul(L),why:src("accHtn25")+src("esc24htn")+src("tw22htn")}));
+  }
+  // 3. 依共病
+  const R=[];
+  if(c.ckdAlb) R.push(`<b>CKD 合併 albuminuria</b>：ACEi 或 ARB 擇一（1, B-R）${src("accHtn25")}`);
+  if(c.dmCkd) R.push(`<b>糖尿病合併 eGFR <60 或 albuminuria</b>：ACEi 或 ARB（1, A）；SBP <130，鼓勵 <120 ${src("accHtn25")}`);
+  if(S.t_stroke) R.push(`<b>中風後</b>：thiazide 類、ACEi 或 ARB（1, A）；目標 <130/80（1, B-R）${src("accHtn25")}`);
+  if(S.hx_hf) R.push(`<b>心衰竭</b>：SBP <130（1, B-R）${src("accHtn25")}；HFrEF 依心衰竭指引用藥 ${src("escHf")}`);
+  if(S.c_cad) R.push(`<b>冠心症／心絞痛</b>：β-blocker 屬強制適應症，任何步驟皆可加入 ${src("esc24htn")}`);
+  if(S.bp_preg) R.push(`<b>懷孕</b>：labetalol、長效 nifedipine 優先（1, A）；不用 atenolol、ACEi、ARB、DRI、nitroprusside、MRA（3: Harm）${src("accHtn25")}`);
+  if(S.bp_gout) R.push(`<b>痛風</b>：可行時 hydrochlorothiazide 改 losartan ${src("acrGout20")}`);
+  if((S.bp_acei||S.bp_arb||S.bp_mra)) R.push(`ACEi、ARB、MRA：追蹤 K 與 Cr ${src("accHtn25")}${src("spiroPI")}`);
+  if(R.length) H.push(optCard({cls:"pref",title:"依共病選擇",tags:src("accHtn25"),lead:ul(R),rows:[["健保",nhiLic("ACEi、ARB、CCB、thiazide、β-blocker、spironolactone")]],open:false}));
+  // 4. 目標血壓（三方並列）
+  H.push(optCard({cls:"",title:"長期目標血壓（三方並列）",tags:src("accHtn25")+src("esc24htn")+src("tw22htn"),lead:ul([
+    `AHA/ACC 2025：所有成人 <130/80；CVD 風險（PREVENT ≥7.5%）SBP 至少 <130、鼓勵 <120（1, A）${src("accHtn25")}`,
+    `ESC 2024：可耐受時 SBP 120–129、DBP 70–79；≥85 歲或症狀性姿勢性低血壓者放寬 ${src("esc24htn")}`,
+    `台灣 2022：722 居家血壓 <130/80 ${src("tw22htn")}`]),rows:[],open:true}));
+  return H.join("");
+}
 
 /* ================= 噁心嘔吐 ================= */
 function nvCtx(){ return {qt:S.t_qt, pd:S.hx_pd, obst:S.b_distend&&(S.b_noflatus||S.b_vomit), age:num(S.age), k:num(S.k), mgM:num(S.mg)!==null?num(S.mg)*0.4114:null, glu:num(S.glu)}; }
@@ -3814,7 +3977,56 @@ Object.assign(REF,{
   morPI:{t:"Morphine 口服錠仿單",f:"Morphine sulfate tablets Prescribing Information 8.7：腎衰竭時藥動學改變，以低於一般劑量開始並緩慢調整，監測呼吸抑制、鎮靜與低血壓。（2026-10-19 核對）",u:"https://medlibrary.org/lib/rx/meds/morphine-sulfate-52/page/7/"},
   ketoPI:{t:"Ketorolac 注射劑仿單",f:"Ketorolac tromethamine injection Prescribing Information（Pfizer）：晚期腎功能不全禁用；≥65 歲、腎功能不全或 <50 kg：單次 IV 15 mg 或 IM 30 mg，多次 15 mg q6h（每日 ≤60 mg）；IV／IM 與口服合計 ≤5 天。（2026-10-19 核對）",u:"https://www.pfizermedical.com/ketorolac-inj"}
 });
+Object.assign(REF,{
+  /* --- v0.9 住院血糖 --- */
+  endoSoc22:{t:"Endocrine Society 住院高血糖 2022",f:"Korytkowski MT, Muniyappa R, Antinori-Lent K, et al. Management of Hyperglycemia in Hospitalized Adult Patients in Non-Critical Care Settings: An Endocrine Society Clinical Practice Guideline. J Clin Endocrinol Metab 2022;107:2101–28。1.1 高低血糖風險且以 insulin 治療者，資源許可時用 CGM 加床邊血糖確認（conditional, low）；2.1 類固醇高血糖：NPH 為主或 basal-bolus 皆可（conditional, low）；4.1 出院規劃含住院衛教（conditional, moderate）；5.1／5.2 擇期手術：術前 HbA1c <8%、血糖 100–180 mg/dL（conditional, very low）；6.1 管灌：NPH 為主或 basal-bolus（conditional, very low）；7.1 以排程 insulin 取代非 insulin 藥物（conditional, low）；7.2 部分輕度高血糖之 T2DM：DPP-4i＋矯正 insulin 或排程 insulin（conditional, low），持續 >180 改排程 insulin；10.1 無糖尿病史、血糖 ≥180：先矯正 insulin，24 小時內 ≥2 次 ≥180 再加排程（conditional, very low）；10.2 飲食或非 insulin 治療之糖尿病、入院確認血糖 ≥180：開始排程 insulin（conditional, very low）；10.3 入院前已用 insulin：持續排程 insulin 並依營養與疾病嚴重度調整（strong, low）。（2026-10-19 依全文 PDF 核對）",u:"https://www.endocrine.org/-/media/endocrine/files/cpg/6_10_22_final_dgac278.pdf"},
+  endotext26:{t:"Endotext 住院糖尿病 2026",f:"Agarwal S, Mohan S. Inpatient Diabetes Management. Endotext（2026/3/7 更新）。非重症目標 100–180 mg/dL，重症 140–180（選擇性 110–140）；嚴重共病可放寬 180–250。每日總量：未用過 insulin、瘦、老人、腎功能不全起始 ≤0.3 U/kg（未訂年齡與 eGFR 切點）；約 50% 為 basal，其餘 50% 分三餐。家中 insulin 控制良好者可沿用，考慮總量減 20–30%。NPO／手術：早上 NPH 減 50%、glargine／degludec 前 24 小時劑量減 25%、睡前 NPH 照給；停餐前 insulin、矯正續用。管灌：連續——basal 為每日總量 50%，營養 insulin＝每日總量／12，管灌中每 4 小時給，管灌中斷時停；12–16 小時間歇管灌可於開始時給 NPH。口服藥：metformin 於腎肝心風險低、急性病緩解後可考慮；SGLT2i 於急性病與酮症緩解、無手術或長時間禁食預期時可為心衰竭續用或開始（非普遍做法）；DPP-4i 低血糖風險低，可用於輕度高血糖，saxagliptin、alogliptin 心衰竭時停；GLP-1 RA、SU 住院不建議新開始。",u:"https://endotext.org/wp-content/uploads/pdfs/inpatient-diabetes-management.pdf"},
+  endotextDU:{t:"Endotext 住院高血糖（Dhatariya/Umpierrez）",f:"Dhatariya K, Umpierrez GE. Management of Diabetes and Hyperglycemia in Hospitalized Patients. Endotext（2024/10/18 更新，引 ADA Standards 2025）：重症 140–180 mg/dL；非重症 100–180 mg/dL（無明顯低血糖時）。內文另寫一般內外科 140–180，兩者未整合。SGLT2i：FDA 建議術前 3 天停（ertugliflozin 4 天）。ADA 2026 原文本版未能開啟，非重症目標依此引述，請確認。",u:"https://www.endotext.org/wp-content/uploads/pdfs/management-of-diabetes-and-hyperglycemia-in-hospitalized-patients.pdf"},
+  rabbit2:{t:"RABBIT 2（Diabetes Care 2007）",f:"Umpierrez GE, Smiley D, Zisman A, et al. Randomized study of basal-bolus insulin therapy in the inpatient management of patients with type 2 diabetes (RABBIT 2 trial). Diabetes Care 2007;30:2181–6。每日總量 0.4 U/kg（血糖 140–200）或 0.5 U/kg（201–400），一半 glargine 每日一次、一半 glulisine 分三餐；不進食時停餐前劑量、glargine 照給；空腹或餐前 >140 時 glargine 加 20%，<70 減 20%。（2026-10-19 依 WikiJournalClub 摘要核對）",u:"https://wikijournalclub.org/wiki/RABBIT_2"},
+  jbdsSter23:{t:"JBDS 類固醇高血糖 2023",f:"Joint British Diabetes Societies for Inpatient Care. Management of Hyperglycaemia and Steroid (Glucocorticoid) Therapy（JBDS 08，第 3 版，2023/1）。住院目標 6.0–10.0 mmol/L（可接受 6.0–12.0）；24 小時內 2 次 >12.0 開始處理；未用藥者：gliclazide 40 mg 早上，每日調整至最多 240 mg；或 NPH 10 U 早上，依晚餐前血糖每日調 10–20%；已用晚上 basal 者改早上給並每日調 10–20%；類固醇減量時降血糖藥同步減量。",u:"https://diabetes.org.uk/sites/default/files/2023-03/JBDS%2008%20Steroids%20and%20DM%20Guideline%20with%20qr%20code.pdf"},
+  fdaSglt2:{t:"FDA SGLT2i 術前停藥（2020）",f:"FDA 2020/3 核准 SGLT2 抑制劑仿單修訂：canagliflozin、dapagliflozin、empagliflozin 預定手術前至少 3 天停用；ertugliflozin 至少 4 天。",u:"https://www.drugtopics.com/view/fda-approves-safety-labeling-changes-sglt2-inhibitors"},
+  ahaPeri24:{t:"AHA/ACC 圍術期 2024",f:"Thompson A, Fleischmann KE, Smilowitz NR, et al. 2024 AHA/ACC/ACS/ASNC/HRS/SCA/SCCT/SCMR/SVM Guideline for Perioperative Cardiovascular Management for Noncardiac Surgery. Circulation 2024；J Am Coll Cardiol 2024. doi:10.1016/j.jacc.2024.06.013。SGLT2i 預定手術前 3–4 天停用（Class 1，ACC Key Points）；RAS 抑制劑術前是否停用個別決定（AAFP 2026 FPIN 引述）。",u:"https://www.acc.org/latest-in-cardiology/ten-points-to-remember/2024/09/23/04/15/2024-aha-acc-perioperative-guideline-gl"},
+  metPI:{t:"Metformin 仿單",f:"Metformin hydrochloride Prescribing Information 2.3／2.4：eGFR <30 禁用；eGFR 30–45 不建議開始；用藥中 eGFR 降至 <45 評估續用效益風險。碘顯影：eGFR 30–60、肝病、酒精、心衰竭或動脈內給顯影劑者，於檢查時或之前停用，48 小時後再評估 eGFR。（2026-10-19 核對）",u:"https://medlibrary.org/lib/rx/meds/metformin-hydrochloride-96/"},
+  sitaPI:{t:"Sitagliptin 仿單（Januvia）",f:"Januvia Prescribing Information：100 mg 每日一次；eGFR 30–<45：50 mg；eGFR <30（含透析）：25 mg；DPP-4 抑制劑與心衰竭相關（其他兩種 DPP-4i 之心血管結果試驗），心衰竭風險者權衡並監測。（2026-10-19 核對）",u:"https://drugs.com/pro/januvia.html"},
+  nhi51:{t:"健保 5.1 糖尿病用藥",f:"衛生福利部中央健康保險署 藥品給付規定 5.1 糖尿病用藥（105/5/1 版文字）：第二型糖尿病原則上優先使用 metformin；TZD、DPP-4 抑制劑、SGLT2 抑制劑限已用最大耐受劑量 metformin 仍控制不佳者；SGLT2 抑制劑與 DPP-4 抑制劑（含複方）宜二種擇一；口服降血糖藥成分最多四種；三種口服藥仍控制不佳宜考慮 insulin。最新修訂日期本版未能確認。",u:"https://ws.nhi.gov.tw/001/Upload/292/relfile/chapterfile/5.1.pdf"},
+  /* --- v0.9 血壓用藥 --- */
+  esc24htn:{t:"ESC 高血壓 2024",f:"McEvoy JW, McCarthy CP, Bruno RM, et al. 2024 ESC Guidelines for the management of elevated blood pressure and hypertension. Eur Heart J 2024;45:3912–4018。Elevated BP：診間 120–139/70–89；高血壓 ≥140/90。治療目標：可耐受時 SBP 120–129、DBP 70–79；不耐受時 as low as reasonably achievable；≥85 歲或治療前有症狀性姿勢性低血壓者個別放寬（如 <140/90）。起始：多數病人低劑量兩藥（最好單一錠）——RAS 阻斷劑＋DHP CCB 或利尿劑；β-blocker 用於有強制適應症（心絞痛、HFrEF 等）；頑固性高血壓應考慮加 spironolactone（不再為 Class I）。（2026-10-20 依 PCRonline 指引整理核對）",u:"https://pcronline.com/Cases-resources-images/Tools-and-Practice/The-Essentials/Hypertension/A-review-of-the-2024-ESC-Guidelines-on-elevated-blood-pressure-and-hypertension"},
+  tw22htn:{t:"台灣高血壓指引 2022",f:"Wang TD, Chiang CE, Chao TH, et al. 2022 Guidelines of the Taiwan Society of Cardiology and the Taiwan Hypertension Society for the Management of Hypertension. Acta Cardiol Sin 2022;38:225–325。依 722 居家血壓（連續 7 天〔至少 4 天〕、每日 2 次、每次 2 讀數）之一致目標 <130/80；ACEi、ARB、β-blocker、CCB、thiazide 五大類皆為第一線；高於目標 ≥20/10 起始合併治療，最好單一錠。糖尿病、CKD、老人章節本版未能讀取全文。",u:"https://pmc.ncbi.nlm.nih.gov/articles/PMC9121756"},
+  stopOrNot24:{t:"STOP-or-NOT（JAMA 2024）",f:"Legrand M, Falcone J, Cholley B, et al. Continuation vs Discontinuation of Renin-Angiotensin System Inhibitors Before Major Noncardiac Surgery: The Stop-or-Not Randomized Clinical Trial. JAMA 2024。2,222 人，術前 48 小時停用 vs 持續至手術日：28 天主要術後心血管事件皆 22%；術中低血壓 41% vs 54%（停用較少）。作者建議個別化。（2026-10-20 依 ACC 摘要核對）",u:"https://www.acc.org/Latest-in-Cardiology/Articles/2024/08/28/19/41/fri-647am-stop-not-esc-2024"},
+  acrGout20:{t:"ACR 痛風 2020",f:"FitzGerald JD, Dalbeth N, Mikuls T, et al. 2020 American College of Rheumatology Guideline for the Management of Gout. Arthritis Care Res 2020;72:744–60。高血壓合併痛風：可行時 hydrochlorothiazide 改為 losartan（AAFP 2021 摘要；建議強度未於摘要列出，請確認）。",u:"https://www.aafp.org/afp/2021/0800/p209.pdf"},
+  amloPI:{t:"Amlodipine 仿單",f:"Amlodipine besylate tablets Prescribing Information（Pfizer）2.1：高血壓起始 5 mg 每日一次，最大 10 mg；體型小、虛弱、老人或肝功能不全可 2.5 mg 起始。（2026-10-20 核對）",u:"https://labeling.pfizer.com/ShowLabeling.aspx?id=794"},
+  losPI:{t:"Losartan 仿單（Cozaar）",f:"Cozaar Prescribing Information：高血壓一般起始 50 mg 每日一次，最大 100 mg；可能血管內容積不足（如使用利尿劑）25 mg 起始；輕中度肝功能不全 25 mg 起始；Boxed warning：發現懷孕儘速停用（胎兒毒性）。（2026-10-20 核對）",u:"https://www.drugs.com/pro/cozaar.html"},
+  hctzPI:{t:"Hydrochlorothiazide 仿單",f:"Hydrochlorothiazide tablets Prescribing Information：成人高血壓起始 25 mg 每日一次，可增至 50 mg（單次或分兩次）；>50 mg 常伴明顯血鉀下降。（2026-10-20 核對）",u:"https://medlibrary.org/lib/rx/meds/hydrochlorothiazide-98/page/3/"},
+  spiroPI:{t:"Spironolactone 仿單（Aldactone）",f:"Aldactone Prescribing Information：高血壓起始每日 25–100 mg（單次或分次），每 2 週可調整，>100 mg 通常無額外降壓；心衰竭：K ≤5.0 且 eGFR >50 時 25 mg 每日一次，可增至 50 mg，發生高血鉀改 25 mg 隔日；eGFR 30–50 考慮 25 mg 隔日起始。（2026-10-20 核對）",u:"https://www.pfizermedical.com/aldactone/dosage-admin"}
+});
 const DRUGS = [
+ {id:"basal",cls:"metab",name:"Basal insulin（glargine、degludec、NPH）",brand:"",type:"Insulin",
+  dose:"住院排程 insulin：每日總量 0.4 U/kg（血糖 ≤200）或 0.5 U/kg（201–400），約一半為 basal 每日一次（RABBIT 2）；類固醇高血糖可用 NPH 早上與類固醇同時（JBDS 10 U 起）。計算見高血糖／血糖控制頁。",adj:"老人、瘦、未用過 insulin、腎功能不全：起始 ≤0.3 U/kg/日（Endotext）；NPO：glargine／degludec 減 25%、早上 NPH 減 50%。",
+  caut:"低血糖；第一型糖尿病 NPO 時仍需 basal。",guide:src("rabbit2")+src("endotext26")+src("endoSoc22")+src("jbdsSter23"),nhi:nhiLic()},
+ {id:"prand",cls:"metab",name:"Prandial／矯正 insulin（aspart、lispro、regular）",brand:"",type:"Insulin",
+  dose:"basal-bolus：每日總量約一半分三餐（RABBIT 2）；不進食時停餐前劑量、保留矯正。連續管灌：每日總量／12 每 4 小時（Endotext）。",adj:"同 basal insulin。",
+  caut:"單用矯正（sliding scale）不作為已知糖尿病的長期方案。",guide:src("rabbit2")+src("endotext26")+src("endoSoc22"),nhi:nhiLic()},
+ {id:"metf",cls:"metab",name:"Metformin",brand:"Glucophage",type:"Biguanide",ren:{b:"egfr",t:[[null,30,"禁用"],[30,45,"不建議開始；已用者評估續用效益風險"],[45,null,"不需調整"]],hd:"禁用",note:"碘顯影：eGFR 30–60、肝病、酒精、心衰竭或動脈內顯影前停，48 小時後再評估 eGFR",r:["metPI"]},
+  dose:"住院：急性病期間依腎功能與病情決定是否續用（Endotext：腎肝心風險低、病情穩定可考慮）。",adj:"見腎功能列。",
+  caut:"乳酸中毒風險：休克、缺氧、AKI、肝衰竭、顯影劑。",guide:src("endotext26")+src("metPI"),nhi:nhiLic("（5.1：第二型糖尿病原則上優先使用）")},
+ {id:"sglt2",cls:"metab",name:"SGLT2 抑制劑（empagliflozin、dapagliflozin 等）",brand:"",type:"SGLT2 抑制劑",
+  dose:"住院：急性病、進食差或 NPO 暫停；手術前至少 3 天停（ertugliflozin 4 天）；心衰竭者急性病緩解後可續用。劑量依品項仿單。",adj:"腎功能：依品項仿單（請確認）。",
+  caut:"euglycemic DKA；脫水、生殖泌尿道感染。",guide:src("fdaSglt2")+src("ahaPeri24")+src("endotext26"),nhi:nhiQ("5.1：限已用最大耐受劑量 metformin 仍控制不佳之 T2DM，與 DPP-4i 擇一；心衰竭、CKD 適應症之給付請確認")},
+ {id:"sita",cls:"metab",name:"Sitagliptin（DPP-4i）",brand:"Januvia",type:"DPP-4 抑制劑",ren:{b:"egfr",t:[[45,null,"100 mg 每日一次"],[30,45,"50 mg 每日一次"],[null,30,"25 mg 每日一次"]],hd:"25 mg 每日一次",r:["sitaPI"]},
+  dose:"100 mg 每日一次；住院輕度高血糖之 T2DM 可 DPP-4i ＋ 矯正 insulin（Endocrine Society 7.2）。",adj:"見腎功能列。",
+  caut:"心衰竭：saxagliptin、alogliptin 停用（Endotext）；DPP-4i 與心衰竭相關（仿單）。",guide:src("endoSoc22")+src("sitaPI")+src("endotext26"),nhi:nhiQ("5.1：限已用最大耐受劑量 metformin 仍控制不佳之 T2DM，與 SGLT2i 擇一")},
+ {id:"glic",cls:"metab",name:"Gliclazide（SU）",brand:"Diamicron",type:"Sulfonylurea",
+  dose:"類固醇高血糖（JBDS）：40 mg 早上，每日調整至最多 240 mg。",adj:"腎功能：請依仿單確認。",
+  caut:"低血糖（進食差、NPO、腎功能差）；Endotext 不建議住院新開始 SU。",guide:src("jbdsSter23")+src("endotext26"),nhi:nhiLic()},
+ {id:"amlo",cls:"cardio",name:"Amlodipine",brand:"Norvasc",type:"DHP CCB",
+  dose:"高血壓 5 mg 每日一次，最大 10 mg。",adj:"體型小、虛弱、老人或肝功能不全 2.5 mg 起始。",caut:"下肢水腫。",guide:src("amloPI")+src("accHtn25"),nhi:nhiLic()},
+ {id:"losa",cls:"cardio",name:"Losartan（ARB）",brand:"Cozaar",type:"ARB",
+  dose:"高血壓 50 mg 每日一次，最大 100 mg。",adj:"可能容積不足（使用利尿劑）或輕中度肝功能不全：25 mg 起始。",
+  caut:"懷孕禁用（boxed warning）；不與 ACEi 合併；追蹤 K、Cr；痛風者可取代 thiazide（ACR）。",guide:src("losPI")+src("accHtn25")+src("acrGout20"),nhi:nhiLic()},
+ {id:"hctz",cls:"cardio",name:"Hydrochlorothiazide",brand:"",type:"Thiazide 利尿劑",
+  dose:"高血壓 25 mg 每日一次，可增至 50 mg。",adj:"—",caut:"低血鉀（>50 mg 更明顯）、低血鈉、高尿酸（痛風者可改 losartan）。",guide:src("hctzPI")+src("accHtn25")+src("acrGout20"),nhi:nhiLic()},
+ {id:"spiro",cls:"cardio",name:"Spironolactone（MRA）",brand:"Aldactone",type:"MRA",ren:{b:"egfr",t:[[50,null,"心衰竭：K ≤5.0 時 25 mg 每日一次"],[30,50,"心衰竭：考慮 25 mg 隔日起始"],[null,30,"仿單此段未載，請確認"]],hd:"仿單此段未載，請確認",r:["spiroPI"]},
+  dose:"高血壓每日 25–100 mg；頑固性高血壓 ESC 建議考慮加用。",adj:"見腎功能列。",caut:"高血鉀；懷孕不用（AHA/ACC 3: Harm）。",guide:src("spiroPI")+src("esc24htn")+src("accHtn25"),nhi:nhiLic()},
  {id:"salb",cls:"resp",name:"Salbutamol",brand:"Ventolin",type:"SABA",
   dose:"氣喘急性發作：MDI＋spacer 4–10 puffs 每 20 分鐘 × 1 小時，或 nebulizer 2.5–5 mg；COPD 惡化：SABA ± SAMA；高血鉀（輔助）：10–20 mg nebulised，不單獨使用（UKKA 2023）。",
   adj:"無需腎肝調整。",caut:"心搏過速、顫抖、低血鉀、高乳酸；心衰竭造成之 wheeze 勿大量給予。",
@@ -4057,7 +4269,7 @@ function renderDrugs(){
 }
 
 /* ================= 分頁 ================= */
-const TABS=[{id:"dysp",t:"喘"},{id:"ams",t:"意識改變"},{id:"cp",t:"胸痛"},{id:"hypo",t:"低血壓／休克"},{id:"tachy",t:"心搏過速／心悸"},{id:"brady",t:"心搏過慢"},{id:"fev",t:"發燒"},{id:"uo",t:"尿少"},{id:"abd",t:"腹痛"},{id:"gib",t:"GI bleeding"},{id:"htn",t:"高血壓急症"},{id:"hd",t:"頭痛"},{id:"dka",t:"高血糖"},{id:"hk",t:"高血鉀"},{id:"na",t:"低血鈉"},{id:"lyte",t:"其他電解質"},{id:"nv",t:"噁心嘔吐"},{id:"pain",t:"疼痛控制"},{id:"sleep",t:"失眠"},{id:"acls",t:"ACLS"},{id:"calc",t:"計算工具"},{id:"drug",t:"藥物"},{id:"ref",t:"來源・版本"}];
+const TABS=[{id:"dysp",t:"喘"},{id:"ams",t:"意識改變"},{id:"cp",t:"胸痛"},{id:"hypo",t:"低血壓／休克"},{id:"tachy",t:"心搏過速／心悸"},{id:"brady",t:"心搏過慢"},{id:"fev",t:"發燒"},{id:"uo",t:"尿少"},{id:"abd",t:"腹痛"},{id:"gib",t:"GI bleeding"},{id:"htn",t:"高血壓"},{id:"hd",t:"頭痛"},{id:"dka",t:"高血糖／血糖控制"},{id:"hk",t:"高血鉀"},{id:"na",t:"低血鈉"},{id:"lyte",t:"其他電解質"},{id:"nv",t:"噁心嘔吐"},{id:"pain",t:"疼痛控制"},{id:"sleep",t:"失眠"},{id:"acls",t:"ACLS"},{id:"calc",t:"計算工具"},{id:"drug",t:"藥物"},{id:"ref",t:"來源・版本"}];
 const MENU=[["急救",["acls"]],["心血管",["cp","hypo","htn","tachy","brady"]],["呼吸・神經",["dysp","ams","hd"]],["感染・腹部",["fev","abd","gib"]],["腎・電解質・代謝",["uo","hk","na","lyte","dka"]],["症狀照護",["nv","pain","sleep"]],["工具・參考",["calc","drug","ref"]]];
 const MODS=[{id:"dysp",r:()=>renderDysp()},{id:"ams",r:()=>renderAMS()},{id:"cp",r:()=>renderCP(),lab:()=>cpLab()},{id:"fev",r:()=>renderFev(),lab:()=>fevLab()},{id:"uo",r:()=>renderUO(),lab:()=>uoLab()},{id:"abd",r:()=>renderAbd(),lab:()=>abdLab()},{id:"gib",r:()=>renderGIB(),lab:()=>gibLab()},{id:"hypo",r:()=>renderShock(),lab:()=>shockLab()},{id:"tachy",r:()=>renderTachy(),lab:()=>tachyLab()},{id:"brady",r:()=>renderBrady(),lab:()=>bradyLab()},{id:"dka",r:()=>renderDKA(),lab:()=>dkaLab()},{id:"acls",r:()=>renderACLS()},{id:"hk",r:()=>renderHK(),lab:()=>hkLab()},{id:"na",r:()=>renderNa(),lab:()=>naLab()},{id:"lyte",r:()=>renderLyte(),lab:()=>lyteLab()},{id:"htn",r:()=>renderHTN(),lab:()=>htnLab()},{id:"nv",r:()=>renderNV()},{id:"pain",r:()=>renderPain(),lab:()=>painLab()},{id:"sleep",r:()=>renderSleep()},{id:"hd",r:()=>renderHD()}];
 const YN=[["","—"],["y","是"],["n","否"]];
@@ -4187,7 +4399,15 @@ function buildPanels(){
   P.dka=`<div id="r-rf-dka"></div>${ptCard("dka")}
   ${labCard("dka","檢驗",fld("glu","血糖（mg/dL）")+fld("bhb","β-OHB（mmol/L）")+fld("ph","pH（靜脈可）")+fld("hco3","HCO₃⁻（mEq/L）")+fld("na","Na（mEq/L）")+fld("k","K（mEq/L）")+fld("wt","體重（kg）"),"",sel("h_uket","尿酮（無 β-OHB 時）",[["","未驗"],["neg","陰性"],["1","1+"],["2","2+"],["3","≥3+"]])+fld("cl","Cl（mEq/L）")+fld("bun","BUN（mg/dL）")+fld("cr","Cr（mg/dL）")+fld("phos","磷（mg/dL）"),"進階：尿酮、AG、總滲透壓、磷")}
   <div class="card"><h3>背景</h3><div class="cb"><div class="chks">${chk("hx_dm","已知糖尿病")}${chk("h_sglt2","使用 SGLT2i")}${chk("h_basal","已使用 basal insulin")}${chk("hx_hf","心衰竭")}${chk("hx_ckd","慢性腎病")}</div></div></div>
-  <div class="card"><h2>處置流程</h2><div class="cb" id="r-dka"></div></div>`;
+  <div class="card"><h2>處置流程（DKA／HHS）</h2><div class="cb" id="r-dka"></div></div>
+  <div class="card" id="dka-gluc"><h3>住院血糖控制 <span class="sub">非危急高血糖、平常用藥、insulin 起始</span></h3><div class="cb">
+    <div class="grid">${fld("gl_hi","最近 24 h 最高血糖")}${fld("gl_lo","最近 24 h 最低血糖")}${fld("gl_a1c","HbA1c（%）")}${fld("gm_tdd","家中 insulin 每日總量（U）")}
+      ${sel("gl_eat","進食",[["","—"],["eat","正常進食"],["poor","進食差"],["npo","NPO"],["tfc","連續管灌"],["tfi","間歇管灌"]])}${sel("gl_ster","類固醇",[["","無"],["am","早上一次口服（prednisolone 等）"],["multi","每日多次或長效（dexamethasone）"]])}</div>
+    <div class="sec">平常用藥與情境</div>
+    <div class="chks">${chk("hx_dm","已知糖尿病")}${chk("gl_t1","第一型糖尿病")}${chk("gm_met","metformin")}${chk("h_sglt2","SGLT2i")}${chk("gm_dpp4","DPP-4i")}${chk("gm_glp1","GLP-1 RA")}${chk("gm_su","sulfonylurea")}${chk("h_basal","basal insulin")}${chk("gl_icu","ICU／重症")}${chk("sx_plan","預計 72 小時內手術")}</div>
+    <div class="note">最高血糖空白時以病人資料的血糖代入。體重、年齡、腎功能沿用病人資料。</div>
+  </div></div>
+  <div class="card"><h2>血糖控制建議</h2><div class="cb" id="r-gluc"></div></div>`;
   P.acls=`<div class="card"><h3>ACLS <span class="sub">成人心跳停止</span></h3><div class="cb">
     <div class="grid">${sel("ac_rh","目前節律",[["","—"],["vf","VF／無脈搏 VT（可電擊）"],["pea","Asystole／PEA（不可電擊）"]])}${fld("wt","體重（kg）")}${sel("dnr","急救意願",[["","未確認"],["full","全力急救"],["dni","DNR（含不插管）"],["comfort","安寧／舒適照護"]])}</div>
     <div class="note">其他分頁輸入的病人資料（K、pH、血糖、出血、PE 線索等）會在 Hs & Ts 標示。</div>
@@ -4213,7 +4433,14 @@ function buildPanels(){
     <div class="sec">可逆誘因</div>
     <div class="chks">${chk("ht_rev","疼痛、尿滯留、焦慮、噁心、戒斷")}${chk("ht_missed","漏吃或停用平常的降壓藥")}</div>
   </div><div class="res" id="r-lab-htn"></div></div>
-  <div class="card"><h2>處置流程</h2><div class="cb" id="r-htn"></div></div>`;
+  <div class="card"><h2>處置流程（急症判斷）</h2><div class="cb" id="r-htn"></div></div>
+  <div class="card" id="htn-med"><h3>降壓藥選擇與調整 <span class="sub">非急症、共病、先停哪些</span></h3><div class="cb">
+    <div class="sec">平常降壓藥</div>
+    <div class="chks">${chk("bp_acei","ACEi")}${chk("bp_arb","ARB")}${chk("bp_ccb","CCB")}${chk("bp_thz","thiazide 類")}${chk("bp_bb","β-blocker")}${chk("bp_mra","MRA（spironolactone）")}${chk("bp_ab","α-blocker")}</div>
+    <div class="sec">共病與情境</div>
+    <div class="chks">${chk("hx_dm","糖尿病")}${chk("hx_ckd","慢性腎病")}${chk("bp_alb","albuminuria ≥30 mg/g")}${chk("hx_hf","心衰竭")}${chk("c_cad","冠心症")}${chk("t_stroke","曾中風／TIA")}${chk("bp_preg","懷孕中")}${chk("bp_gout","痛風")}${chk("bp_aki","AKI、脫水或進食差")}${chk("sx_plan","預計 72 小時內手術")}</div>
+  </div></div>
+  <div class="card"><h2>降壓藥建議</h2><div class="cb" id="r-bpmed"></div></div>`;
   P.nv=`<div id="r-rf-nv"></div>${ptCard("nv",true)}
   <div class="card"><h3>線索</h3><div class="cb">
     <div class="grid">${sel("nv_prophy","已用的預防止吐藥",[["","無／不明"],["5ht3","5-HT3 拮抗劑（ondansetron 等）"],["dex","dexamethasone"],["other","其他"]])}</div>
@@ -4254,6 +4481,8 @@ function renderRefPanel(){
     ["GI bleeding",["acgUgib21","esgeVar22","acgLgib23","acgAc22","haltit","aabb23","gbs","childPugh"]],
     ["低血壓／休克、升壓藥",["ssc26hemo","levoPI","epiPI","vasoPI","pitTW","dopaPI","dobuPI","pheniPI","sfeAdrenal"]],
     ["心搏過速／過慢、ACLS",["ahaAcls25","ahaAlg25","rcuk25","escAf24","accAf23","escSvt19","diltPI","metoPI"]],
+    ["住院血糖",["endoSoc22","endotext26","endotextDU","rabbit2","jbdsSter23","fdaSglt2","metPI","sitaPI","nhi51"]],
+    ["降壓藥選擇",["esc24htn","tw22htn","ahaPeri24","stopOrNot24","acrGout20","amloPI","losPI","hctzPI","spiroPI"]],
     ["腎功能劑量（仿單）",["levPI","mcpPI","mgPI","apapIV","colchPI","zolPI","ddavpPI","tramPI","hmPI","morPI","ketoPI"]],
     ["RSI 插管",["sccmRsi23","rsiTrial25","preoxi24","etoPI","ketPI","propPI","rocPI","sccPI","sugPI"]],
     ["計算工具：類固醇、輸血",["litflSt","eseGiai24","woodcock20","aabbPlt25","chestTx25","vghBlood"]],
@@ -4270,7 +4499,12 @@ function renderRefPanel(){
     <div class="note">建議強度標示：AHA/ACC、AHA/ASA＝Class 1／2a／2b／3 ＋ LOE；ESC＝I／IIa／IIb／III；ERS/ATS、GRADE＝strong／conditional；BTS＝Grade A–D。「依輸入推導」的鑑別排序為本工具的規則，不是指引分類。</div>
   </div></div>
   <div class="card"><h2>Changelog</h2><div class="cb small">
-    <p style="margin:0 0 6px"><b>v0.8（${CHECKED}）</b></p>
+    <p style="margin:0 0 6px"><b>v0.9（${CHECKED}）</b></p>
+    <ul class="tight"><li>「高血糖」頁改名「高血糖／血糖控制」，新增住院血糖控制：目標（非重症 100–180、重症 140–180、圍術期 100–180）、低血糖提示、平常口服藥（metformin、SGLT2i、DPP-4i、GLP-1 RA、SU）入院時停續與腎調整、insulin 起始（家中 insulin 減 20–30%；未用 insulin 依體重 0.4／0.5 U/kg，老人或腎功能不全 ≤0.3；第一型 0.2–0.4），自動拆 basal／餐前／管灌劑量；NPO 與手術、早上類固醇（NPH）、連續或間歇管灌。依據 Endocrine Society 2022、Endotext 2026、RABBIT 2、JBDS 2023、FDA。</li>
+    <li>「高血壓急症」頁改名「高血壓」，新增降壓藥選擇與調整：低血壓、AKI、手術前、高血鉀時先停哪些；ACEi＋ARB、懷孕用 RAAS 抑制劑提示；住院血壓偏高（非急症）不追加 PRN、依目前用藥給下一步（第一線 → 兩類 → 三類 → spironolactone）；依共病選藥（CKD＋albuminuria、糖尿病、中風後、心衰竭、冠心症、懷孕、痛風）；長期目標 AHA/ACC 2025、ESC 2024、台灣 2022 並列。</li>
+    <li>藥物頁新增 basal 與餐前 insulin、metformin、SGLT2i、sitagliptin、gliclazide、amlodipine、losartan、hydrochlorothiazide、spironolactone（含腎功能列）。AHA/ACC 2025 出處補慢性治療建議；IV 藥物表仍未能讀取全文。</li>
+    <li>測試：fuzz.js 新增住院血糖與降壓藥不變式（DKA 中不給皮下起始劑量、低血糖提示、老人／腎差 ≤0.3 U/kg、家中 insulin 沿用、metformin eGFR <30 禁用、SGLT2i 術前停、第一型不停 basal；ACEi＋ARB、懷孕、低血壓、急症互斥）；3,000 組 0 失敗，故意改壞 4 處皆被抓到。</li></ul>
+    <p style="margin:8px 0 6px"><b>v0.8（2026-10-19）</b></p>
     <ul class="tight"><li>腎功能：病人資料新增 Cr 與「透析中」；有年齡、性別、體重、Cr 時自動算 Cockcroft-Gault CrCl（BMI ≥30 用調整體重），摘要列顯示 CrCl 或「透析」。仿單以 CrCl 訂切點者用 CrCl，缺時以 eGFR 代並註明。</li>
     <li>藥物頁新增「腎功能」列（enoxaparin、levetiracetam、metoclopramide、magnesium sulfate、sugammadex、acetaminophen、colchicine、zoledronic acid、desmopressin），依病人腎功能以 ▶ 標出適用劑量；出處為各藥 FDA／EMA 仿單。抗生素見 abx-helper。</li>
     <li>各頁劑量自動調整並標「已依腎功能調整」：PE 的 enoxaparin（CrCl <30 改 q24h、透析改提示 UFH）、癲癇重積 levetiracetam 維持劑量（含透析後追加）、metoclopramide（CrCl <40 約半量）、止痛（acetaminophen、NSAID、morphine、hydromorphone、tramadol、ketorolac）、心包炎 colchicine、RSI sugammadex、低血鈉 desmopressin（CrCl <50 禁忌）、高血鈣 zoledronic acid（Cr ≥4.5）、健保 NOAC 判定改用 CrCl。</li>
@@ -4391,7 +4625,7 @@ function renderAll(){
   renderStrip();
   const sb=scoreBox(), rb=redBanner(), ab=abgRes();
   MODS.forEach(m=>{ setHTML("r-score-"+m.id,sb); setHTML("r-rf-"+m.id,rb); setHTML("r-"+m.id,hypoX(m.id)+o2X(m.id)+m.r()); if(m.lab) setHTML("r-lab-"+m.id,m.lab()); });
-  setHTML("r-rsi",rsiCard()); renderTools();
+  setHTML("r-rsi",rsiCard()); setHTML("r-gluc",renderGluc()); setHTML("r-bpmed",renderBPmed()); renderTools();
   setHTML("r-abg-dysp",ab); setHTML("r-abg-ams",ab); setHTML("r-gcs",gcsBox());
   document.querySelectorAll("#dSeg [data-dc]").forEach(b=>b.classList.toggle("pri",b.dataset.dc===S.dflt));
   setHTML("r-drugs",renderDrugs());

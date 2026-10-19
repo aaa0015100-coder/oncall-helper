@@ -75,6 +75,29 @@ if(!MODSEL.length||MODSEL.includes('tachy')) if(typeof A.nhiDoacCheck().ok==='un
   const got=/rivaroxaban（2\.1\.4\.2）： ✔ 符合/.test(t);
   return exp!==got? `rivaroxaban 判定 ${got} ≠ 預期 ${exp}`:''; }]);
 for(const [lab,fn] of [['score',A.scoreBox],['red',A.redBanner],['abg',A.abgRes],['gcs',A.gcsBox],['calc',A.calcPanel]]) if(!MODSEL.length) outs.push([lab,fn,()=> '']);
+// v0.9 住院血糖、降壓藥（舊版無此函式時略過）
+if(A.renderGluc&&(!MODSEL.length||MODSEL.includes('gluc'))) outs.push(['gluc',A.renderGluc,(t,h,o)=>{
+  const c=A.glCtx(); const rc=A.rv('crcl'), age=num(o.age); const lowD=(age!==null&&age>=70)||!!(rc&&(rc.hd||rc.v<60));
+  if(c.crisis&&/排程起始每日總量/.test(t)) return 'DKA／HHS 中仍給皮下排程起始劑量';
+  if(c.lo!==null&&c.lo<70&&!/低血糖（<70）/.test(t)) return '低血糖未提示';
+  if(!c.crisis&&c.wt!==null&&c.hi!==null&&c.hi>=180&&c.hi<=400&&!c.homeIns&&!o.gl_t1&&lowD&&!/0\.3 U\/kg：老人或腎功能不全/.test(t)) return '老人或腎功能不全未用 ≤0.3 U/kg';
+  if(!c.crisis&&c.wt!==null&&c.hi!==null&&c.hi>=180&&c.hi<=400&&!c.homeIns&&!o.gl_t1&&!lowD&&/0\.3 U\/kg：老人或腎功能不全/.test(t)) return '非老人非腎差卻用 0.3';
+  if(!c.crisis&&num(o.gm_tdd)>0&&!/沿用家中 insulin/.test(t)) return '有家中 insulin 未沿用';
+  if(!c.crisis&&o.gm_met&&c.eg&&(c.eg.hd||c.eg.v<30)&&!/禁用/.test(t)) return 'eGFR <30／透析 metformin 未標禁用';
+  if(!c.crisis&&o.h_sglt2&&o.sx_plan&&!/手術前至少 3 天停/.test(t)) return '預計手術 SGLT2i 未提示停藥';
+  if(!c.crisis&&o.gl_t1&&!/NPO 時仍需 basal/.test(t)) return '第一型未提示不可停 basal';
+  const ns=[...h.matchAll(/class="st-n">(\d+)</g)].map(x=>+x[1]); for(let j=0;j<ns.length;j++) if(ns[j]!==j+1) return '步驟編號不連續';
+  return ''; }]);
+if(A.renderBPmed&&(!MODSEL.length||MODSEL.includes('bpmed'))) outs.push(['bpmed',A.renderBPmed,(t,h,o)=>{
+  const c=A.bpCtx();
+  if(o.bp_acei&&o.bp_arb&&!/ACEi ＋ ARB 同時使用：不建議/.test(t)) return 'ACEi＋ARB 未提示';
+  if(o.bp_preg&&(o.bp_acei||o.bp_arb||o.bp_mra)&&!/懷孕：停/.test(t)) return '懷孕用 RAAS 未提示停';
+  if(o.bp_preg&&/加 <b>(ACEi|ARB|CCB 或 thiazide)/.test(h)) return '懷孕仍建議加 ACEi／ARB';
+  if(c.hypot&&!/暫停降壓藥|如有使用降壓藥：暫停/.test(t)) return '低血壓未提示暫停';
+  if(c.hypot&&/不追加 PRN/.test(t)) return '低血壓仍出現血壓偏高建議';
+  if(c.emerg&&/不追加 PRN/.test(t)) return '急症卻給非急症建議';
+  const ns=[...h.matchAll(/class="st-n">(\d+)</g)].map(x=>+x[1]); for(let j=0;j<ns.length;j++) if(ns[j]!==j+1) return '步驟編號不連續';
+  return ''; }]);
 // 藥物頁：有腎功能資料時，每個有腎功能列的藥恰好一個 ▶；沒有資料時不可出現 ▶
 if(!MODSEL.length||MODSEL.includes('drug')) outs.push(['drugs',()=>{ A.S.dflt='all'; return A.renderDrugs(); },(t,h,o)=>{
   if(!A.renPick) return '';
