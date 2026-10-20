@@ -448,7 +448,7 @@ const S0 = {
   pe_when:"", pe_bleed:"", pe_neur:false, pe_cns:false, pe_warf:false, pe_apix:false, pe_riva:false, pe_edox:false, pe_dabi:false, pe_lmwh:"", pe_ufh:"", pe_asa:false, pe_clop:false, pe_tica:false, pe_pras:false, pe_cilo:false,
   pe_af:false, pe_strk3:false, pe_rheum:false, pe_mhv:false, pe_mhvpos:"", pe_mhvold:false, pe_mhvrf:false, pe_periTE:false, pe_vte:false, pe_vtet:"", pe_thromS:false, pe_thromN:false, pe_vterec:false, pe_pci:"", pe_pciacs:false,
   // 藥物頁
-  dflt:"all", _gcsLast:null
+  dflt:"all", dsub:"", dq:"", _gcsLast:null
 };
 let S = JSON.parse(JSON.stringify(S0));
 
@@ -4320,10 +4320,10 @@ const DRUGS = [
   caut:"第一個 24 小時上升 ≤10 mmol/L，之後每 24 小時 ≤8；頻繁追蹤 Na。",guide:src("eurHypoNa"),nhi:nhiLic()},
  {id:"insulin",cls:"metab",name:"Regular insulin（IV）",brand:"",type:"胰島素",
   dose:"DKA：fixed-rate 0.1 U/kg/h，血糖 <250 加葡萄糖並降為 0.05 U/kg/h，持續至酮酸緩解；HHS：0.05 U/kg/h；K <3.5 先補鉀再開。高血鉀：10 U ＋ 葡萄糖 25 g IV 15 分鐘；治療前血糖 <126 mg/dL 者之後 10% 葡萄糖 50 mL/h × 5 小時。",adj:"腎衰竭時低血糖風險較高。",caut:"低血鉀時先補鉀；低血糖（高血鉀治療後 6 小時內反覆測血糖）。",guide:src("dka24")+src("dkaCcjm")+src("ukkaK23"),nhi:nhiLic()},
- {id:"lactu",cls:"metab",name:"Lactulose",brand:"Duphalac",type:"不吸收雙醣",
+ {id:"lactu",cls:"gi",name:"Lactulose",brand:"Duphalac",type:"不吸收雙醣",
   dose:"肝性腦病變：25 mL q1–2h 直到 ≥2 次軟便，之後調整每日 2–3 次；無法口服可鼻胃管或灌腸。",adj:"—",caut:"過量腹瀉、脫水、高血鈉（反而誘發 HE）。",
   guide:src("easlHe")+src("aasldHe"),nhi:nhiLic()},
- {id:"rifax",cls:"metab",name:"Rifaximin",brand:"台灣品項請確認",type:"不吸收抗生素",
+ {id:"rifax",cls:"gi",name:"Rifaximin",brand:"台灣品項請確認",type:"不吸收抗生素",
   dose:"550 mg PO BID（合併 lactulose，預防 overt HE 再發）。",adj:"—",caut:"C. difficile。",guide:src("easlHe")+src("aasldHe"),nhi:nhiQ("給付規定查無公開條文，請確認")},
  {id:"pcc",cls:"anti",name:"4F-PCC",brand:"台灣品項請確認",type:"凝血因子濃縮劑",
   dose:"warfarin 相關 ICH：依 INR 與體重給予（合併 vitamin K IV）；FXa 抑制劑無 andexanet 時（2b）；依院內流程。",adj:"—",caut:"血栓事件。",
@@ -4471,9 +4471,32 @@ function renRow(ren){
   const cur=pk? `<div>${renTag(pk.x)}</div>` : `<div class="small muted">填 eGFR，或年齡、性別、體重、Cr 以自動判定</div>`;
   return cur+ul(L)+(ren.note?`<div class="small muted">${ren.note}</div>`:"")+(ren.r||[]).map(k=>src(k)).join("");
 }
+/* v1.0：藥物頁子分類（id 清單）與頁內藥名篩選 */
+const DSUB={
+  resp:[["bronch","支氣管擴張",["salb","ipra","mg"]],["ster","類固醇",["pred"]],["allergy","過敏",["epi"]],["rsi","插管 RSI",["etom","keta","prop","roc","sux","suga"]]],
+  cardio:[["press","升壓／強心",["ne","vaso","epiinf","phen","dobu","dopa"]],["arr","心律不整・心搏過慢",["adeno","dilt","meto","amio","lido","proc","atro"]],["ivbp","靜脈降壓",["nicar","urap","labet","ntg"]],["pobp","口服降壓",["rami","valsa","olmes","losa","amlo","nifer","bisop","carve","doxaz"]],["diur","利尿劑",["furo","hctz","indap","spiro"]],["ac","抗凝・抗血小板",["ufh","enox","asa"]],["oth","其他",["colch"]]],
+  neuro:[["seiz","癲癇",["lzp","mdz","dzp","lev","vpa","pht","pb"]],["stroke","中風血栓溶解",["alte","tnk"]],["deli","譫妄",["hal"]],["sleep","失眠",["zolp","suvo","zopi","esta","traz"]],["pain","止痛",["apap"]]],
+  metab:[["glu","血糖",["basal","prand","insulin","metf","sglt2","sita","glic","dex","glucagon"]],["lyte","電解質",["hts","kcl","phos","cagluc","szc","zol","ddavp"]],["endo","內分泌・維生素",["hydro","thia"]]],
+  gi:[["emesis","止吐",["ond","mcp"]],["ugib","上消化道出血",["ppi","octr","terli","soma","eryth","ctx","alb"]],["he","肝性腦病變",["lactu","rifax"]],["cdi","C. difficile",["vancpo","fidax"]]],
+  anti:[["rev","抗凝逆轉",["pcc","ida","andex","vitk","prot"]],["tox","解毒",["nalox"]]]
+};
+function drugList(){
+  const q=String(S.dq===null||S.dq===undefined?"":S.dq).trim().toLowerCase();
+  if(q) return {q,list:DRUGS.filter(d=>(d.name+" "+(d.brand||"")+" "+(d.type||"")).toLowerCase().includes(q))};
+  let list=DRUGS.filter(d=>S.dflt==="all"||d.cls===S.dflt);
+  const subs=DSUB[S.dflt], sb=subs&&subs.find(x=>x[0]===S.dsub);
+  if(sb) list=sb[2].map(id=>list.find(d=>d.id===id)).filter(Boolean);
+  return {q,list};
+}
+function renderDrugSub(){
+  const subs=DSUB[S.dflt]; if(!subs||String(S.dq||"").trim()) return "";
+  const n=S.dflt==="all"?DRUGS.length:DRUGS.filter(d=>d.cls===S.dflt).length;
+  return `<div class="seg" style="margin-bottom:10px">${[["","全部"+DCLS[S.dflt],null]].concat(subs).map(([k,l,ids])=>`<button type="button" class="btn ${S.dsub===k?"pri":""}" data-ds="${k}">${l} <span class="small">${ids?ids.length:n}</span></button>`).join("")}</div>`;
+}
 function renderDrugs(){
-  const list = DRUGS.filter(d=>S.dflt==="all"||d.cls===S.dflt);
-  return list.map(d=>`<div class="card drug"><h3>${esc(d.name)} ${d.brand?`<span class="sub">（${esc(d.brand)}）</span>`:""}${d.upd?upd(d.upd):""}</h3><div class="cb">
+  const {q,list}=drugList();
+  const head=q?`<div class="note" style="margin:0 0 10px">篩選「${esc(q)}」：${list.length} 筆（所有分類）${list.length?"":"。試試學名、商品名或藥物類別。"}</div>`:renderDrugSub();
+  return head+list.map(d=>`<div class="card drug"><h3>${esc(d.name)} ${d.brand?`<span class="sub">（${esc(d.brand)}）</span>`:""}${d.upd?upd(d.upd):""}</h3><div class="cb">
     <div class="row"><div class="k">類別</div><div>${d.type}</div></div>
     <div class="row"><div class="k">劑量</div><div>${d.dose}</div></div>
     <div class="row"><div class="k">調整</div><div>${d.adj}</div></div>
@@ -5116,7 +5139,7 @@ function buildPanels(){
     <div class="sec">冠狀動脈支架</div><div class="grid">${sel("pe_pci","距 PCI",[["","無支架"],["lt1","<1 個月"],["1to3","1–3 個月"],["3to6","3–6 個月"],["6to12","6–12 個月"],["gt12",">12 個月"]])}</div><div class="chks">${chk("pe_pciacs","因 ACS 置放")}</div>
   </div></div>
   <div class="card"><h2>處置流程</h2><div class="cb" id="r-peri"></div></div>`;
-  P.drug=`<div class="filters seg" id="dSeg" style="margin-bottom:10px">${Object.entries(DCLS).map(([k,v])=>`<button type="button" class="btn" data-dc="${k}">${v}</button>`).join("")}</div><div class="note" style="margin-bottom:10px">腎功能列依病人資料的 CrCl（Cockcroft-Gault；需年齡、性別、體重、Cr）或 eGFR 自動標出適用劑量（▶）。抗生素劑量與腎調整見 <a href="https://aaa0015100-coder.github.io/abx-helper/" target="_blank" rel="noopener">abx-helper</a>。</div><div id="r-drugs"></div>`;
+  P.drug=`<div class="filters seg" id="dSeg" style="margin-bottom:10px">${Object.entries(DCLS).map(([k,v])=>`<button type="button" class="btn" data-dc="${k}">${v}</button>`).join("")}</div><div class="grid" style="margin-bottom:10px"><label class="f wide"><span>藥名篩選（學名、商品名或類別，所有分類）</span><input data-f="dq" type="search" autocomplete="off" placeholder="例：amio、Lasix、PPI"></label></div><div class="note" style="margin-bottom:10px">腎功能列依病人資料的 CrCl（Cockcroft-Gault；需年齡、性別、體重、Cr）或 eGFR 自動標出適用劑量（▶）。抗生素劑量與腎調整見 <a href="https://aaa0015100-coder.github.io/abx-helper/" target="_blank" rel="noopener">abx-helper</a>。</div><div id="r-drugs"></div>`;
   P.ref=renderRefPanel();
   return P;
 }
@@ -5161,6 +5184,7 @@ function renderRefPanel(){
     <li>新頁「過敏反應」（急救群組）：WAO 2020 診斷條件、依體重 epinephrine IM 劑量（可複製）、refractory 輸注速率（RCUK 2021）、β-blocker 時 glucagon、抗組織胺與類固醇定位、依劑數的觀察時間（NICE 2026）、tryptase 抽血時機與 20%＋2 判讀、出院自動注射器（台灣許可證、健保待確認）。喘、低血壓頁改為連到本頁。</li>
     <li>新頁「暈厥」（心血管群組）：住院病人暈倒情境；ESC 2018 高／低風險特徵分層、姿勢性血壓判讀、住院常見原因（出血、PE、姿勢性、藥物、反射性）與處置；計算工具與本頁加 Canadian Syncope Risk Score（標明急診驗證）。</li>
     <li>新頁「抗血栓藥圍術期」（圍術期群組）：12 種藥依手術出血風險、CrCl、neuraxial 給術前停藥天數與術後恢復時間（CHEST 2022、PAUSE、EHRA 2021、ASRA 2025、ESC 2022 並列），時程摘要與醫囑可複製；warfarin 依 CHEST 2022 栓塞風險判斷 bridging，與 ESC 2022、AHA/ACC 2024 差異並列；冠狀動脈支架時機；急迫手術導向逆轉。</li>
+    <li>藥物頁：選大類後多一排子分類（例：心血管 → 升壓／強心、心律不整・心搏過慢、靜脈降壓、口服降壓、利尿劑、抗凝・抗血小板），按鈕顯示藥數；新增頁內藥名篩選（學名、商品名或類別，跨所有分類）。lactulose、rifaximin 移到「腸胃・肝」。</li>
     <li>效能：輸入時只重繪目前分頁（每次輸入約 37 ms → 約 2 ms）；切換分頁時重繪該頁。</li>
     <li>測試（v1.0 完整）：fuzz 3,000 組隨機病人 × 48 個輸出區（144,000 次）0 失敗，新增過敏反應、暈厥、抗血栓藥不變式（epinephrine 劑量、WAO 判定、refractory 條件、觀察時數、ESC 高風險、OH 判定、DOAC 停藥天數、dabigatran 依 CrCl、bridging 例外、neuraxial ASRA 時數、急迫手術不列術前天數），5 種刻意改錯均被抓到；Playwright 320／390／768／1280 px 深淺色、所有分頁所有選項、跨頁同步、收合、跳到建議、搜尋、清除後復原、主題切換，無橫向溢出、無 console 錯誤、零網路請求。</li></li></ul>
     <p style="margin:8px 0 6px"><b>v0.9（2026-10-20）</b></p>
@@ -5485,7 +5509,8 @@ function init(){
     const sb=t.closest("[data-sbar]"); if(sb){ showSbar(sb.dataset.sbar); return; }
     if(t.id==="sbarCopy"){ copySbar(); return; }
     if(t.id==="menuBtn"){ showMenu(); return; }
-    const dc=t.closest("[data-dc]"); if(dc){ S.dflt=dc.dataset.dc; document.querySelectorAll("#dSeg [data-dc]").forEach(b=>b.classList.toggle("pri",b.dataset.dc===S.dflt)); setHTML("r-drugs",renderDrugs()); markGloss(document.getElementById("p-drug")); return; }
+    const ds=t.closest("[data-ds]"); if(ds){ S.dsub=ds.dataset.ds; setHTML("r-drugs",renderDrugs()); markGloss(document.getElementById("p-drug")); return; }
+    const dc=t.closest("[data-dc]"); if(dc){ S.dflt=dc.dataset.dc; S.dsub=""; document.querySelectorAll("#dSeg [data-dc]").forEach(b=>b.classList.toggle("pri",b.dataset.dc===S.dflt)); setHTML("r-drugs",renderDrugs()); markGloss(document.getElementById("p-drug")); return; }
     const r=t.closest("[data-ref]"); if(r){ const x=REF[r.dataset.ref]; if(x) showOv(`<h4>${esc(x.t)}</h4><p>${esc(x.f)}</p>${x.u?`<p><a href="${x.u}" target="_blank" rel="noopener">開啟原始出處</a></p>`:""}`); return; }
     const u=t.closest("[data-upd]"); if(u){ showOv(`<h4><span class="upd">更新</span> 變更內容</h4><p>${esc(u.dataset.upd)}</p>`); return; }
     const gl=t.closest("abbr.gl"); if(gl){ showOv(`<h4>${esc(gl.dataset.gl||gl.textContent)}</h4><p>${esc(GLOSS[gl.dataset.gl||gl.textContent]||"")}</p>`); return; }

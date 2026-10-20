@@ -150,7 +150,7 @@ if(A.renderBPmed&&(!MODSEL.length||MODSEL.includes('bpmed'))) outs.push(['bpmed'
   const ns=[...h.matchAll(/class="st-n">(\d+)</g)].map(x=>+x[1]); for(let j=0;j<ns.length;j++) if(ns[j]!==j+1) return '步驟編號不連續';
   return ''; }]);
 // 藥物頁：有腎功能資料時，每個有腎功能列的藥恰好一個 ▶；沒有資料時不可出現 ▶
-if(!MODSEL.length||MODSEL.includes('drug')) outs.push(['drugs',()=>{ A.S.dflt='all'; return A.renderDrugs(); },(t,h,o)=>{
+if(!MODSEL.length||MODSEL.includes('drug')) outs.push(['drugs',()=>{ A.S.dflt='all'; A.S.dsub=''; A.S.dq=''; return A.renderDrugs(); },(t,h,o)=>{
   if(!A.renPick) return '';
   const cards=h.split('<div class="card drug">').slice(1);
   for(const c of cards){ if(!/<div class="k">腎功能<\/div>/.test(c)) continue;
