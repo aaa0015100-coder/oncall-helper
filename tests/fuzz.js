@@ -160,7 +160,8 @@ if(A.renderBPmed&&(!MODSEL.length||MODSEL.includes('bpmed'))) outs.push(['bpmed'
 if(!MODSEL.length||MODSEL.includes('drug')) outs.push(['drugs',()=>{ A.S.dflt='all'; A.S.dsub=''; A.S.dq=''; return A.renderDrugs(); },(t,h,o)=>{
   if(!A.renPick) return '';
   const cards=h.split('<div class="card drug">').slice(1);
-  for(const c of cards){ if(!/<div class="k">腎功能<\/div>/.test(c)) continue;
+  for(const c of cards){ if(!/<div class="k">腎功能(區間)?<\/div>/.test(c)) continue;
+    if(A.rv('crcl')&&A.rv('scr')&&/填 eGFR，或年齡/.test(c)) return ((c.match(/<h3>([^<]*)/)||[])[1])+' 有腎功能仍顯示未填';
     const n=(c.match(/▶/g)||[]).length, name=(c.match(/<h3>([^<]*)/)||[])[1];
     const known=!!A.rv('crcl')||!!A.rv('scr');
     if(n>1) return name+' 多個 ▶';

@@ -4225,13 +4225,13 @@ const DRUGS = [
   dose:"類固醇高血糖（JBDS）：40 mg 早上，每日調整至最多 240 mg。",adj:"腎功能：請依仿單確認。",
   caut:"低血糖（進食差、NPO、腎功能差）；Endotext 不建議住院新開始 SU。",guide:src("jbdsSter23")+src("endotext26"),nhi:nhiLic()},
  {id:"rami",cls:"cardio",name:"Ramipril（ACEi）",brand:"Tritace",type:"ACEi",ren:{b:"crcl",t:[[null,40,"1.25 mg 每日一次起始，每日上限 5 mg"],[40,null,"不需調整（2.5 mg 起始）"]],hd:"1.25 mg 起始（CrCl <40 規則），請確認",r:["ramiPI"]},
-  dose:"高血壓 2.5 mg 每日一次起始，維持 2.5–20 mg/日。",adj:"疑容積不足或腎動脈狹窄 1.25 mg 起始；腎功能見腎功能列。",caut:"懷孕禁用；不與 ARB 合併；高血鉀、血管性水腫。",guide:src("ramiPI")+src("accHtn25"),nhi:nhiLic()},
+  dose:"高血壓 2.5 mg 每日一次起始，維持 2.5–20 mg/日。",adj:"疑容積不足或腎動脈狹窄 1.25 mg 起始；腎功能見「此病人」與「腎功能區間」。",caut:"懷孕禁用；不與 ARB 合併；高血鉀、血管性水腫。",guide:src("ramiPI")+src("accHtn25"),nhi:nhiLic()},
  {id:"valsa",cls:"cardio",name:"Valsartan（ARB）",brand:"Diovan",type:"ARB",dose:"高血壓 80 mg 每日一次起始，範圍 80–320 mg。",adj:"容積不足先矯正。",caut:"懷孕禁用；不與 ACEi 合併；追蹤 K、Cr。",guide:src("valsPI")+src("accHtn25"),nhi:nhiLic()},
  {id:"olmes",cls:"cardio",name:"Olmesartan（ARB）",brand:"Olmetec",type:"ARB",dose:"高血壓 20 mg 每日一次起始，2 週後可增至 40 mg（上限）。",adj:"可能容積不足考慮較低起始。",caut:"懷孕禁用；不與 ACEi 合併。",guide:src("olmePI")+src("accHtn25"),nhi:nhiLic()},
  {id:"nifer",cls:"cardio",name:"Nifedipine 長效錠",brand:"Adalat OROS",type:"DHP CCB",dose:"高血壓 30 或 60 mg 每日一次起始，每 7–14 天調整，>120 mg 不建議；整顆吞。",adj:"—",caut:"水腫、頭痛；懷孕可用（AHA/ACC 1, A）。",guide:src("nifePI")+src("accHtn25"),nhi:nhiLic()},
  {id:"indap",cls:"cardio",name:"Indapamide",brand:"Natrilix",type:"Thiazide-like 利尿劑",dose:"高血壓 1.25 mg 每日一次（早上），4 週後可 2.5、再 5 mg。",adj:"合併初期其他降壓藥減半。",caut:"低血鉀、低血鈉、高尿酸。",guide:src("indaPI")+src("accHtn25"),nhi:nhiLic()},
  {id:"bisop",cls:"cardio",name:"Bisoprolol",brand:"Concor",type:"β1-selective blocker",ren:{b:"crcl",t:[[null,40,"2.5 mg 起始，謹慎調整"],[40,null,"5 mg 起始"]],hd:"2.5 mg 起始（CrCl <40 規則），請確認",r:["bisoPI"]},
-  dose:"高血壓 5 mg 每日一次起始（部分 2.5 mg），可至 10、20 mg。",adj:"肝炎、肝硬化 2.5 mg 起始；腎功能見腎功能列。",caut:"支氣管痙攣疾病一般不用；心搏過慢。",guide:src("bisoPI")+src("esc24htn"),nhi:nhiLic()},
+  dose:"高血壓 5 mg 每日一次起始（部分 2.5 mg），可至 10、20 mg。",adj:"肝炎、肝硬化 2.5 mg 起始；腎功能見「此病人」與「腎功能區間」。",caut:"支氣管痙攣疾病一般不用；心搏過慢。",guide:src("bisoPI")+src("esc24htn"),nhi:nhiLic()},
  {id:"carve",cls:"cardio",name:"Carvedilol",brand:"Dilatrend",type:"α／β blocker",dose:"高血壓 6.25 mg BID 起始，隨餐，7–14 天後 12.5 mg BID，再至 25 mg BID（每日 ≤50 mg）。",adj:"—",caut:"姿勢性低血壓、心搏過慢；氣喘避免。",guide:src("carvPI"),nhi:nhiLic()},
  {id:"doxaz",cls:"cardio",name:"Doxazosin",brand:"Doxaben",type:"α1-blocker",dose:"高血壓 1 mg 每日一次起始，上限 16 mg。",adj:"—",caut:"首劑與加量後 6 小時內姿勢性低血壓、暈厥。",guide:src("doxaPI"),nhi:nhiLic()},
  {id:"amlo",cls:"cardio",name:"Amlodipine",brand:"Norvasc",type:"DHP CCB",
@@ -4263,7 +4263,7 @@ const DRUGS = [
   guide:src("rcukAna")+src("asciaAna")+src("ahaAcls25"),nhi:nhiLic()},
  {id:"furo",cls:"cardio",name:"Furosemide",brand:"Lasix",type:"Loop diuretic",
   dose:"急性心衰竭：未使用利尿劑者 20–40 mg IV；長期使用者口服每日劑量的 1–2 倍 IV。2 小時 urine Na <50–70 或 6 小時尿量 <100–150 mL/h → 加倍（上限約 400–600 mg/日）。",
-  adj:"腎功能差需較高劑量。",caut:"低血鉀、低血鎂、腎前性 AKI、低血壓。",
+  adj:"—",caut:"低血鉀、低血鎂、腎前性 AKI、低血壓。",
   guide:src("escHf")+src("hfaDiur"),nhi:nhiLic()},
  {id:"ntg",cls:"cardio",name:"Nitroglycerin（IV）",brand:"",type:"血管擴張劑",
   dose:"10–20 µg/min 起，可調至 200 µg/min（SBP >110 mmHg）。",adj:"—",
@@ -4343,7 +4343,7 @@ const DRUGS = [
   dose:"20 mg IV（2 分鐘以上），每 10 分鐘 40–80 mg，總量 ≤300 mg；或 2 mg/min 輸注依血壓調整。主動脈剝離：SBP <120、HR 60–80（ACC/AHA 2022）。",adj:"肝病謹慎。",
   caut:"心搏過緩、房室傳導阻滯、氣喘、急性心衰竭。",guide:src("accAorta22")+src("labetPI"),nhi:nhiLic()},
  {id:"colch",ren:{b:"crcl",t:[[null,30,"起始 0.3 mg/日，加量需密切監測（仿單 FMF；台灣錠劑 0.5 mg，依院內品項）"],[30,80,"密切監測副作用，可能需減量"],[80,null,"不需調整"]],hd:"起始 0.3 mg/日（仿單 FMF）",note:"心包炎劑量依 ESC；腎調整引自仿單（FMF、痛風）",r:["colchPI"]},cls:"cardio",name:"Colchicine",brand:"",type:"抗發炎",
-  dose:"急性心包炎（合併 aspirin 或 NSAID）：<70 kg 0.5 mg QD、≥70 kg 0.5 mg BID，3–6 個月。",adj:"老人注意；腎功能見腎功能列。",
+  dose:"急性心包炎（合併 aspirin 或 NSAID）：<70 kg 0.5 mg QD、≥70 kg 0.5 mg BID，3–6 個月。",adj:"老人注意；腎功能見「此病人」與「腎功能區間」。",
   caut:"腹瀉；強效 CYP3A4／P-gp 抑制劑（clarithromycin 等）交互作用致中毒。",guide:src("escPeri25")+"（劑量來自二手整理）",nhi:nhiQ("心包炎非仿單適應症，給付請確認")},
  {id:"cagluc",cls:"metab",name:"Calcium gluconate 10%",brand:"",type:"鈣劑",
   dose:"高血鉀合併 ECG 變化：30 mL IV 10 分鐘以上，ECG 未改善可重複（或 10% CaCl₂ 10 mL）。有症狀低血鈣：10–20 mL 加入 50–100 mL 5% 葡萄糖 IV 10 分鐘，之後 100 mL 加入 1 L，50–100 mL/h。",adj:"—",
@@ -4415,7 +4415,7 @@ const DRUGS = [
   dose:"口服：輕度 24 mmol BID–TID、中度 24–36 mmol TID–QID；IV：20–40 mmol/L（不含葡萄糖），周邊 ≤40 mmol/L、通常 ≤10 mmol/h，>20 mmol/h 需中心靜脈與心電監測；每日上限 2–3 mmol/kg。",
   adj:"腎功能差減量。",caut:"IV 濃縮 KCl 嚴禁直接推注；同時補鎂。",guide:src("spsK"),nhi:nhiLic()},
  {id:"zol",ren:{b:"scr",t:[[null,4.5,"高血鈣：不需調整；每次給藥前驗 Cr"],[4.5,null,"Cr ≥4.5：臨床試驗排除，評估風險效益後才使用"]],hd:"Cr 通常 ≥4.5：評估風險效益",r:["zolPI"]},cls:"metab",name:"Zoledronic acid",brand:"Zometa",type:"Bisphosphonate",
-  dose:"高血鈣（校正鈣 ≥12 mg/dL 合併補液）：4 mg IV 15 分鐘；最低點約 2–4 天。",adj:"輸注 ≥15 分鐘；腎功能見腎功能列。",caut:"低血鈣、急性期反應、顎骨壞死（長期）。",
+  dose:"高血鈣（校正鈣 ≥12 mg/dL 合併補液）：4 mg IV 15 分鐘；最低點約 2–4 天。",adj:"輸注 ≥15 分鐘；腎功能見「此病人」與「腎功能區間」。",caut:"低血鈣、急性期反應、顎骨壞死（長期）。",
   guide:src("sfeHyperCa"),nhi:nhiQ("高血鈣用途之給付條件請確認")},
  {id:"phos",cls:"metab",name:"Phosphate（IV）",brand:"台灣品項請確認",type:"磷補充",
   dose:"<0.3 mmol/L：40–60 kg 25 mmol、61–80 kg 35 mmol、81–120 kg 50 mmol；0.3–0.6（無法口服）：10／15／20 mmol；輸注 12–24 小時。",adj:"腎功能差減量或不適用。",
@@ -4432,7 +4432,7 @@ const DRUGS = [
   dose:"10 mg IV（≥3 分鐘）或口服，每日最多 3 次、≤5 天，24 小時上限 0.5 mg/kg；偏頭痛 10 mg IV。",adj:"見腎功能列。",
   caut:"腸阻塞禁用；Parkinson 病避免；錐體外症狀、遲發性運動異常（老人）。",guide:src("emaMcp13")+src("ahs16")+src("beers23"),nhi:nhiLic()},
  {id:"apap",ren:{b:"crcl",t:[[null,30,"FDA：延長給藥間隔並減少每日總量；NHS：間隔至少 6 小時",true],[30,null,"不需調整"]],hd:"延長給藥間隔並減少每日總量",r:["apapIV","nhsPara"]},cls:"neuro",name:"Acetaminophen",brand:"Panadol、Scanol",type:"解熱止痛",
-  dose:"≥50 kg：1 g q6h（上限 4 g/日）；<50 kg：15 mg/kg（上限 60 mg/kg 且 ≤3 g）；肝病、酒精、營養不良：1 g TID（上限 3 g）。",adj:"肝病見劑量；腎功能見腎功能列。",
+  dose:"≥50 kg：1 g q6h（上限 4 g/日）；<50 kg：15 mg/kg（上限 60 mg/kg 且 ≤3 g）；肝病、酒精、營養不良：1 g TID（上限 3 g）。",adj:"肝病見劑量；腎功能見「此病人」與「腎功能區間」。",
   caut:"重複含 acetaminophen 之複方；嚴重肝衰竭禁 IV。",guide:src("nhsPara")+src("asaAps16"),nhi:nhiLic()},
  {id:"zolp",cls:"neuro",name:"Zolpidem",brand:"Stilnox",type:"Z-drug 安眠藥",
   dose:"女性 5 mg、男性 5–10 mg（上限 10 mg）睡前，需剩 7–8 小時；老人、虛弱、輕中度肝病 5 mg。",adj:"嚴重肝功能不全避免。",
@@ -4460,17 +4460,124 @@ const DRUGS = [
  {id:"suga",ren:{b:"crcl",t:[[null,30,"不建議"],[30,80,"劑量同一般；常規逆轉後再用 rocuronium 需間隔 24 小時"],[80,null,"不需調整"]],hd:"不建議（含透析）",r:["sugPI"]},cls:"resp",name:"Sugammadex",brand:"Bridion",type:"肌肉鬆弛逆轉",
   dose:"立即逆轉（rocuronium 1.2 mg/kg 後 3 分鐘）16 mg/kg；常規 2 或 4 mg/kg。",adj:"見腎功能列。",caut:"過敏、心搏過慢；16 mg/kg 後 24 小時內再用 rocuronium 效果差。",guide:src("sugPI"),nhi:nhiQ("給付條件請確認")}
 ];
+/* ================= v1.0 藥物腎功能（標準用法／此病人／各區間） ================= */
+Object.assign(REF,{
+  ddRenal:{t:"FDA 仿單腎功能段（Drugs.com）",f:"各藥 FDA 仿單 Renal Dose Adjustments／Dialysis 段落，經 Drugs.com 成人劑量頁（drugs.com/dosage/<藥名>）逐藥核對（2026-10-21）。「仿單未訂」＝該頁寫 Data not available；未能讀取者標「未查到」。",u:"https://www.drugs.com/dosage/"},
+  glicSmPC:{t:"Gliclazide SmPC",f:"Diamicron 30 mg MR SmPC（UK eMC）：輕中度腎功能不全可用相同劑量並密切監測；重度腎功能或肝功能不全禁用，改用 insulin。（SmPC 未以 CrCl 定義重度）",u:"https://www.medicines.org.uk/emc/product/1321/smpc"}
+});
+// all：所有腎功能同一建議；t：分區（[下限, 上限, 文字, 上限含等號]）；b：依據（crcl／egfr／scr）
+const REN={
+  basal:{b:"crcl",t:[[null,60,"仿單：低血糖風險增加，需更頻繁監測、可能需減量；本工具住院排程以 ≤0.3 U/kg/日計"],[60,null,"不需調整"]],hd:"同腎功能不全：監測血糖、可能需減量",r:["ddRenal","endotext26"]},
+  prand:{b:"crcl",t:[[null,60,"仿單：需更頻繁監測、可能需調整；本工具住院排程以 ≤0.3 U/kg/日計"],[60,null,"不需調整"]],hd:"同腎功能不全：監測血糖、可能需減量",r:["ddRenal","endotext26"]},
+  insulin:{all:"仿單：腎功能不全低血糖風險增加，需更頻繁監測、可能需減量（無固定比例）",r:["ddRenal"]},
+  sglt2:{b:"egfr",t:[[45,null,"不需調整"],[30,45,"dapagliflozin：降糖不建議（其他適應症可用）；empagliflozin：可用，降糖效果下降"],[25,30,"降糖：兩者皆不建議；dapagliflozin 心衰竭／CKD 適應症可開始"],[null,25,"降糖不建議；dapagliflozin 其他適應症不建議開始，已用 10 mg 可續用"]],hd:"dapagliflozin：禁忌；empagliflozin：仿單未訂",note:"empagliflozin 心衰竭、CKD 適應症的 eGFR 門檻未核對（請確認）",r:["ddRenal"]},
+  glic:{b:"crcl",t:[[null,30,"重度腎功能不全：禁用，改用 insulin（SmPC 未定義重度，本工具以 CrCl <30 判定）"],[30,null,"同劑量，密切監測"]],hd:"禁用，改用 insulin",r:["glicSmPC"]},
+  valsa:{b:"crcl",t:[[null,30,"仿單無具體劑量，小心使用（兒童 <30 不建議）"],[30,null,"不需調整"]],hd:"不被透析移除；小心使用",r:["ddRenal"]},
+  olmes:{all:"不需調整（成人）",r:["ddRenal"]},
+  nifer:{all:"仿單未訂",r:["ddRenal"]},
+  indap:{all:"嚴重腎功能不全小心使用（可致 azotemia）",r:["ddRenal"]},
+  carve:{all:"不需減量；加量時多監測腎功能，惡化時減量或停用",hd:"高蛋白結合，透析不明顯移除",r:["ddRenal"]},
+  doxaz:{all:"仿單未訂",r:["ddRenal"]},
+  amlo:{all:"仿單未訂（臨床常不需調整）",hd:"不需調整",r:["ddRenal"]},
+  losa:{all:"不需調整（腎功能明顯惡化時考慮停用）",hd:"不需調整",r:["ddRenal"]},
+  hctz:{b:"crcl",t:[[null,30,"不建議（CrCl <30 thiazide 無效）"],[30,null,"不需調整"]],hd:"不建議",r:["ddRenal"]},
+  salb:{all:"仿單未訂",r:["ddRenal"]},
+  ipra:{all:"小心使用（仿單）",r:["ddRenal"]},
+  pred:{all:"仿單腎功能段未能讀取（請確認）；臨床多不需調整",r:["ddRenal"]},
+  epi:{all:"仿單未訂（依反應滴定）",r:["ddRenal"]},
+  epiinf:{all:"仿單未訂（依 MAP 滴定）",r:["ddRenal"]},
+  ne:{all:"仿單未訂（依 MAP 滴定）",r:["ddRenal"]},
+  vaso:{all:"仿單未訂",r:["ddRenal"]},
+  dobu:{all:"仿單未訂",r:["ddRenal"]},
+  dopa:{all:"仿單未訂",r:["ddRenal"]},
+  phen:{all:"仿單未訂",hd:"血液透析病人反應可能增加（小劑量起）",r:["ddRenal"]},
+  furo:{all:"仿單無腎功能減量；嚴重進行性腎病出現 azotemia 加重、寡尿時停用（仿單）。腎功能差時利尿反應較差，依 2 小時尿 Na 與 6 小時尿量逐步加量（HFA 2019）",r:["ddRenal","hfaDiur"]},
+  ntg:{all:"不需調整",r:["ddRenal"]},
+  ufh:{all:"輕中度：仿單未訂；重度：小心使用。依 aPTT／anti-Xa 調整",hd:"依 aPTT／anti-Xa；透析迴路抗凝依透析室規範",r:["ddRenal"]},
+  alte:{all:"仿單未訂",r:["ddRenal"]},
+  tnk:{all:"仿單未訂",r:["ddRenal"]},
+  nalox:{all:"小心使用（仿單）",r:["ddRenal"]},
+  lzp:{all:"注射劑短時間內多次給藥：小心；單次或間隔給藥：不需調整（仿單）",r:["ddRenal"]},
+  mdz:{all:"不需調整（仿單）",r:["ddRenal"]},
+  dzp:{all:"注射劑小心使用（仿單）",r:["ddRenal"]},
+  vpa:{all:"不需調整；游離分率升高，總濃度可能低估（仿單）",hd:"血液透析使濃度約降 20%",r:["ddRenal"]},
+  pht:{all:"小心使用；監測游離 phenytoin 濃度（腎衰竭、低白蛋白時總濃度會誤導）",r:["ddRenal"]},
+  pb:{all:"可能需減量，仿單無具體建議；小心使用",r:["ddRenal"]},
+  hal:{all:"仿單未訂",r:["ddRenal"]},
+  thia:{all:"仿單未訂",r:["ddRenal"]},
+  dex:{all:"仿單腎功能段未能讀取（請確認）",r:["ddRenal"]},
+  glucagon:{all:"不需調整",r:["ddRenal"]},
+  hts:{all:"仿單未查到；腎功能差時 Na 上升可能較快，加密監測（本工具提醒）",r:["ddRenal"]},
+  lactu:{all:"仿單未訂",hd:"可能被透析移除（仿單未訂）",r:["ddRenal"]},
+  rifax:{all:"仿單未訂",r:["ddRenal"]},
+  pcc:{all:"仿單未載腎功能調整（依 INR、體重）",r:["ddRenal"]},
+  ida:{all:"不需調整",r:["ddRenal"]},
+  andex:{all:"仿單腎功能資料未查到（請確認）",r:["ddRenal"]},
+  vitk:{all:"仿單未訂",r:["ddRenal"]},
+  prot:{all:"仿單未訂",r:["ddRenal"]},
+  asa:{b:"crcl",t:[[null,10,"仿單：禁忌（多指止痛等高劑量）；低劑量抗血小板依適應症由主治判斷"],[10,null,"小心使用"]],hd:"可被透析移除；建議透析後給，注意出血",r:["ddRenal"]},
+  labet:{all:"仿單未訂",hd:"不被透析移除，不需補充",r:["ddRenal"]},
+  cagluc:{all:"小心使用；以最低劑量起始，IV 期間每 4 小時驗鈣（仿單）",r:["ddRenal"]},
+  szc:{all:"不需調整",hd:"長期透析：非透析日 5 g 每日一次起（K >6.5 可 10 g），維持 5–15 g 非透析日；依長間隔後透析前 K 調整",r:["ddRenal"]},
+  ppi:{all:"esomeprazole：不需調整；pantoprazole：仿單未訂",r:["ddRenal"]},
+  octr:{all:"注射劑不需調整（仿單）",hd:"小心使用，仿單無具體建議",r:["ddRenal"]},
+  terli:{all:"仿單（美國 Terlivaz，HRS）：SCr >5 mg/dL 不太可能受益；第 4 天依 SCr 下降幅度調整劑量，第 3 天後 SCr ≥基準即停藥",note:"本頁靜脈瘤出血劑量為不同用法；腎調整依美國 HRS 仿單",r:["ddRenal"]},
+  soma:{all:"仿單腎功能資料未查到（請確認）",r:["ddRenal"]},
+  eryth:{all:"仿單腎功能段未能讀取（請確認）",r:["ddRenal"]},
+  ctx:{all:"單純腎功能不全：不需調整；合併嚴重肝功能不全：每日 ≤2 g",hd:"不被透析移除，不需補充",r:["ddRenal"]},
+  alb:{all:"仿單未訂",r:["ddRenal"]},
+  vancpo:{all:"口服不吸收，不需調整",r:["ddRenal"]},
+  fidax:{all:"不需調整",r:["ddRenal"]},
+  hydro:{all:"不需調整（小心使用）",r:["ddRenal"]},
+  atro:{all:"仿單未訂",hd:"不被透析明顯移除",r:["ddRenal"]},
+  adeno:{all:"不需調整",r:["ddRenal"]},
+  dilt:{all:"小心使用（仿單）",r:["ddRenal"]},
+  meto:{all:"不需調整",r:["ddRenal"]},
+  amio:{all:"不需調整",r:["ddRenal"]},
+  lido:{all:"小心使用；代謝物可能蓄積致毒性（仿單）",r:["ddRenal"]},
+  proc:{b:"crcl",t:[[null,10,"口服間隔 q8–24h；IV 重度：負荷減至 12 mg/kg，維持輸注減 2/3"],[10,50,"口服間隔 q6–12h；IV 中度：維持輸注減 1/3"],[50,null,"不需調整"]],hd:"監測 procainamide／NAPA 濃度；透析後可能需補 200 mg",note:"仿單 IV 以「中度、重度」描述，對應 CrCl 10–50、<10 為本工具取法",r:["ddRenal"]},
+  kcl:{all:"仿單：腎衰竭禁用；腎功能不全可致致命高血鉀，從低劑量開始、定期驗 K（尤其合併 RAAS 抑制劑）",hd:"可被透析移除，無劑量建議",r:["ddRenal"]},
+  phos:{all:"potassium phosphate：嚴重腎衰竭小心使用（鉀滯留）；sodium phosphate：未查到",r:["ddRenal"]},
+  nicar:{all:"小心使用；慢慢調整、密切監測（仿單）",r:["ddRenal"]},
+  urap:{all:"有時需減量；中重度腎功能不全特別小心（歐盟 SmPC）",r:["urapSmPC"]},
+  ond:{all:"不需調整",r:["ddRenal"]},
+  zolp:{all:"不需調整，需較常監測",r:["ddRenal"]},
+  suvo:{all:"不需調整",r:["ddRenal"]},
+  zopi:{all:"腎功能不全 3.75 mg 起始（SmPC；未觀察到蓄積）",r:["zopiSmPC"]},
+  esta:{all:"小心使用（仿單）",r:["ddRenal"]},
+  traz:{all:"小心使用（仿單）",r:["ddRenal"]},
+  etom:{all:"主要經腎排除，腎功能不全不良反應風險可能增加；未訂劑量（Drugs.com 病人資訊頁）",r:["ddRenal"]},
+  keta:{all:"仿單未訂",r:["ddRenal"]},
+  prop:{all:"仿單未訂",r:["ddRenal"]},
+  roc:{all:"不需調整",r:["ddRenal"]},
+  sux:{all:"仿單未訂；已有高血鉀者避免（高血鉀風險）",r:["ddRenal"]}
+};
+// 已有腎功能資料的藥補出處；其餘套用 REN
+DRUGS.forEach(d=>{ if(REN[d.id]) d.ren=Object.assign({},REN[d.id],d.ren||{}); });
+function renNow(ren){
+  const x=rv(ren.b||"crcl");
+  if(ren.all){ if(!x) return null; return {x,txt:x.hd&&ren.hd?ren.hd:ren.all}; }
+  return renPick(ren);
+}
+
 const DCLS = {all:"全部",resp:"呼吸",cardio:"心血管・抗凝",neuro:"神經",metab:"代謝・電解質",gi:"腸胃・肝",anti:"解毒・逆轉"};
 
 function mcpLow(){ const x=rv("crcl"); return !!(x&&(x.hd||x.v<40)); }
 function renRow(ren){
-  const pk=renPick(ren), bl={crcl:"CrCl",egfr:"eGFR",scr:"Cr"}[ren.b], u=ren.b==="scr"?"mg/dL":"";
+  const pk=renNow(ren), bl={crcl:"CrCl",egfr:"eGFR",scr:"Cr"}[ren.b||"crcl"], u=ren.b==="scr"?"mg/dL":"";
   const rng=(lo,hi,inc)=> lo===null?`${bl} ${inc?"≤":"<"}${hi}${u}`: hi===null?`${bl} ≥${lo}${u}`:`${bl} ${lo}–<${hi}${u}`;
-  const L=(ren.t||[]).map(([lo,hi,txt,inc])=>{ const on=pk&&!pk.x.hd&&pk.txt===txt; return `${on?"<b>▶ ":""}${rng(lo,hi,inc)}：${txt}${on?"</b>":""}`; });
-  if(ren.hd) L.push(`${pk&&pk.x.hd?"<b>▶ ":""}透析：${ren.hd}${pk&&pk.x.hd?"</b>":""}`);
-  const cur=pk? `<div>${renTag(pk.x)}</div>` : `<div class="small muted">填 eGFR，或年齡、性別、體重、Cr 以自動判定</div>`;
-  return cur+ul(L)+(ren.note?`<div class="small muted">${ren.note}</div>`:"")+(ren.r||[]).map(k=>src(k)).join("");
+  const L=ren.all?[`不分腎功能區間（同「此病人」）`]:(ren.t||[]).map(([lo,hi,txt,inc])=>{ const on=pk&&!pk.x.hd&&pk.txt===txt; return `${on?"<b>▶ ":""}${rng(lo,hi,inc)}：${txt}${on?"</b>":""}`; });
+  if(ren.hd) L.push(`${pk&&pk.x.hd&&!ren.all?"<b>▶ ":""}透析：${ren.hd}${pk&&pk.x.hd&&!ren.all?"</b>":""}`);
+  return ul(L)+(ren.note?`<div class="small muted">${ren.note}</div>`:"")+(ren.r||[]).map(k=>src(k)).join("");
 }
+function renPatient(ren){
+  const x=rv(ren.b||"crcl"), pk=renNow(ren);
+  if(!x) return `<span class="small muted">填 eGFR，或年齡、性別、體重、Cr 後顯示</span>`;
+  const lab=`<span class="cau">依 ${x.hd?"透析":x.lab}${x.sub?"；"+x.sub:""}</span>`;
+  if(!pk) return `<b>${x.hd?"透析：仿單未載透析劑量（見下方區間）":"—"}</b> ${lab}`;
+  return `<b>${pk.txt}</b> ${lab}`;
+}
+
 /* v1.0：藥物頁子分類（id 清單）與頁內藥名篩選 */
 const DSUB={
   resp:[["bronch","支氣管擴張",["salb","ipra","mg"]],["ster","類固醇",["pred"]],["allergy","過敏",["epi"]],["rsi","插管 RSI",["etom","keta","prop","roc","sux","suga"]]],
@@ -4498,9 +4605,9 @@ function renderDrugs(){
   const head=q?`<div class="note" style="margin:0 0 10px">篩選「${esc(q)}」：${list.length} 筆（所有分類）${list.length?"":"。試試學名、商品名或藥物類別。"}</div>`:renderDrugSub();
   return head+list.map(d=>`<div class="card drug"><h3>${esc(d.name)} ${d.brand?`<span class="sub">（${esc(d.brand)}）</span>`:""}${d.upd?upd(d.upd):""}</h3><div class="cb">
     <div class="row"><div class="k">類別</div><div>${d.type}</div></div>
-    <div class="row"><div class="k">劑量</div><div>${d.dose}</div></div>
-    <div class="row"><div class="k">調整</div><div>${d.adj}</div></div>
-    ${d.ren?`<div class="row"><div class="k">腎功能</div><div>${renRow(d.ren)}</div></div>`:""}
+    <div class="row"><div class="k">標準用法</div><div>${d.dose}</div></div>
+    ${d.ren?`<div class="row"><div class="k">此病人</div><div>${renPatient(d.ren)}</div></div><div class="row"><div class="k">腎功能區間</div><div>${renRow(d.ren)}</div></div>`:""}
+    ${d.adj&&d.adj!=="—"?`<div class="row"><div class="k">其他調整</div><div>${d.adj}</div></div>`:""}
     <div class="row"><div class="k">注意</div><div>${d.caut}</div></div>
     <div class="row"><div class="k">指引建議</div><div>${d.guide}</div></div>
     <div class="row"><div class="k">健保</div><div>${d.nhi}${src("nhi")}</div></div>
@@ -5232,7 +5339,7 @@ function buildPanels(){
     <div class="sec">冠狀動脈支架</div><div class="grid">${sel("pe_pci","距 PCI",[["","無支架"],["lt1","<1 個月"],["1to3","1–3 個月"],["3to6","3–6 個月"],["6to12","6–12 個月"],["gt12",">12 個月"]])}</div><div class="chks">${chk("pe_pciacs","因 ACS 置放")}</div>
   </div></div>
   <div class="card"><h2>處置流程</h2><div class="cb" id="r-peri"></div></div>`;
-  P.drug=`<div class="filters seg" id="dSeg" style="margin-bottom:10px">${Object.entries(DCLS).map(([k,v])=>`<button type="button" class="btn" data-dc="${k}">${v}</button>`).join("")}</div><div class="grid" style="margin-bottom:10px"><label class="f wide"><span>藥名篩選（學名、商品名或類別，所有分類）</span><input data-f="dq" type="search" autocomplete="off" placeholder="例：amio、Lasix、PPI"></label></div><div class="note" style="margin-bottom:10px">腎功能列依病人資料的 CrCl（Cockcroft-Gault；需年齡、性別、體重、Cr）或 eGFR 自動標出適用劑量（▶）。抗生素劑量與腎調整見 <a href="https://aaa0015100-coder.github.io/abx-helper/" target="_blank" rel="noopener">abx-helper</a>。</div><div id="r-drugs"></div>`;
+  P.drug=`<div class="filters seg" id="dSeg" style="margin-bottom:10px">${Object.entries(DCLS).map(([k,v])=>`<button type="button" class="btn" data-dc="${k}">${v}</button>`).join("")}</div><div class="grid" style="margin-bottom:10px"><label class="f wide"><span>藥名篩選（學名、商品名或類別，所有分類）</span><input data-f="dq" type="search" autocomplete="off" placeholder="例：amio、Lasix、PPI"></label></div><div class="note" style="margin-bottom:10px">每個藥依序列出標準用法、「此病人」（依病人資料的 CrCl〔Cockcroft-Gault；需年齡、性別、體重、Cr〕或 eGFR）與各腎功能區間，目前適用的區間標 ▶。抗生素劑量與腎調整見 <a href="https://aaa0015100-coder.github.io/abx-helper/" target="_blank" rel="noopener">abx-helper</a>。</div><div id="r-drugs"></div>`;
   P.ref=renderRefPanel();
   return P;
 }
@@ -5279,6 +5386,7 @@ function renderRefPanel(){
     <li>新頁「暈厥」（心血管群組）：住院病人暈倒情境；ESC 2018 高／低風險特徵分層、姿勢性血壓判讀、住院常見原因（出血、PE、姿勢性、藥物、反射性）與處置；計算工具與本頁加 Canadian Syncope Risk Score（標明急診驗證）。</li>
     <li>新頁「抗血栓藥圍術期」（圍術期群組）：12 種藥依手術出血風險、CrCl、neuraxial 給術前停藥天數與術後恢復時間（CHEST 2022、PAUSE、EHRA 2021、ASRA 2025、ESC 2022 並列），時程摘要與醫囑可複製；warfarin 依 CHEST 2022 栓塞風險判斷 bridging，與 ESC 2022、AHA/ACC 2024 差異並列；冠狀動脈支架時機；急迫手術導向逆轉。</li>
     <li>新頁「癲癇／抽搐」（呼吸・神經群組）：正在抽依時間分段（0–5 分鐘穩定、benzodiazepine、第二線、refractory），依體重劑量可複製，標示目前階段；抽完未恢復 → EEG；抽完已恢復分首次發作（AAN/AES 2015 復發風險與用藥）與已知癲癇；住院誘因與交互作用（低血糖、低血鈉、子癇 magnesium、tramadol、cefepime、carbapenem＋valproate、戒斷）。意識改變頁改為立即處置＋連到本頁。</li>
+    <li>藥物頁腎功能：98 種藥每張卡依序顯示「標準用法」、「此病人」（依 CrCl／eGFR／透析自動帶出調整後用法）與「腎功能區間」（各區間建議，目前區間標 ▶，含透析）。依 FDA 仿單腎功能段逐藥核對（Drugs.com 劑量頁），FDA 無此藥者用歐盟 SmPC；仿單未訂或未能讀取者照實標示。</li>
     <li>藥物頁：選大類後多一排子分類（例：心血管 → 升壓／強心、心律不整・心搏過慢、靜脈降壓、口服降壓、利尿劑、抗凝・抗血小板），按鈕顯示藥數；新增頁內藥名篩選（學名、商品名或類別，跨所有分類）。lactulose、rifaximin 移到「腸胃・肝」。</li>
     <li>效能：輸入時只重繪目前分頁（每次輸入約 37 ms → 約 2 ms）；切換分頁時重繪該頁。</li>
     <li>測試（v1.0 完整）：fuzz 3,000 組隨機病人 × 48 個輸出區（144,000 次）0 失敗，新增過敏反應、暈厥、抗血栓藥不變式（epinephrine 劑量、WAO 判定、refractory 條件、觀察時數、ESC 高風險、OH 判定、DOAC 停藥天數、dabigatran 依 CrCl、bridging 例外、neuraxial ASRA 時數、急迫手術不列術前天數），5 種刻意改錯均被抓到；Playwright 320／390／768／1280 px 深淺色、所有分頁所有選項、跨頁同步、收合、跳到建議、搜尋、清除後復原、主題切換，無橫向溢出、無 console 錯誤、零網路請求。</li></li></ul>

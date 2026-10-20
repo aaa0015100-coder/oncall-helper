@@ -26,6 +26,7 @@ if(/<meta name="claude:/.test(html)) F.push("含 claude: meta");
 { const vm=require('vm'); const c={console}; vm.createContext(c);
   try{ vm.runInContext(js+';this.__X={DRUGS:typeof DRUGS!=="undefined"?DRUGS:null,DSUB:typeof DSUB!=="undefined"?DSUB:null};',c); const {DRUGS,DSUB}=c.__X;
     if(DRUGS&&DSUB){ const ids=new Set(DRUGS.map(d=>d.id));
+      for(const d of DRUGS){ if(!d.ren) F.push('缺腎功能資料：'+d.id); }
       for(const d of DRUGS){ const n=(DSUB[d.cls]||[]).filter(x=>x[2].includes(d.id)).length; if(n!==1) F.push(`藥物子分類：${d.id} 在 ${d.cls} 出現 ${n} 次`); }
       for(const [k,ss] of Object.entries(DSUB)) for(const x of ss) for(const id of x[2]) if(!ids.has(id)) F.push("子分類引用不存在的藥："+id); } }catch(e){ F.push("子分類檢查失敗 "+e.message); } }
 console.log(F.length?"STATIC FAIL "+F.length+"\n  "+F.join("\n  "):"STATIC OK");
