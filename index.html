@@ -220,7 +220,7 @@ pre.ord{white-space:pre-wrap;font:13px/1.55 var(--f-mono);background:var(--surfa
   <div id="panels" style="margin-top:12px"></div>
   <footer>
     <div>v<span id="ver2"></span>　最後查證日期：<span id="checked"></span></div>
-    <div>主要依據：BTS 氧氣 2017、GOLD 2026、GINA 2026、ESC 心衰竭 2021／2023、AHA/ACC 急性 PE 2026、ESC PE 2019、ERS/ATS NIV 2017、ERS HFNC 2022、BTS 肋膜 2023、AHA/ASA 急性缺血性中風 2026、AHA/ASA 腦出血 2022、AES 癲癇重積 2016、NICE 譫妄、ESAIC 2024、歐洲低血鈉 2014、ADA/EASD 高血糖危象 2024、EASL 肝性腦病變 2022、AHA ACLS 2025、SSC 2026、ACC/AHA ACS 2025、ESC AF 2024、ACC/AHA AF 2023、ESC SVT 2019、ADA 等高血糖危象共識 2024、UKKA 高血鉀 2023、歐洲低血鈉 2014、AHA 急性照護血壓 2024、ESC 高血壓急症 2019、ACEP 頭痛 2019、PONV 共識 2020、APS/ASA 術後疼痛 2016、AGS Beers 2023、ACC/AHA 主動脈 2022、ESC 心肌炎與心包炎 2025、SCCM/IDSA 新發燒 2023、IDSA 嗜中性球低下發燒、IDSA/SHEA C. difficile 2021、KDIGO AKI 2012、UKKA 高血鉀 2023、WSES 腸繫膜缺血 2022、ACG 胰臟炎 2024、TG18、ACG 上／下消化道出血 2021／2023、ESGE 靜脈瘤 2022、ACG-CAG 抗血栓 2022、NEWS2（RCP 2017）、SCCM RSI 2023、AABB 紅血球 2023、AABB/ICTMG 血小板 2025、CHEST 血漿與血小板 2025、ESE/ES 類固醇相關腎上腺功能不全 2024、WAO 2020、AAAAI/ACAAI 2023、NICE NG258 2026、ESC 暈厥 2018、ACC/AHA/HRS 暈厥 2017、CHEST 圍術期抗血栓 2022、EHRA NOAC 2021、ASRA 2025 ／ 健保藥品給付規定。詳見「來源・版本」。</div>
+    <div>主要依據：BTS 氧氣 2017、GOLD 2026、GINA 2026、ESC 心衰竭 2021／2023、AHA/ACC 急性 PE 2026、ESC PE 2019、ERS/ATS NIV 2017、ERS HFNC 2022、BTS 肋膜 2023、AHA/ASA 急性缺血性中風 2026、AHA/ASA 腦出血 2022、AES 癲癇重積 2016、NICE 譫妄、ESAIC 2024、歐洲低血鈉 2014、ADA/EASD 高血糖危象 2024、EASL 肝性腦病變 2022、AHA ACLS 2025、SSC 2026、ACC/AHA ACS 2025、ESC AF 2024、ACC/AHA AF 2023、ESC SVT 2019、ADA 等高血糖危象共識 2024、UKKA 高血鉀 2023、歐洲低血鈉 2014、AHA 急性照護血壓 2024、ESC 高血壓急症 2019、ACEP 頭痛 2019、PONV 共識 2020、APS/ASA 術後疼痛 2016、AGS Beers 2023、ACC/AHA 主動脈 2022、ESC 心肌炎與心包炎 2025、SCCM/IDSA 新發燒 2023、IDSA 嗜中性球低下發燒、IDSA/SHEA C. difficile 2021、KDIGO AKI 2012、UKKA 高血鉀 2023、WSES 腸繫膜缺血 2022、ACG 胰臟炎 2024、TG18、ACG 上／下消化道出血 2021／2023、ESGE 靜脈瘤 2022、ACG-CAG 抗血栓 2022、NEWS2（RCP 2017）、SCCM RSI 2023、AABB 紅血球 2023、AABB/ICTMG 血小板 2025、CHEST 血漿與血小板 2025、ESE/ES 類固醇相關腎上腺功能不全 2024、ACEP 癲癇 2024、AAN/AES 首次發作 2015、WAO 2020、AAAAI/ACAAI 2023、NICE NG258 2026、ESC 暈厥 2018、ACC/AHA/HRS 暈厥 2017、CHEST 圍術期抗血栓 2022、EHRA NOAC 2021、ASRA 2025 ／ 健保藥品給付規定。詳見「來源・版本」。</div>
   </footer>
 </div></main>
 <div id="ov" role="dialog" aria-modal="true"><div id="ovBox"></div></div>
@@ -441,6 +441,7 @@ const S0 = {
   bp_acei:false, bp_arb:false, bp_ccb:false, bp_thz:false, bp_bb:false, bp_mra:false, bp_ab:false, bp_alb:false, bp_preg:false, bp_gout:false, bp_aki:false,
   // v1.0 過敏反應、暈厥、抗血栓藥圍術期
   an_skin:false, an_resp:false, an_cv:false, an_gi:false, an_expo:false, an_trig:"", an_epi:"", an_persist:false, an_resolved:false, an_bb:false, an_biph:false, an_sevresp:false, an_slow:false, an_tryp:null, an_tryb:null,
+  sz_bzd:"", sz_2nd:false, sz_noiv:false, sz_first:false, sz_known:false, sz_head:false, sz_fever:false, sz_etoh:false, sz_preg:false, sz_miss:false, sz_tram:false, sz_cefe:false, sz_carb:false,
   sy_pulse:false, sy_seiz:false, sy_head:false, sy_pain:false, sy_exert:false, sy_supine:false, sy_palp:false, sy_nowarn:false, sy_sit:false, sy_fhx:false, sy_prod:false, sy_trig:false, sy_stand:false, sy_recur:false,
   sy_shd:false, sy_gib:false, sy_murmur:false, sy_bleed:false, sy_drug:false, sy_ecg_ok:false, sy_e_isch:false, sy_e_avb:false, sy_e_brady:false, sy_e_bbb:false, sy_e_vt:false, sy_e_dev:false, sy_e_brug:false, sy_e_qt:false, sy_e_min1:false, sy_e_min2:false,
   sy_lsbp:null, sy_ldbp:null, sy_lhr:null, sy_ssbp:null, sy_sdbp:null, sy_shr:null,
@@ -1157,15 +1158,14 @@ function amsCard(cs,c){
     o.tags=src("aes16")+src("esett");
     if(c.seActive){
       o.lead=`<b>立即給 benzodiazepine</b>（5–20 分鐘階段）：`+seDoses(wt);
-      o.rows=[["20–40 分鐘",`仍抽 → 第二線擇一（ESETT：三者效果相近）：${se2Doses(wt)} ${src("esett")}`],
-        ["40–60 分鐘","仍抽 → refractory：叫上級／神經科、ICU，麻醉劑量藥物（midazolam、propofol 等）與 EEG 監測"],
+      o.rows=[["完整流程",tabBtn("sz","癲癇頁：第二線、refractory、誘因與交互作用")],
         ["同時","ABC、側躺、O₂、血糖（<60 mg/dL 立即給葡萄糖；酒精／營養不良者先或同時 thiamine）、電解質、藥物濃度"],
         ["台灣品項",`<span class="cau">fosphenytoin 台灣許可證與院內品項請確認；無時改 phenytoin 20 mg/kg IV（≤50 mg/min，心電監測）</span>`],
         ["健保",nhiLic("lorazepam、levetiracetam、valproate、phenytoin 注射劑")]];
     }else{
       o.lead=`抽搐後應逐漸恢復；<b>未在預期時間內恢復或意識波動 → 疑非痙攣性癲癇重積，安排 EEG</b>，並找誘因。`;
       o.rows=[["找誘因","低血糖、低血鈉、低血鈣、低血鎂、酒精或 benzodiazepine 戒斷、藥物（tramadol、cefepime 等降低閾值）、中風、顱內出血、感染"],
-        ["提醒","首次抽搐或有局部神經學症狀 → 頭部 CT。"]];
+        ["提醒","首次抽搐或有局部神經學症狀 → 頭部 CT。"],["完整流程",tabBtn("sz","癲癇／抽搐頁")]];
     }
     break;
   case "stroke":{
@@ -1310,7 +1310,7 @@ function reversibleList(c){
   R.push([c.sbp===null?"q":c.hypot?"bad":"ok",`休克：${c.sbp===null?"量血壓":`SBP ${c.sbp}`}`]);
   R.push([(S.med_opioid||S.med_benzo)?(c.sedSigns?"bad":"q"):"na",`Opioid／鎮靜藥：${(S.med_opioid||S.med_benzo)?(c.sedSigns?"有呼吸抑制或針孔瞳孔 → naloxone":"使用中，評估呼吸與瞳孔"):"未勾選使用"}`]);
   R.push([c.wern?"bad":"na",`Wernicke 風險：${c.wern?"→ thiamine IV（含醣輸液前或同時）":"未勾選酒精或營養不良"}`]);
-  R.push([c.seActive?"bad":S.a_seiz===""?"q":"ok",`抽搐：${c.seActive?"進行中 → benzodiazepine":S.a_seiz==="post"?"發作後":S.a_seiz==="none"?"無":"未評估"}`]);
+  R.push([c.seActive?"bad":S.a_seiz===""?"q":"ok",`抽搐：${c.seActive?"進行中 → benzodiazepine":S.a_seiz==="post"?"發作後":S.a_seiz==="ended"?"已恢復":S.a_seiz==="none"?"無":"未評估"}`]);
   R.push([S.a_focal?"bad":"na",`局部神經學症狀：${S.a_focal?"有 → 中風流程":"未勾選"}`]);
   return `<ul class="chklist">${R.map(r=>`<li>${st(r[0])} ${r[1]}</li>`).join("")}</ul>`;
 }
@@ -4031,7 +4031,7 @@ function sbarText(tabId){
   return L.join("\n");
 }
 /* ================= English duty note ================= */
-const CC_EN={dysp:"Dyspnea",ams:"Altered mental status",cp:"Chest pain",hypo:"Hypotension / shock",tachy:"Tachycardia / palpitations",brady:"Bradycardia",fev:"Fever",uo:"Oliguria",abd:"Abdominal pain",gib:"GI bleeding",htn:"Elevated blood pressure",hd:"Headache",dka:"Hyperglycemia (DKA / HHS)",hk:"Hyperkalemia",na:"Hyponatremia",lyte:"Electrolyte abnormality",nv:"Nausea / vomiting",pain:"Pain control",sleep:"Insomnia",acls:"Cardiac arrest",ana:"Anaphylaxis",syn:"Syncope",peri:"Perioperative antithrombotic management"};
+const CC_EN={dysp:"Dyspnea",ams:"Altered mental status",cp:"Chest pain",hypo:"Hypotension / shock",tachy:"Tachycardia / palpitations",brady:"Bradycardia",fev:"Fever",uo:"Oliguria",abd:"Abdominal pain",gib:"GI bleeding",htn:"Elevated blood pressure",hd:"Headache",dka:"Hyperglycemia (DKA / HHS)",hk:"Hyperkalemia",na:"Hyponatremia",lyte:"Electrolyte abnormality",nv:"Nausea / vomiting",pain:"Pain control",sleep:"Insomnia",acls:"Cardiac arrest",ana:"Anaphylaxis",syn:"Syncope",sz:"Seizure / status epilepticus",peri:"Perioperative antithrombotic management"};
 const DDX_EN={ptx:"Tension pneumothorax",pe:"Pulmonary embolism",ana:"Anaphylaxis",uao:"Upper airway obstruction",acs:"ACS / myocardial ischemia",transf:"Transfusion reaction (TACO / TRALI)",hypovent:"Opioid / sedative-induced hypoventilation",ahf:"Acute heart failure / fluid overload",pna:"Pneumonia / aspiration",copd:"COPD exacerbation",asthma:"Asthma exacerbation",metac:"Metabolic acidosis (respiratory compensation)",eff:"Pleural effusion",atel:"Atelectasis (post-op)",anemia:"Anemia / bleeding",
   hypogly:"Hypoglycemia",se:"Status epilepticus",stroke:"Acute stroke",ich:"Intracranial hemorrhage",sed:"Opioid / sedative overdose",hypox:"Hypoxemia / hypercapnia",shock:"Shock / cerebral hypoperfusion",wern:"Wernicke encephalopathy",mening:"CNS infection",dkahhs:"DKA / HHS",dka:"DKA / HHS",hypona:"Hyponatremia",hyperna:"Hypernatremia",hyperca:"Hypercalcemia",sepsis:"Sepsis",he:"Hepatic encephalopathy",uremia:"Uremia",aws:"Alcohol withdrawal",drug:"Drug-induced",delir:"Delirium (underlying cause to be identified)",
   stemi:"STEMI",aad:"Acute aortic syndrome (dissection)",tamp:"Cardiac tamponade",peri:"Myopericarditis",eso:"Esophageal rupture",mins:"Myocardial injury after noncardiac surgery (MINS)",zoster:"Herpes zoster",msk:"Musculoskeletal chest pain",
@@ -4686,7 +4686,7 @@ function synCard(cs,c){
       ["相關頁面",`${tabBtn("brady","心搏過慢")}${tabBtn("tachy","心搏過速")}${S.sy_pain?tabBtn("cp","胸痛"):""}`]]; break;
   case "bleed": o.lead=`Hb、凝血功能；檢查傷口、引流量、黑便；備血。${tabBtn("gib","GI bleeding")}${S.med_ac?tabBtn("peri","抗血栓藥"):""}`; break;
   case "pe": o.lead=`術後或 VTE 風險加上心搏過速、低血氧或胸痛 → 評估 PE（Wells／YEARS、CTPA）${tabBtn("dysp","喘：PE")}`; break;
-  case "seiz": o.lead=`以癲癇處理：見意識改變頁 ${tabBtn("ams","意識改變")}`; break;
+  case "seiz": o.lead=`以癲癇處理：見癲癇頁 ${tabBtn("sz","癲癇／抽搐")}`; break;
   case "oh": o.tags=src("escSyn18");
     o.lead=c.oh?`站立 3 分鐘：SBP ${c.oh.s1}→${c.oh.s3}（${c.oh.ds>=0?"−":"+"}${Math.abs(c.oh.ds)}）${c.oh.dd!==null?`、DBP −${c.oh.dd}`:""}${c.oh.dh!==null?`、HR ${c.oh.dh>=0?"+":""}${c.oh.dh}`:""} → ${c.oh.oh?"<b>符合 OH</b>":"未達 OH 標準"}${c.oh.neuro?"；心跳上升 ≤10 提示神經性 OH":""}`:`<span class="muted">填平躺與站立 3 分鐘血壓後判定。</span>`;
     o.rows=[["處置",ul([`檢視並減停降壓、利尿、α-blocker（doxazosin、tamsulosin）、nitrate、鎮靜藥 ${jump("htn","htn-med","降壓藥調整")}`,"評估容積：NPO、引流或腹瀉流失、攝取差；補液","起身分段（先坐再站）、防跌、下床前協助"])],
@@ -4910,9 +4910,94 @@ function renderPeri(){
 }
 function periHi(c){ return c.bleed==="high"; }
 
-const TABS=[{id:"dysp",t:"喘"},{id:"ams",t:"意識改變"},{id:"cp",t:"胸痛"},{id:"hypo",t:"低血壓／休克"},{id:"tachy",t:"心搏過速／心悸"},{id:"brady",t:"心搏過慢"},{id:"syn",t:"暈厥"},{id:"fev",t:"發燒"},{id:"uo",t:"尿少"},{id:"abd",t:"腹痛"},{id:"gib",t:"GI bleeding"},{id:"htn",t:"高血壓"},{id:"hd",t:"頭痛"},{id:"dka",t:"高血糖／血糖控制"},{id:"hk",t:"高血鉀"},{id:"na",t:"低血鈉"},{id:"lyte",t:"其他電解質"},{id:"nv",t:"噁心嘔吐"},{id:"pain",t:"疼痛控制"},{id:"sleep",t:"失眠"},{id:"peri",t:"抗血栓藥圍術期"},{id:"acls",t:"ACLS"},{id:"ana",t:"過敏反應"},{id:"calc",t:"計算工具"},{id:"drug",t:"藥物"},{id:"ref",t:"來源・版本"}];
-const MENU=[["急救",["acls","ana"]],["心血管",["cp","hypo","htn","tachy","brady","syn"]],["呼吸・神經",["dysp","ams","hd"]],["感染・腹部",["fev","abd","gib"]],["腎・電解質・代謝",["uo","hk","na","lyte","dka"]],["症狀照護",["nv","pain","sleep"]],["圍術期",["peri"]],["工具・參考",["calc","drug","ref"]]];
-const MODS=[{id:"dysp",r:()=>renderDysp()},{id:"ams",r:()=>renderAMS()},{id:"cp",r:()=>renderCP(),lab:()=>cpLab()},{id:"fev",r:()=>renderFev(),lab:()=>fevLab()},{id:"uo",r:()=>renderUO(),lab:()=>uoLab()},{id:"abd",r:()=>renderAbd(),lab:()=>abdLab()},{id:"gib",r:()=>renderGIB(),lab:()=>gibLab()},{id:"hypo",r:()=>renderShock(),lab:()=>shockLab()},{id:"tachy",r:()=>renderTachy(),lab:()=>tachyLab()},{id:"brady",r:()=>renderBrady(),lab:()=>bradyLab()},{id:"dka",r:()=>renderDKA(),lab:()=>dkaLab()},{id:"acls",r:()=>renderACLS()},{id:"hk",r:()=>renderHK(),lab:()=>hkLab()},{id:"na",r:()=>renderNa(),lab:()=>naLab()},{id:"lyte",r:()=>renderLyte(),lab:()=>lyteLab()},{id:"htn",r:()=>renderHTN(),lab:()=>htnLab()},{id:"nv",r:()=>renderNV()},{id:"pain",r:()=>renderPain(),lab:()=>painLab()},{id:"sleep",r:()=>renderSleep()},{id:"hd",r:()=>renderHD()},{id:"ana",r:()=>renderAna()},{id:"syn",r:()=>renderSyn(),lab:()=>synLab()},{id:"peri",r:()=>renderPeri()}];
+/* ================= v1.0 癲癇／抽搐分頁 ================= */
+Object.assign(REF,{
+  acep24:{t:"ACEP 癲癇 2024",f:"American College of Emergency Physicians. Clinical Policy: Critical Issues in the Management of Adult Patients Presenting to the Emergency Department With Seizures（ACEP Board 2024-04-17 核准；Smith MD, Sampson CS, Wall SP, Diercks DB）。Benzodiazepine 足量後仍抽之全身痙攣性癲癇重積：應給第二線藥，fosphenytoin、levetiracetam 或 valproate 效果相近（Level A）。其他問題沿用 2014 版。",u:"https://www.acep.org/siteassets/new-pdfs/clinical-policies/seizures-2024-final.pdf"},
+  acep14:{t:"ACEP 癲癇 2014",f:"Huff JS, et al. Clinical policy: critical issues in the evaluation and management of adult patients presenting to the emergency department with seizures. Ann Emerg Med 2014;63:437–447（ABEM 標示 2025-08 retired）。第一次全身性發作且已恢復：誘發性發作治療誘因、不需在急診開始抗癲癇藥；無腦部疾病之非誘發性首次發作不需開始；有遠端腦部病灶者可開始或與後續醫師協調（皆 Level C）；首次非誘發性發作已恢復者不一定需住院（Level C）；已知癲癇恢復用藥可 IV 或口服（Level C）。",u:"https://www.abem.org/key-advances_-adult-patients-with-seizures_clinical-policy-alert"},
+  aan15:{t:"AAN/AES 首次發作 2015",f:"Krumholz A, Wiebe S, Gronseth GS, et al. Evidence-based guideline: management of an unprovoked first seizure in adults. Neurology 2015;84:1705–1713。首次非誘發性發作後 2 年內復發約 21–45%（strong evidence），第一年最高；增加復發：先前腦部損傷（中風、腫瘤、外傷）、EEG 癲癇樣異常（strong）、影像明顯異常、夜間發作（moderate）；立即用抗癲癇藥使 2 年內復發降低約 35%（moderate），3 年以上持續無發作率不變（moderate）；副作用 7–31%，多輕微可逆。不給單一是否用藥結論，依個別風險與病人偏好共同決定。",u:"https://blogs.the-hospitalist.org/content/new-guideline-offers-advice-first-unprovoked-seizure"},
+  ncs12:{t:"NCS 癲癇重積 2012",f:"Brophy GM, et al. Guidelines for the evaluation and management of status epilepticus. Neurocrit Care 2012;17:3–23。定義：持續 ≥5 分鐘臨床或電氣發作，或反覆發作其間未恢復。首選 benzodiazepine：IV lorazepam、IM midazolam；第二線 IV fosphenytoin／phenytoin、valproate、levetiracetam；refractory 以連續輸注藥物，滴定至電氣發作停止或 burst suppression，維持 24–48 小時後緩慢減量；疑持續發作者 1 小時內開始連續 EEG，昏迷者至少監測 48 小時。（依 Guideline Central 摘要核對）",u:"https://guidelinecentral.com/guideline/9923"},
+  torSE23:{t:"Toronto 癲癇流程 2023",f:"Critical Care Toronto Seizure Algorithm V7（2023-01；參考 Brophy NCS 2012、Shorvon 2011）。Refractory 連續輸注：midazolam 0.1–0.2 mg/kg 緩慢 IV，輸注 0.05–0.2 mg/kg/h，突破發作再 bolus 0.1–0.2 mg/kg 並上調，最高 2 mg/kg/h；propofol 1–2 mg/kg IV，輸注 25–75 µg/kg/min，突破發作 1 mg/kg 並上調 10–20 µg/kg/min；ketamine 1–2 mg/kg（最高 4.5 mg/kg），輸注 0.5–7 mg/kg/h。（院內實務流程，非指引）",u:"https://criticalcaretoronto.com/wp-content/uploads/2023/11/Seizure-Algorithm-V7-JAN-2023.pdf"},
+  mhraVpa:{t:"MHRA carbapenem＋valproate",f:"MHRA Drug Safety Update（2010；GOV.UK 2014-12-11）：carbapenem 與 valproic acid 併用可使 valproate 濃度約 2 天內下降 60–100%，可能失去癲癇控制；監測濃度或調整劑量不足以處理，不建議併用，宜改用其他抗生素。",u:"https://www.gov.uk/drug-safety-update/carbapenems-concomitant-use-with-valproic-acid-not-recommended"},
+  fdaCefe12:{t:"FDA cefepime 2012",f:"FDA Drug Safety Communication（2012-06）：cefepime 有非痙攣性癲癇重積報告，多為腎功能不全未調整劑量者（部分已調整）；1996–2012/2 共 59 例，多數停藥或透析後可逆。CrCl ≤60 mL/min 應依仿單調整；發生抽搐應考慮停藥或調整。（依 MDedge 2012 報導）",u:"https://mdedge.com/content/fda-warns-seizure-risk-cefepime"},
+  tramSz:{t:"Tramadol 仿單（抽搐）",f:"Tramadol hydrochloride Prescribing Information 5.1：建議劑量下即有抽搐報告，超過建議劑量風險增加；癲癇或曾抽搐、頭部外傷、代謝異常、酒精或藥物戒斷、中樞感染者風險增加；併用 SSRI、SNRI、三環類、MAOI、抗精神病藥、其他 opioid 或降低閾值藥物增加風險；tramadol 過量時 naloxone 可能增加抽搐風險。",u:"https://medlibrary.org/lib/rx/meds/tramadol-hydrochloride-24/"},
+  smiEcl19:{t:"子癇流程 2019",f:"Safe Motherhood Initiative（ACOG District II）Eclampsia protocol（2019-01 修訂）：magnesium sulfate 4–6 g（10%，100 mL）IV 20 分鐘，維持 1–2 g/h；無 IV 時 10 g IM（50%，兩側臀部各 5 g）；腎衰竭小心使用；Mg 禁忌或反覆抽搐時 lorazepam 2–4 mg IV（10–15 分鐘可重複一次）或 diazepam 5–10 mg IV q5–10 min（總量 ≤30 mg）。",u:"https://kansaspqc.kdhe.ks.gov/wp-content/uploads/2022/05/HTN-Bundle.Eclampsia-protocol.ACOG-2019.pdf"}
+});
+Object.assign(GLOSS,{"SE":"status epilepticus，癲癇重積","ASM":"antiseizure medication，抗癲癇藥","cEEG":"continuous EEG，連續腦波監測","PNES":"psychogenic non-epileptic seizure"});
+function szCtx(){
+  const st=S.a_seiz, min=num(S.a_seizmin), wt=num(S.wt), bzd=S.sz_bzd===""?null:+S.sz_bzd;
+  const active=st==="active";
+  const stage=!active?null:(S.sz_2nd?"refr":(bzd!==null&&bzd>=2)||(min!==null&&min>=20)?"second":(min!==null&&min<5&&!(bzd>0))?"early":"bzd");
+  const na=num(S.na), glu=num(S.glu), ca=num(S.ca), mg=num(S.mg);
+  return {st,min,wt,bzd,active,stage,na,glu,ca,mg,any:!!st};
+}
+function szCauses(c){
+  const {L,push}=causeList();
+  push("glu",c.glu!==null&&c.glu<70?"must":null,"低血糖",[`血糖 ${c.glu}`]);
+  push("na",c.na!==null&&c.na<125?"must":(c.na!==null&&c.na<130?"consider":null),"低血鈉",[`Na ${c.na}`]);
+  push("ecl",S.sz_preg?"must":null,"子癇",["懷孕 ≥20 週或產後"]);
+  push("ich",(S.a_focal||S.a_fall||S.sz_head)?"must":(S.sz_first?"likely":null),"顱內病灶（出血、中風、腫瘤）",[S.a_focal&&"局部神經學症狀",S.a_fall&&"跌倒或頭部外傷",S.sz_head&&"已知顱內病灶",S.sz_first&&"首次發作"]);
+  push("cns",S.sz_fever?"likely":null,"中樞感染",["發燒或疑腦膜炎／腦炎"]);
+  push("etoh",S.sz_etoh?"likely":null,"酒精或 benzodiazepine 戒斷",["近期停酒或停 BZD"]);
+  push("drug",(S.sz_tram||S.sz_cefe)?"likely":null,"藥物降低發作閾值",[S.sz_tram&&"tramadol 等",S.sz_cefe&&"cefepime（腎功能差）"]);
+  push("carb",S.sz_carb?"likely":null,"Carbapenem 使 valproate 濃度下降",["valproate 合併 carbapenem"]);
+  push("miss",S.sz_miss?"likely":null,"漏服或停用抗癲癇藥",["NPO、漏給、劑量不足"]);
+  push("lyte",(c.ca!==null&&c.ca<7.5)||(c.mg!==null&&c.mg<1.2)?"consider":null,"低血鈣／低血鎂",[c.ca!==null&&c.ca<7.5&&`Ca ${c.ca}`,c.mg!==null&&c.mg<1.2&&`Mg ${c.mg}`]);
+  return L;
+}
+function szCard(cs,c){
+  const o={rows:[]};
+  switch(cs.id){
+  case "glu": o.lead=`D50W 50 mL IV（或 glucagon 1 mg IM）；酒精或營養不良者同時給 thiamine。${jump("dka","dka-gluc","血糖")}`; break;
+  case "na": o.tags=src("eurHypoNa"); o.lead=c.na<125?`<b>低血鈉合併抽搐</b>：3% NaCl 150 mL IV 20 分鐘，可重複至 Na 上升 5 mmol/L ${src("eurHypoNa")} ${tabBtn("na","低血鈉頁")}`:`Na ${c.na}：輕度低血鈉不太會單獨造成抽搐，仍需矯正並找其他原因 ${tabBtn("na","低血鈉頁")}`; break;
+  case "ecl": o.tags=src("smiEcl19"); o.lead=`<b>magnesium sulfate 4–6 g IV 20 分鐘，之後 1–2 g/h</b>；無 IV 時 10 g IM（兩側臀部各 5 g）；Mg 禁忌或反覆抽搐 → lorazepam 2–4 mg IV；通知婦產科，控制血壓 ${src("smiEcl19")} ${cpBtn("Magnesium sulfate 4 g IV over 20 min, then 1 g/h（依院內子癇流程）")}`; o.rows=[["腎功能","腎衰竭小心使用，監測 Mg 濃度、尿量、深部肌腱反射"+src("smiEcl19")]]; break;
+  case "ich": o.lead=`<b>頭部 CT</b>（首次發作、局部神經學症狀、外傷、抗凝血劑）；使用抗凝血劑者見意識改變頁顱內出血與逆轉 ${tabBtn("ams","意識改變")}`; o.rows=[["提醒","首次發作之後續評估：MRI、EEG（依神經科安排）；本項為本工具整理"]]; break;
+  case "cns": o.lead=`血液培養後經驗性抗生素（± acyclovir），不因 CT 或 LP 延誤；見發燒頁與 abx-helper ${tabBtn("fev","發燒頁")}`; break;
+  case "etoh": o.tags=src("asamAws"); o.lead=`以 benzodiazepine 治療（symptom-triggered；戒斷譫妄偏好靜脈）；給 thiamine ${src("asamAws")}`; break;
+  case "drug": o.lead=ul([S.sz_tram?`<b>tramadol</b>：建議劑量即可能抽搐，併 SSRI／SNRI／三環類／抗精神病藥或癲癇病史風險增加 → 停用改其他止痛 ${src("tramSz")} ${tabBtn("pain","疼痛控制")}`:"",S.sz_cefe?`<b>cefepime</b>：腎功能差未調整劑量可致非痙攣性癲癇重積，多停藥或透析後可逆 → 停用或依 CrCl 調整，安排 EEG ${src("fdaCefe12")}`:""]); break;
+  case "carb": o.tags=src("mhraVpa"); o.lead=`carbapenem 使 valproate 濃度約 2 天內下降 60–100%，調整劑量或監測濃度不足以處理 → <b>改用其他抗生素</b>或改用其他抗癲癇藥 ${src("mhraVpa")}`; break;
+  case "miss": o.lead=`恢復原抗癲癇藥（NPO 時改 IV：levetiracetam、valproate、phenytoin 有針劑）${src("acep14","Level C")}；檢查漏給原因（NPO、轉床、藥物交互）。`; break;
+  case "lyte": o.lead=`補充鈣、鎂 ${tabBtn("lyte","其他電解質")}`; break;
+  }
+  return cardWrap(cs,o);
+}
+function renderSz(){
+  const c=szCtx(); const H=[]; const st=stepper(); const w=c.wt;
+  if(!c.any){ H.push(st({k:"info",t:"抽搐狀態",c:`<span class="muted">選擇「抽搐」狀態後顯示處置（正在抽、抽完未恢復、抽完已恢復）。</span>`})); }
+  if(c.active){
+    const cur=k=>c.stage===k?' <span class="tag t-high">目前</span>':"";
+    H.push(st({k:"bx",t:"0–5 分鐘：穩定"+cur("early"),c:ul([`側躺、保護頭部、O₂、監測 SpO₂ 與心電；記錄開始時間`,`<b>POC 血糖</b>${c.glu!==null?`：${c.glu}${c.glu<70?' <span class="ng">→ D50W 50 mL IV（酒精或營養不良者同時給 thiamine）</span>':""}`:""}`,`建立 IV；抽電解質（Na、Ca、Mg）、抗癲癇藥濃度`,S.sz_preg?'<span class="ng">懷孕或產後：疑子癇 → magnesium sulfate（見下方）</span>':""]),why:src("aes16")+src("ncs12")}));
+    H.push(st({k:"bx",t:"5–20 分鐘：benzodiazepine"+cur("bzd"),c:(S.sz_noiv?`<b>無 IV：midazolam ${w!==null&&w<=40?"5":"10"} mg IM</b> ${cpBtn(`Midazolam ${w!==null&&w<=40?"5":"10"} mg IM st`)}<div class="small muted">其他選擇：</div>`:"")+seDoses(w)+(w!==null?cpBtn(`Lorazepam ${fmt(Math.min(0.1*w,4),1)} mg IV st，5 分鐘仍抽可重複一次`):""),
+      x:`足量給藥（劑量不足是常見問題）；同一藥最多重複一次 ${src("aes16")}${c.bzd!==null?`。已給 ${c.bzd} 劑`:""}`}));
+    H.push(st({k:c.stage==="second"?"bx":"wait",t:"20–40 分鐘：第二線（擇一）"+cur("second"),c:se2Doses(w)+(S.sz_carb?'<div class="ng small">合併 carbapenem：valproate 濃度會快速下降，選 levetiracetam 或 fosphenytoin</div>':""),
+      x:`fosphenytoin、levetiracetam、valproate 效果相近 ${src("acep24","Level A")}${src("esett")}；valproate 避免於肝病、懷孕${S.hx_cirr?"（已勾肝硬化）":""}`}));
+    H.push(st({k:c.stage==="refr"?"bx":"wait",t:"40 分鐘以上：refractory"+cur("refr"),c:ul([`<b>叫上級、神經科、ICU</b>；插管保護呼吸道 ${rsiLink()}`,
+      `連續輸注（ICU 執行）：midazolam ${w!==null?`<b>${fmt(0.2*w,1)} mg</b>（0.2 mg/kg）`:"0.1–0.2 mg/kg"} IV，之後 0.05–0.2 mg/kg/h${w!==null?`（${fmt(0.05*w,1)}–${fmt(0.2*w,1)} mg/h）`:""}；或 propofol ${w!==null?`<b>${fmt(w,0)}–${fmt(2*w,0)} mg</b>`:"1–2 mg/kg"} IV，之後 25–75 µg/kg/min ${src("torSE23")}`,
+      `<b>1 小時內開始連續 EEG</b>；滴定至電氣發作停止，維持 24–48 小時後緩慢減量 ${src("ncs12")}`]),x:"Refractory 劑量為院內實務流程，依 ICU 規範與藥局濃度。"}));
+  }
+  if(c.st==="post") H.push(st({k:"bx",t:"抽完未恢復",c:ul([`<b>疑非痙攣性癲癇重積 → 安排 EEG</b>（疑持續發作 1 小時內開始；昏迷者至少監測 48 小時）${src("ncs12")}`,`意識未恢復前仍視同癲癇重積，可再給 benzodiazepine 並準備第二線`,`同時找原因（下方）`])}));
+  if(c.st==="ended"){
+    const L=[S.sz_first?`<b>首次發作</b>：2 年內復發約 21–45%；先前腦部損傷、EEG 異常（strong）、影像異常、夜間發作（moderate）增加復發 ${src("aan15")}`:"",
+      S.sz_first?`立即用抗癲癇藥 2 年內復發約減 35%，但 3 年以上無發作率不變；副作用 7–31% → 與病人、神經科共同決定 ${src("aan15","moderate")}`:"",
+      S.sz_first?`誘發性發作：治療誘因，不需開始抗癲癇藥；無腦部疾病的非誘發性首次發作也不需立即開始 ${src("acep14","Level C")}`:"",
+      S.sz_known?`<b>已知癲癇</b>：查漏服、藥物濃度（valproate、phenytoin）、交互作用；恢復原用藥，NPO 改 IV ${src("acep14","Level C")}；反覆發作與神經科討論加藥`:"",
+      !S.sz_first&&!S.sz_known?`<span class="muted">勾選「首次發作」或「已知癲癇」顯示後續處置。</span>`:"",
+      `記錄發作型態、持續時間、恢復時間；防跌、床欄軟墊；交班註明`];
+    H.push(st({k:"go",t:"抽完已恢復",c:ul(L)}));
+  }
+  if(c.any){
+    const cs=szCauses(c);
+    H.push(ddxStep(st,cs,true,"",""));
+    const cards=sortCauses(cs).map(x=>szCard(x,c)).join("");
+    if(cards) H.push(`<div class="sec">誘因與處置</div>`+cards);
+    H.push(`<div class="note">住院常見誘因：低血糖、低血鈉、低血鈣／鎂、酒精或 BZD 戒斷、tramadol、cefepime（腎功能差）、carbapenem 降低 valproate 濃度、漏服抗癲癇藥、顱內出血或中風、中樞感染、子癇。鑑別：暈厥（短暫肢體抽動常見）${tabBtn("syn","暈厥頁")}</div>`);
+  }
+  H.push(escStep(st,[c.active?"正在抽：通知上級；>5 分鐘即為癲癇重積":"",c.stage==="refr"?"Refractory：ICU、插管、連續 EEG":"",c.st==="post"?"抽完未恢復：EEG、神經科":""],c.active||c.st==="post"));
+  return H.join("");
+}
+
+const TABS=[{id:"dysp",t:"喘"},{id:"ams",t:"意識改變"},{id:"sz",t:"癲癇／抽搐"},{id:"cp",t:"胸痛"},{id:"hypo",t:"低血壓／休克"},{id:"tachy",t:"心搏過速／心悸"},{id:"brady",t:"心搏過慢"},{id:"syn",t:"暈厥"},{id:"fev",t:"發燒"},{id:"uo",t:"尿少"},{id:"abd",t:"腹痛"},{id:"gib",t:"GI bleeding"},{id:"htn",t:"高血壓"},{id:"hd",t:"頭痛"},{id:"dka",t:"高血糖／血糖控制"},{id:"hk",t:"高血鉀"},{id:"na",t:"低血鈉"},{id:"lyte",t:"其他電解質"},{id:"nv",t:"噁心嘔吐"},{id:"pain",t:"疼痛控制"},{id:"sleep",t:"失眠"},{id:"peri",t:"抗血栓藥圍術期"},{id:"acls",t:"ACLS"},{id:"ana",t:"過敏反應"},{id:"calc",t:"計算工具"},{id:"drug",t:"藥物"},{id:"ref",t:"來源・版本"}];
+const MENU=[["急救",["acls","ana"]],["心血管",["cp","hypo","htn","tachy","brady","syn"]],["呼吸・神經",["dysp","ams","sz","hd"]],["感染・腹部",["fev","abd","gib"]],["腎・電解質・代謝",["uo","hk","na","lyte","dka"]],["症狀照護",["nv","pain","sleep"]],["圍術期",["peri"]],["工具・參考",["calc","drug","ref"]]];
+const MODS=[{id:"dysp",r:()=>renderDysp()},{id:"ams",r:()=>renderAMS()},{id:"cp",r:()=>renderCP(),lab:()=>cpLab()},{id:"fev",r:()=>renderFev(),lab:()=>fevLab()},{id:"uo",r:()=>renderUO(),lab:()=>uoLab()},{id:"abd",r:()=>renderAbd(),lab:()=>abdLab()},{id:"gib",r:()=>renderGIB(),lab:()=>gibLab()},{id:"hypo",r:()=>renderShock(),lab:()=>shockLab()},{id:"tachy",r:()=>renderTachy(),lab:()=>tachyLab()},{id:"brady",r:()=>renderBrady(),lab:()=>bradyLab()},{id:"dka",r:()=>renderDKA(),lab:()=>dkaLab()},{id:"acls",r:()=>renderACLS()},{id:"hk",r:()=>renderHK(),lab:()=>hkLab()},{id:"na",r:()=>renderNa(),lab:()=>naLab()},{id:"lyte",r:()=>renderLyte(),lab:()=>lyteLab()},{id:"htn",r:()=>renderHTN(),lab:()=>htnLab()},{id:"nv",r:()=>renderNV()},{id:"pain",r:()=>renderPain(),lab:()=>painLab()},{id:"sleep",r:()=>renderSleep()},{id:"hd",r:()=>renderHD()},{id:"ana",r:()=>renderAna()},{id:"syn",r:()=>renderSyn(),lab:()=>synLab()},{id:"peri",r:()=>renderPeri()},{id:"sz",r:()=>renderSz()}];
 const YN=[["","—"],["y","是"],["n","否"]];
 function buildPanels(){
   const P={};
@@ -4943,7 +5028,7 @@ function buildPanels(){
       ${sel("a_course","病程",[["","—"],["acute","急性（數小時）"],["fluct","波動"],["subacute","數天漸進"]])}
       ${sel("a_pupil","瞳孔",[["","—"],["normal","正常"],["pin","雙側針孔"],["uni","單側放大／無反射"],["bilat","雙側放大固定"]])}
       ${fld("a_lkw","LKW 距今（小時）")}
-      ${sel("a_seiz","抽搐",[["","—"],["none","無"],["active","正在抽"],["post","抽完未恢復"]])}
+      ${sel("a_seiz","抽搐",[["","—"],["none","無"],["active","正在抽"],["post","抽完未恢復"],["ended","抽完已恢復"]])}
       ${fld("a_seizmin","已抽幾分鐘")}
       ${sel("a_nasx","低血鈉症狀（Na <135 時）",[["","—"],["none","無明顯症狀"],["moderate","中度：噁心、混亂、頭痛"],["severe","嚴重：嘔吐、抽搐、GCS ≤8、心肺窘迫"]])}
     </div>
@@ -5106,6 +5191,14 @@ function buildPanels(){
   </div></div></div>
   <div class="card"><h2>處置流程</h2><div class="cb" id="r-hd"></div></div>`;
   P.calc=calcPanel()+`<div class="card" id="calc-csrs"><h3>Canadian Syncope Risk Score <span class="sub">暈厥 30 天風險（急診驗證）</span></h3><div class="cb">${csrsInputs()}</div><div class="res" id="r-csrs-calc"></div></div>`;
+  P.sz=`<div id="r-rf-sz"></div>${ptCard("sz")}
+  <div class="card"><h3>抽搐 <span class="sub">與意識改變頁同步</span></h3><div class="cb">
+    <div class="grid">${sel("a_seiz","抽搐",[["","—"],["none","無"],["active","正在抽"],["post","抽完未恢復"],["ended","抽完已恢復"]])}${fld("a_seizmin","已抽幾分鐘")}${sel("sz_bzd","已給 benzodiazepine",[["","—"],["0","尚未給"],["1","1 劑"],["2","2 劑"]])}</div>
+    <div class="chks" style="margin-top:6px">${chk("sz_2nd","已給第二線藥仍在抽")}${chk("sz_noiv","沒有 IV 管路")}${chk("sz_first","首次發作")}${chk("sz_known","已知癲癇")}</div>
+  </div></div>
+  <div class="card"><h3>誘因線索</h3><div class="cb"><div class="chks">${chk("a_focal","新的局部神經學症狀")}${chk("a_fall","跌倒或頭部外傷")}${chk("sz_head","已知顱內病灶（腫瘤、中風、術後）")}${chk("sz_fever","發燒或疑中樞感染")}${chk("sz_etoh","酒精或 benzodiazepine 戒斷")}${chk("sz_preg","懷孕 ≥20 週或產後 6 週內")}${chk("sz_miss","漏服或停用抗癲癇藥")}${chk("sz_tram","使用 tramadol")}${chk("sz_cefe","使用 cefepime 且腎功能差")}${chk("sz_carb","使用 valproate 合併 carbapenem")}${chk("hx_cirr","肝硬化")}</div>
+    <div class="grid" style="margin-top:6px">${fld("na","Na（mEq/L）")}${fld("ca","Ca（總鈣，mg/dL）")}${fld("mg","Mg（mg/dL）")}</div></div></div>
+  <div class="card"><h2>處置流程</h2><div class="cb" id="r-sz"></div></div>`;
   P.ana=`<div id="r-rf-ana"></div>${ptCard("ana")}
   <div class="card"><h3>表現與暴露 <span class="sub">勾選後判斷</span></h3><div class="cb">
     <div class="chks">${chk("an_skin","皮膚或黏膜：蕁麻疹、搔癢或潮紅、唇舌或懸雍垂腫")}${chk("an_resp","呼吸：喘、wheeze、stridor、聲音沙啞、低血氧")}${chk("an_cv","循環：低血壓、昏厥、意識改變或失禁")}${chk("an_gi","嚴重腸胃症狀：劇烈腹痛、反覆嘔吐")}${chk("an_expo","數分鐘至數小時前暴露於已知或高度可能的過敏原")}</div>
@@ -5166,6 +5259,7 @@ function renderRefPanel(){
     ["電解質",["spsK","spsMg","sfeHypoCa","sfeHyperCa","ukmiP","eurHypoNaSl","usHypoNa13"]],
     ["高血壓急症、頭痛",["ahaBp24","accHtn25","escHtnEm","urapSmPC","acepHa19","ahs16","pdph24"]],
     ["噁心嘔吐、疼痛、失眠",["ponv20","fdaOnd12","emaMcp13","asaAps16","cdcMme22","nhsPara","beers23","aasm17","zolpPI","belsPI","alosa24","hypDose","zopiSmPC"]],
+    ["癲癇／抽搐",["acep24","acep14","aan15","ncs12","torSE23","mhraVpa","fdaCefe12","tramSz","smiEcl19"]],
     ["過敏反應",["wao20","aaaai23","aaaai20","eaaci21","nice26Ana","glucAna","epipenTW","neffy24"]],
     ["暈厥",["escSyn18","escSyn18t","accSyn17","csrs"]],
     ["抗血栓藥圍術期",["chest22","chestRisk","pause19","bridge15","ehraNoac21","asra25","escNcsAt"]],
@@ -5173,7 +5267,7 @@ function renderRefPanel(){
   ];
   const list=groups.map(([h,ks])=>`<div class="sec">${h}</div><div class="card"><div class="cb small">${ks.map(k=>`<p style="margin:0 0 8px"><b>${esc(REF[k].t)}</b>　${esc(REF[k].f)}${REF[k].u?` <a href="${REF[k].u}" target="_blank" rel="noopener">連結</a>`:""}</p>`).join("")}</div></div>`).join("");
   return `<div class="card"><h2>版本</h2><div class="cb">
-    <div class="kv"><div><div class="k">版本</div>v${APP_VERSION}</div><div><div class="k">最後查證</div>${CHECKED}</div><div><div class="k">涵蓋主訴</div>喘、意識改變、胸痛、低血壓／休克、心搏過速／心悸、心搏過慢、暈厥、高血壓、頭痛、發燒、尿少、腹痛、GI bleeding、高血糖／血糖控制、高血鉀、低血鈉、其他電解質、噁心嘔吐、疼痛控制、失眠、抗血栓藥圍術期、ACLS（含 RSI）、過敏反應；計算工具（點滴速率、升壓藥換算、類固醇、輸血、Canadian Syncope Risk Score）</div></div>
+    <div class="kv"><div><div class="k">版本</div>v${APP_VERSION}</div><div><div class="k">最後查證</div>${CHECKED}</div><div><div class="k">涵蓋主訴</div>喘、意識改變、癲癇／抽搐、胸痛、低血壓／休克、心搏過速／心悸、心搏過慢、暈厥、高血壓、頭痛、發燒、尿少、腹痛、GI bleeding、高血糖／血糖控制、高血鉀、低血鈉、其他電解質、噁心嘔吐、疼痛控制、失眠、抗血栓藥圍術期、ACLS（含 RSI）、過敏反應；計算工具（點滴速率、升壓藥換算、類固醇、輸血、Canadian Syncope Risk Score）</div></div>
     <div class="legend" style="margin-top:8px"><span>${upd("示例")} 2024 年後指引改版、新核准或已發表 phase 3 帶來的改變</span><span>${src("bts","示例")} 點選看完整出處</span><span><abbr class="gl" data-gl="NEWS2">NEWS2</abbr> 點選看縮寫全稱</span></div>
     <div class="note">建議強度標示：AHA/ACC、AHA/ASA＝Class 1／2a／2b／3 ＋ LOE；ESC＝I／IIa／IIb／III；ERS/ATS、GRADE＝strong／conditional；BTS＝Grade A–D。「依輸入推導」的鑑別排序為本工具的規則，不是指引分類。</div>
   </div></div>
@@ -5184,6 +5278,7 @@ function renderRefPanel(){
     <li>新頁「過敏反應」（急救群組）：WAO 2020 診斷條件、依體重 epinephrine IM 劑量（可複製）、refractory 輸注速率（RCUK 2021）、β-blocker 時 glucagon、抗組織胺與類固醇定位、依劑數的觀察時間（NICE 2026）、tryptase 抽血時機與 20%＋2 判讀、出院自動注射器（台灣許可證、健保待確認）。喘、低血壓頁改為連到本頁。</li>
     <li>新頁「暈厥」（心血管群組）：住院病人暈倒情境；ESC 2018 高／低風險特徵分層、姿勢性血壓判讀、住院常見原因（出血、PE、姿勢性、藥物、反射性）與處置；計算工具與本頁加 Canadian Syncope Risk Score（標明急診驗證）。</li>
     <li>新頁「抗血栓藥圍術期」（圍術期群組）：12 種藥依手術出血風險、CrCl、neuraxial 給術前停藥天數與術後恢復時間（CHEST 2022、PAUSE、EHRA 2021、ASRA 2025、ESC 2022 並列），時程摘要與醫囑可複製；warfarin 依 CHEST 2022 栓塞風險判斷 bridging，與 ESC 2022、AHA/ACC 2024 差異並列；冠狀動脈支架時機；急迫手術導向逆轉。</li>
+    <li>新頁「癲癇／抽搐」（呼吸・神經群組）：正在抽依時間分段（0–5 分鐘穩定、benzodiazepine、第二線、refractory），依體重劑量可複製，標示目前階段；抽完未恢復 → EEG；抽完已恢復分首次發作（AAN/AES 2015 復發風險與用藥）與已知癲癇；住院誘因與交互作用（低血糖、低血鈉、子癇 magnesium、tramadol、cefepime、carbapenem＋valproate、戒斷）。意識改變頁改為立即處置＋連到本頁。</li>
     <li>藥物頁：選大類後多一排子分類（例：心血管 → 升壓／強心、心律不整・心搏過慢、靜脈降壓、口服降壓、利尿劑、抗凝・抗血小板），按鈕顯示藥數；新增頁內藥名篩選（學名、商品名或類別，跨所有分類）。lactulose、rifaximin 移到「腸胃・肝」。</li>
     <li>效能：輸入時只重繪目前分頁（每次輸入約 37 ms → 約 2 ms）；切換分頁時重繪該頁。</li>
     <li>測試（v1.0 完整）：fuzz 3,000 組隨機病人 × 48 個輸出區（144,000 次）0 失敗，新增過敏反應、暈厥、抗血栓藥不變式（epinephrine 劑量、WAO 判定、refractory 條件、觀察時數、ESC 高風險、OH 判定、DOAC 停藥天數、dabigatran 依 CrCl、bridging 例外、neuraxial ASRA 時數、急迫手術不列術前天數），5 種刻意改錯均被抓到；Playwright 320／390／768／1280 px 深淺色、所有分頁所有選項、跨頁同步、收合、跳到建議、搜尋、清除後復原、主題切換，無橫向溢出、無 console 錯誤、零網路請求。</li></li></ul>
@@ -5403,7 +5498,7 @@ const SYN=[
   {w:["sepsis","敗血","shock","休克","lactate"],tab:"hypo"},
   {w:["stemi","nstemi","acs","心肌梗塞","troponin","主動脈剝離","dissection"],tab:"cp"},
   {w:["stroke","中風","cva","ich","腦出血","tpa","alteplase","tenecteplase"],tab:"ams",q:/中風|腦出血/},
-  {w:["seizure","癲癇","抽搐","status epilepticus"],tab:"ams",q:/癲癇/},
+  {w:["seizure","癲癇","抽搐","status epilepticus","se","convulsion","keppra","levetiracetam"],tab:"sz"},
   {w:["delirium","譫妄","躁動","agitation"],tab:"ams",q:/譫妄/},
   {w:["gcs","昏迷","coma"],tab:"ams",q:/GCS|神經學評估/},
   {w:["吐血","黑便","血便","melena","hematemesis","ugib","lgib","靜脈瘤","varix"],tab:"gib"},

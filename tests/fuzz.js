@@ -55,6 +55,13 @@ for(const m of A.MODS){ if(MODSEL.length&&!MODSEL.includes(m.id)) continue;
       if(o.an_epi==='3'&&/觀察時間/.test(t)&&!/至少 12 小時/.test(t)) return '>2 劑未列 12 小時';
       if(/Refractory anaphylaxis（/.test(t)&&!(+o.an_epi>=2&&o.an_persist&&!o.an_resolved)) return 'refractory 條件錯';
       if(/目前僅皮膚黏膜症狀/.test(t)&&(o.an_resp||hyp||o.an_gi)) return '有全身症狀仍判僅皮膚'; }
+    // v1.0 癲癇
+    if(m.id==='sz'){ const act=o.a_seiz==='active';
+      if(act!==/5–20 分鐘：benzodiazepine/.test(t)) return '正在抽與 BZD 步驟不一致';
+      const lz=(t.match(/lorazepam ([\d.]+) mg IV/)||[])[1]; if(lz&&+lz>4) return 'lorazepam >4 mg';
+      if(act&&o.sz_2nd&&!/refractory 目前/.test(t)) return '已給第二線未標 refractory';
+      if(o.sz_preg&&o.a_seiz&&!/magnesium sulfate/.test(t)) return '懷孕未提示 magnesium';
+      const lv=(t.match(/levetiracetam ([\d.]+) mg IV/)||[])[1]; if(lv&&+lv>4500) return 'levetiracetam >4500'; }
     // v1.0 暈厥
     if(m.id==='syn'){ const maj=['sy_pain','sy_exert','sy_supine','sy_palp','sy_gib','sy_murmur','sy_shd','hx_hf','sy_e_isch','sy_e_avb','sy_e_brady','sy_e_bbb','sy_e_vt','sy_e_dev','sy_e_brug','sy_e_qt'].some(f=>o[f])||(num(o.sbp)!==null&&num(o.sbp)<90)||(num(o.hr)!==null&&num(o.hr)<40);
       if(maj&&!/高風險 ：早期密集評估/.test(t)) return '有主要高風險特徵未列高風險';
