@@ -173,12 +173,43 @@ footer{color:var(--muted);font-size:12px;padding:10px 0 calc(28px + env(safe-are
 .jump{display:inline-block;border:1px solid var(--accent);background:var(--accent-weak);color:var(--accent);border-radius:6px;padding:1px 8px;font-size:12.5px;font-weight:600;cursor:pointer;margin:2px 2px;line-height:1.6;white-space:nowrap}
 .card.flash,.opt.flash{outline:2px solid var(--accent);outline-offset:2px;transition:outline-color .6s}
 textarea.sbar{width:100%;font:13.5px/1.55 var(--f-mono);color:var(--ink);background:var(--surface2);border:1px solid var(--line);border-radius:8px;padding:8px 10px;resize:vertical}
+/* v1.0 介面：輸入卡收合、搜尋、底部動作列、復原提示 */
+.icol{margin-left:auto;background:var(--surface2);border:1px solid var(--line);border-radius:6px;padding:1px 9px;font-size:12px;font-weight:400;color:var(--accent);cursor:pointer}
+.isum{display:none;padding:9px 14px;font-size:13px;color:var(--muted);cursor:pointer;overflow-wrap:anywhere}
+.isum b{color:var(--ink);font-weight:600;font-family:var(--f-mono)}
+.card.col>.cb{display:none}
+.card.col>.isum{display:block}
+.flash{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+#sq{width:100%;border:1px solid var(--line);background:var(--surface2);border-radius:8px;padding:9px 11px;font-size:16px;min-height:42px}
+#sq:focus{outline:2px solid var(--accent);outline-offset:-1px;background:var(--surface)}
+.sres{list-style:none;margin:8px 0 0;padding:0}
+.sres li{border-bottom:1px dashed var(--line2)}
+.sres li:last-child{border-bottom:0}
+.sres button{display:block;width:100%;text-align:left;background:none;border:0;padding:9px 4px;cursor:pointer;font-size:14px;color:var(--ink)}
+.sres .sp{display:block;font-size:12px;color:var(--muted)}
+.sres .sk{font-size:11px;font-weight:700;color:var(--accent);margin-right:6px}
+#bbar{display:none}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom));z-index:60;background:var(--ink);color:var(--bg);border-radius:999px;padding:8px 16px;font-size:14px;display:flex;gap:14px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:calc(100vw - 32px)}
+.toast[hidden]{display:none}
+.toast button{background:none;border:0;color:var(--bg);font-weight:700;text-decoration:underline;cursor:pointer;padding:4px 2px}
+@media (max-width:919px){
+  #bbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--line);padding:0 max(4px,env(safe-area-inset-right)) env(safe-area-inset-bottom) max(4px,env(safe-area-inset-left))}
+  #bbar button{flex:1 1 0;min-width:0;background:none;border:0;min-height:50px;padding:4px 2px;font-size:13px;color:var(--ink);cursor:pointer;white-space:nowrap}
+  #bbar button:disabled{color:var(--muted);opacity:.6}
+  #bbar #bbClear{color:var(--danger)}
+  body{padding-bottom:calc(52px + env(safe-area-inset-bottom))}
+  #menuBtn,#searchBtn,.strip #sbarBtn,.strip #clearAll{display:none}
+  .toast{bottom:calc(64px + env(safe-area-inset-bottom))}
+}
+.copy{border:1px solid var(--line);background:var(--surface2);border-radius:6px;padding:1px 9px;font-size:12px;cursor:pointer;margin-left:4px;vertical-align:1px}
+pre.ord{white-space:pre-wrap;font:13px/1.55 var(--f-mono);background:var(--surface2);border:1px solid var(--line2);border-radius:7px;padding:7px 9px;margin:6px 0}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <button class="themeBtn menuBtn" id="menuBtn" type="button" aria-label="主訴選單">☰ 主訴</button>
   <div class="brand"><h1>值班常見主訴決策參考</h1><small>On-call Chief Complaint Decision Support</small></div>
+  <button class="themeBtn" id="searchBtn" type="button" aria-label="搜尋">搜尋</button>
   <button class="themeBtn" id="themeBtn" type="button" aria-label="切換深淺色">自動</button>
   <span class="ver" id="ver"></span>
 </div></header>
@@ -189,14 +220,16 @@ textarea.sbar{width:100%;font:13.5px/1.55 var(--f-mono);color:var(--ink);backgro
   <div id="panels" style="margin-top:12px"></div>
   <footer>
     <div>v<span id="ver2"></span>　最後查證日期：<span id="checked"></span></div>
-    <div>主要依據：BTS 氧氣 2017、GOLD 2026、GINA 2026、ESC 心衰竭 2021／2023、AHA/ACC 急性 PE 2026、ESC PE 2019、ERS/ATS NIV 2017、ERS HFNC 2022、BTS 肋膜 2023、AHA/ASA 急性缺血性中風 2026、AHA/ASA 腦出血 2022、AES 癲癇重積 2016、NICE 譫妄、ESAIC 2024、歐洲低血鈉 2014、ADA/EASD 高血糖危象 2024、EASL 肝性腦病變 2022、AHA ACLS 2025、SSC 2026、ACC/AHA ACS 2025、ESC AF 2024、ACC/AHA AF 2023、ESC SVT 2019、ADA 等高血糖危象共識 2024、UKKA 高血鉀 2023、歐洲低血鈉 2014、AHA 急性照護血壓 2024、ESC 高血壓急症 2019、ACEP 頭痛 2019、PONV 共識 2020、APS/ASA 術後疼痛 2016、AGS Beers 2023、ACC/AHA 主動脈 2022、ESC 心肌炎與心包炎 2025、SCCM/IDSA 新發燒 2023、IDSA 嗜中性球低下發燒、IDSA/SHEA C. difficile 2021、KDIGO AKI 2012、UKKA 高血鉀 2023、WSES 腸繫膜缺血 2022、ACG 胰臟炎 2024、TG18、ACG 上／下消化道出血 2021／2023、ESGE 靜脈瘤 2022、ACG-CAG 抗血栓 2022、NEWS2（RCP 2017）、SCCM RSI 2023、AABB 紅血球 2023、AABB/ICTMG 血小板 2025、CHEST 血漿與血小板 2025、ESE/ES 類固醇相關腎上腺功能不全 2024 ／ 健保藥品給付規定。詳見「來源・版本」。</div>
+    <div>主要依據：BTS 氧氣 2017、GOLD 2026、GINA 2026、ESC 心衰竭 2021／2023、AHA/ACC 急性 PE 2026、ESC PE 2019、ERS/ATS NIV 2017、ERS HFNC 2022、BTS 肋膜 2023、AHA/ASA 急性缺血性中風 2026、AHA/ASA 腦出血 2022、AES 癲癇重積 2016、NICE 譫妄、ESAIC 2024、歐洲低血鈉 2014、ADA/EASD 高血糖危象 2024、EASL 肝性腦病變 2022、AHA ACLS 2025、SSC 2026、ACC/AHA ACS 2025、ESC AF 2024、ACC/AHA AF 2023、ESC SVT 2019、ADA 等高血糖危象共識 2024、UKKA 高血鉀 2023、歐洲低血鈉 2014、AHA 急性照護血壓 2024、ESC 高血壓急症 2019、ACEP 頭痛 2019、PONV 共識 2020、APS/ASA 術後疼痛 2016、AGS Beers 2023、ACC/AHA 主動脈 2022、ESC 心肌炎與心包炎 2025、SCCM/IDSA 新發燒 2023、IDSA 嗜中性球低下發燒、IDSA/SHEA C. difficile 2021、KDIGO AKI 2012、UKKA 高血鉀 2023、WSES 腸繫膜缺血 2022、ACG 胰臟炎 2024、TG18、ACG 上／下消化道出血 2021／2023、ESGE 靜脈瘤 2022、ACG-CAG 抗血栓 2022、NEWS2（RCP 2017）、SCCM RSI 2023、AABB 紅血球 2023、AABB/ICTMG 血小板 2025、CHEST 血漿與血小板 2025、ESE/ES 類固醇相關腎上腺功能不全 2024、WAO 2020、AAAAI/ACAAI 2023、NICE NG258 2026、ESC 暈厥 2018、ACC/AHA/HRS 暈厥 2017、CHEST 圍術期抗血栓 2022、EHRA NOAC 2021、ASRA 2025 ／ 健保藥品給付規定。詳見「來源・版本」。</div>
   </footer>
 </div></main>
 <div id="ov" role="dialog" aria-modal="true"><div id="ovBox"></div></div>
+<nav id="bbar" aria-label="快捷列"><button type="button" id="bbMenu">主訴</button><button type="button" id="bbSearch">搜尋</button><button type="button" id="bbJump">跳到建議</button><button type="button" id="bbSbar">SBAR</button><button type="button" id="bbClear">清除</button></nav>
+<div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <script>
 "use strict";
 /* ================= 基本設定 ================= */
-const APP_VERSION="0.9";
+const APP_VERSION="1.0";
 const CHECKED = "2026-10-20";
 
 /* ================= 出處 ================= */
@@ -406,6 +439,14 @@ const S0 = {
   // v0.9 血壓用藥
   bpd_amlo:"", bpd_nife:"", bpd_losa:"", bpd_vals:"", bpd_olme:"", bpd_rami:"", bpd_hctz:"", bpd_inda:"", bpd_biso:"", bpd_carv:"", bpd_labe:"", bpd_spir:"", bpd_doxa:"",
   bp_acei:false, bp_arb:false, bp_ccb:false, bp_thz:false, bp_bb:false, bp_mra:false, bp_ab:false, bp_alb:false, bp_preg:false, bp_gout:false, bp_aki:false,
+  // v1.0 過敏反應、暈厥、抗血栓藥圍術期
+  an_skin:false, an_resp:false, an_cv:false, an_gi:false, an_expo:false, an_trig:"", an_epi:"", an_persist:false, an_resolved:false, an_bb:false, an_biph:false, an_sevresp:false, an_slow:false, an_tryp:null, an_tryb:null,
+  sy_pulse:false, sy_seiz:false, sy_head:false, sy_pain:false, sy_exert:false, sy_supine:false, sy_palp:false, sy_nowarn:false, sy_sit:false, sy_fhx:false, sy_prod:false, sy_trig:false, sy_stand:false, sy_recur:false,
+  sy_shd:false, sy_gib:false, sy_murmur:false, sy_bleed:false, sy_drug:false, sy_ecg_ok:false, sy_e_isch:false, sy_e_avb:false, sy_e_brady:false, sy_e_bbb:false, sy_e_vt:false, sy_e_dev:false, sy_e_brug:false, sy_e_qt:false, sy_e_min1:false, sy_e_min2:false,
+  sy_lsbp:null, sy_ldbp:null, sy_lhr:null, sy_ssbp:null, sy_sdbp:null, sy_shr:null,
+  cs_vv:false, cs_hd:false, cs_bp:false, cs_trop:false, cs_axis:false, cs_qrs:false, cs_qt:false, cs_dx:"",
+  pe_when:"", pe_bleed:"", pe_neur:false, pe_cns:false, pe_warf:false, pe_apix:false, pe_riva:false, pe_edox:false, pe_dabi:false, pe_lmwh:"", pe_ufh:"", pe_asa:false, pe_clop:false, pe_tica:false, pe_pras:false, pe_cilo:false,
+  pe_af:false, pe_strk3:false, pe_rheum:false, pe_mhv:false, pe_mhvpos:"", pe_mhvold:false, pe_mhvrf:false, pe_periTE:false, pe_vte:false, pe_vtet:"", pe_thromS:false, pe_thromN:false, pe_vterec:false, pe_pci:"", pe_pciacs:false,
   // 藥物頁
   dflt:"all", _gcsLast:null
 };
@@ -722,7 +763,8 @@ function redFlags(){
   if(sp!==null && ((onO2()&&(hypercapRisk()?sp<88:sp<=91)) || sp<85)) L.push(`<b>SpO₂ ${sp}%</b>${onO2()?"（已給氧）":""}：提高氧氣、ABG、叫上級；目標 ${o2Target().txt}。${src("bts")}`);
   if(rr!==null && (rr>=25||rr<=8)) L.push(`<b>RR ${rr}</b>：${rr<=8?"呼吸抑制 → 檢查 opioid／鎮靜藥、PaCO₂，必要時 naloxone、輔助通氣":"呼吸窘迫"}。`);
   if(ph!==null && pc!==null && ph<7.35 && pc>45) L.push(`<b>呼吸性酸中毒 pH ${ph}</b>：${(S.med_opioid||S.med_benzo)?"若為 opioid／鎮靜藥造成先 naloxone；":""}考慮 NIV${ph<7.25?"，pH <7.25 需 ICU 層級監測":""}。${src("ersNiv")}`);
-  if(sbp!==null && sbp<=90) L.push(`<b>SBP ${sbp}</b>：休克 → 兩條 IV、輸液、lactate、找原因（敗血、出血、心因、阻塞性）；液體後仍低 → norepinephrine。${src("ssc26")}`);
+  const anaS=!!(S.an_skin||S.an_expo||S.d_allergy);
+  if(sbp!==null && sbp<=90) L.push(anaS?`<b>SBP ${sbp}</b>：疑過敏性休克 → <b>epinephrine IM</b>（見過敏反應頁）、晶體液 500–1,000 mL；兩劑無效 → epinephrine 輸注。${src("rcukAna")}`:`<b>SBP ${sbp}</b>：休克 → 兩條 IV、輸液、lactate、找原因（敗血、出血、心因、阻塞性）；液體後仍低 → norepinephrine。${src("ssc26")}`);
   if(prInUse()) L.push(`<b>使用升壓藥</b>（${prList().map(x=>PR[x.k].n).join("、")}）：ICU 層級照護、動脈導管監測。${src("ssc26hemo")}`);
   if(hr!==null && (hr>=131||hr<=40)) L.push(`<b>HR ${hr}</b>：12 導程 ECG、監視器。`);
   if(t!==null && t<=35) L.push(`<b>體溫 ${t}°C</b>：低體溫，需找原因（敗血、低血糖、甲狀腺功能低下、環境）。`);
@@ -874,7 +916,7 @@ function dyspCard(cs,c){
     o.tags=src("rcukAna")+src("asciaAna");
     o.lead=`<b>adrenaline 0.5 mg IM</b>（1 mg/mL 取 0.5 mL，大腿前外側），5 分鐘無改善重複；停用可疑藥物／輸血；平躺抬腿（呼吸困難可坐）、高流量氧；低血壓給 IV 輸液。`;
     o.rows=[["支氣管痙攣","持續 wheeze：加 inhaled salbutamol（adrenaline 仍為首要）"+src("rcukAna")],["Refractory",`兩劑 IM 後仍有呼吸或循環問題 → 叫上級，IV adrenaline infusion（不建議 IV bolus）＋積極 IV 輸液 ${src("rcukAna")}${src("asciaAna")}`],
-      ["其他",ul([`類固醇不再常規使用；抗組織胺只用於皮膚症狀 ${src("rcukAna")}`,`觀察雙相反應；記錄過敏原並轉介過敏科`])],
+      ["完整流程",tabBtn("ana","過敏反應頁：依體重劑量、refractory 輸注、觀察時間、tryptase")],
       ["健保",nhiLic("adrenaline")]];
     break;
   case "uao":
@@ -3675,7 +3717,7 @@ function prChoiceCard(c,cs){
     sepsis:`<b>敗血性</b>：晶體液後仍低 → <b>norepinephrine</b>（可先周邊）；劑量上升加 <b>vasopressin</b>；仍不足加 <b>epinephrine</b>；IV 類固醇（皆 suggest）${src("ssc26hemo")}`,
     septicCard:`<b>敗血性合併心功能差</b>：norepinephrine 或 epinephrine 皆可第一線（心搏過速偏 NE、心搏過慢偏 epi）；容積與血壓足夠仍低灌流 → dobutamine 加於 NE，或單用 epinephrine ${src("ssc26hemo")}`,
     cardio:`<b>心因性</b>：低灌流 → 強心劑 <b>dobutamine</b>（IIb）；需升壓劑時 <b>norepinephrine</b> 優先（IIb）；避免大量輸液 ${src("escHf")}`,
-    ana:`<b>過敏性</b>：<b>epinephrine 0.5 mg IM</b>，5 分鐘可重複；兩劑 IM 無效 → epinephrine 輸注（依院內 refractory anaphylaxis 流程）${src("rcukAna")}`,
+    ana:`<b>過敏性</b>：<b>epinephrine 0.5 mg IM</b>，5 分鐘可重複；兩劑 IM 無效 → epinephrine 輸注（依院內 refractory anaphylaxis 流程）${src("rcukAna")} ${tabBtn("ana","過敏反應頁")}`,
     bleed:`<b>出血性</b>：<b>止血＋輸血</b>為主；升壓劑僅短暫橋接，不取代補充血液 ${src("aabb23")}`,
     obst:`<b>阻塞性</b>（PE、心包填塞、張力性氣胸）：處理原因（溶栓、穿刺、減壓）；高風險 PE 可用 norepinephrine 及／或 dobutamine ${src("escPe19")}`,
     brady:`<b>心搏過慢</b>：atropine 無效 → <b>dopamine 5–20 µg/kg/min</b> 或 <b>epinephrine 2–10 µg/min</b>、經皮節律器 ${src("ahaAcls25")}`,
@@ -3707,7 +3749,7 @@ function prCaution(){
 
 /* ================= 跨頁：低血壓卡 ================= */
 function hypoX(page){
-  if(page==="hypo"||page==="acls") return "";
+  if(page==="hypo"||page==="acls"||page==="ana") return "";
   const c=shockCtx(); const inUse=prInUse();
   if(!c.hypot && !inUse) return "";
   const L=[]; const w=c.wt;
@@ -3989,7 +4031,7 @@ function sbarText(tabId){
   return L.join("\n");
 }
 /* ================= English duty note ================= */
-const CC_EN={dysp:"Dyspnea",ams:"Altered mental status",cp:"Chest pain",hypo:"Hypotension / shock",tachy:"Tachycardia / palpitations",brady:"Bradycardia",fev:"Fever",uo:"Oliguria",abd:"Abdominal pain",gib:"GI bleeding",htn:"Elevated blood pressure",hd:"Headache",dka:"Hyperglycemia (DKA / HHS)",hk:"Hyperkalemia",na:"Hyponatremia",lyte:"Electrolyte abnormality",nv:"Nausea / vomiting",pain:"Pain control",sleep:"Insomnia",acls:"Cardiac arrest"};
+const CC_EN={dysp:"Dyspnea",ams:"Altered mental status",cp:"Chest pain",hypo:"Hypotension / shock",tachy:"Tachycardia / palpitations",brady:"Bradycardia",fev:"Fever",uo:"Oliguria",abd:"Abdominal pain",gib:"GI bleeding",htn:"Elevated blood pressure",hd:"Headache",dka:"Hyperglycemia (DKA / HHS)",hk:"Hyperkalemia",na:"Hyponatremia",lyte:"Electrolyte abnormality",nv:"Nausea / vomiting",pain:"Pain control",sleep:"Insomnia",acls:"Cardiac arrest",ana:"Anaphylaxis",syn:"Syncope",peri:"Perioperative antithrombotic management"};
 const DDX_EN={ptx:"Tension pneumothorax",pe:"Pulmonary embolism",ana:"Anaphylaxis",uao:"Upper airway obstruction",acs:"ACS / myocardial ischemia",transf:"Transfusion reaction (TACO / TRALI)",hypovent:"Opioid / sedative-induced hypoventilation",ahf:"Acute heart failure / fluid overload",pna:"Pneumonia / aspiration",copd:"COPD exacerbation",asthma:"Asthma exacerbation",metac:"Metabolic acidosis (respiratory compensation)",eff:"Pleural effusion",atel:"Atelectasis (post-op)",anemia:"Anemia / bleeding",
   hypogly:"Hypoglycemia",se:"Status epilepticus",stroke:"Acute stroke",ich:"Intracranial hemorrhage",sed:"Opioid / sedative overdose",hypox:"Hypoxemia / hypercapnia",shock:"Shock / cerebral hypoperfusion",wern:"Wernicke encephalopathy",mening:"CNS infection",dkahhs:"DKA / HHS",dka:"DKA / HHS",hypona:"Hyponatremia",hyperna:"Hypernatremia",hyperca:"Hypercalcemia",sepsis:"Sepsis",he:"Hepatic encephalopathy",uremia:"Uremia",aws:"Alcohol withdrawal",drug:"Drug-induced",delir:"Delirium (underlying cause to be identified)",
   stemi:"STEMI",aad:"Acute aortic syndrome (dissection)",tamp:"Cardiac tamponade",peri:"Myopericarditis",eso:"Esophageal rupture",mins:"Myocardial injury after noncardiac surgery (MINS)",zoster:"Herpes zoster",msk:"Musculoskeletal chest pain",
@@ -4443,9 +4485,411 @@ function renderDrugs(){
 }
 
 /* ================= 分頁 ================= */
-const TABS=[{id:"dysp",t:"喘"},{id:"ams",t:"意識改變"},{id:"cp",t:"胸痛"},{id:"hypo",t:"低血壓／休克"},{id:"tachy",t:"心搏過速／心悸"},{id:"brady",t:"心搏過慢"},{id:"fev",t:"發燒"},{id:"uo",t:"尿少"},{id:"abd",t:"腹痛"},{id:"gib",t:"GI bleeding"},{id:"htn",t:"高血壓"},{id:"hd",t:"頭痛"},{id:"dka",t:"高血糖／血糖控制"},{id:"hk",t:"高血鉀"},{id:"na",t:"低血鈉"},{id:"lyte",t:"其他電解質"},{id:"nv",t:"噁心嘔吐"},{id:"pain",t:"疼痛控制"},{id:"sleep",t:"失眠"},{id:"acls",t:"ACLS"},{id:"calc",t:"計算工具"},{id:"drug",t:"藥物"},{id:"ref",t:"來源・版本"}];
-const MENU=[["急救",["acls"]],["心血管",["cp","hypo","htn","tachy","brady"]],["呼吸・神經",["dysp","ams","hd"]],["感染・腹部",["fev","abd","gib"]],["腎・電解質・代謝",["uo","hk","na","lyte","dka"]],["症狀照護",["nv","pain","sleep"]],["工具・參考",["calc","drug","ref"]]];
-const MODS=[{id:"dysp",r:()=>renderDysp()},{id:"ams",r:()=>renderAMS()},{id:"cp",r:()=>renderCP(),lab:()=>cpLab()},{id:"fev",r:()=>renderFev(),lab:()=>fevLab()},{id:"uo",r:()=>renderUO(),lab:()=>uoLab()},{id:"abd",r:()=>renderAbd(),lab:()=>abdLab()},{id:"gib",r:()=>renderGIB(),lab:()=>gibLab()},{id:"hypo",r:()=>renderShock(),lab:()=>shockLab()},{id:"tachy",r:()=>renderTachy(),lab:()=>tachyLab()},{id:"brady",r:()=>renderBrady(),lab:()=>bradyLab()},{id:"dka",r:()=>renderDKA(),lab:()=>dkaLab()},{id:"acls",r:()=>renderACLS()},{id:"hk",r:()=>renderHK(),lab:()=>hkLab()},{id:"na",r:()=>renderNa(),lab:()=>naLab()},{id:"lyte",r:()=>renderLyte(),lab:()=>lyteLab()},{id:"htn",r:()=>renderHTN(),lab:()=>htnLab()},{id:"nv",r:()=>renderNV()},{id:"pain",r:()=>renderPain(),lab:()=>painLab()},{id:"sleep",r:()=>renderSleep()},{id:"hd",r:()=>renderHD()}];
+/* ================= v1.0 過敏反應分頁 ================= */
+Object.assign(REF,{
+  wao20:{t:"WAO 2020",f:"Cardona V, et al. World Allergy Organization anaphylaxis guidance 2020. World Allergy Organ J 2020;13(10):100472。診斷（符合任一即高度可能）：(1) 急性發作（數分鐘至數小時）皮膚、黏膜或兩者受影響，並合併呼吸窘迫、血壓下降或器官功能不良、或嚴重腸胃症狀（尤其非食物過敏原）之一；(2) 暴露於已知或高度可能過敏原後急性發作低血壓、支氣管痙攣或喉部侵犯，即使無典型皮膚表現。成人低血壓：SBP <90 mmHg 或較基準下降 >30%。Epinephrine（1 mg/mL）0.01 mg/kg IM 大腿中段前外側，成人最大 0.5 mg、兒童 0.3 mg，需要時每 5–15 分鐘重複（WAO 海報）。",u:"https://www.worldallergy.org/media/PDFs/Anaphylaxis_Guidelines_Poster.pdf"},
+  aaaai23:{t:"AAAAI/ACAAI 2023",f:"Golden DBK, Wang J, Waserman S, et al. Anaphylaxis: A 2023 practice parameter update. Ann Allergy Asthma Immunol（2023 線上）. doi:10.1016/j.anai.2023.09.015。Epinephrine 不需等符合診斷條件即可給（Rec 6，conditional／very low）；是否給藥或對藥的反應不可當作診斷依據（Rec 7）；急性 tryptase 儘早抽，理想在發作 2 小時內，另抽基準值（Rec 2，conditional／moderate）；急性值 ≥ 基準 ×1.2＋2 ng/mL 支持肥大細胞活化；雙相反應：症狀完全緩解 ≥1 小時後 48 小時內再發、無再暴露；緩解後觀察 1 小時無症狀之陰性預測值約 95%；初始較嚴重、需 >1 劑 epinephrine 者雙相風險較高；高風險者常規開立 epinephrine 自動注射器（Rec 23），曾需多劑或雙相反應者開 >1 支（Rec 24）；IM epinephrine 嚴重副作用非常罕見，不應因此延遲（Rec 27，strong）；refractory：≥3 劑適當 epinephrine 或已開始 IV 輸注仍持續；圍術期過敏死亡率較高，以抗生素與 NMBA 最常見，過敏原檢測一般於 4–6 週後。",u:"https://www.aaaai.org/Aaaai/media/Media-Library-PDFs/Allergist%20Resources/Statements%20and%20Practice%20Parameters/Anaphylaxis-Practice-Paramaters-2023.pdf"},
+  aaaai20:{t:"AAAAI/ACAAI 2020",f:"Shaker MS, Wallace DV, Golden DBK, et al. Anaphylaxis — a 2020 practice parameter update, systematic review, and GRADE analysis. J Allergy Clin Immunol 2020;145(4):1082–1123。嚴重或需 >1 劑 epinephrine 者延長觀察（Rec 3，conditional／very low；摘要建議高風險者至少 6 小時）；不建議以類固醇或抗組織胺預防雙相反應（Rec 4，conditional／very low）；特定化療藥物（無過敏史）可用抗組織胺及／或類固醇 premedication（Rec 5，conditional／very low）。本工具依 J Hosp Med 摘要核對，原文未取得。",u:"https://doi.org/10.1016/j.jaci.2020.01.017"},
+  eaaci21:{t:"EAACI 2021",f:"EAACI guidelines: Anaphylaxis (2021 update). Allergy 2022;77(2):357–377. doi:10.1111/all.15032。以臨床條件診斷並抽血驗 tryptase；儘早 IM adrenaline 為第一線；高風險者應可取得 adrenaline 自動注射器。（依摘要核對，全文未取得）",u:"https://pubmed.ncbi.nlm.nih.gov/34343358/"},
+  nice26Ana:{t:"NICE NG258 2026",f:"NICE NG258（2026；觀察期建議改編自 RCUK 2021）：單劑 IM adrenaline（發作 30 分鐘內給）且 5–10 分鐘內反應良好、症狀完全緩解、備有 2 支效期內自動注射器並會使用、出院後有人照看 → 自氣道腫脹緩解、呼吸正常、血壓心跳穩定起觀察 2 小時可考慮出院（1.1.7）；需 2 劑或曾有雙相反應 → 症狀緩解後至少 6 小時（1.1.8）；>2 劑的嚴重反應、嚴重氣喘或嚴重呼吸窘迫、過敏原可能持續吸收（如長效劑型）、非上班時段就診、惡化時可能無法求助、出院地點難及時就醫 → 至少 12 小時（1.1.9）。指引全名未在頁面核對。",u:"https://www.nice.org.uk/guidance/ng258/chapter/Period-of-observation"},
+  glucAna:{t:"Glucagon（β-blocker）",f:"使用 β-blocker、對 adrenaline 輸注與足量輸液仍無反應時考慮 glucagon（RCUK 2021，未給劑量）。劑量 1–5 mg IV（5 分鐘以上），之後 5–15 µg/min 輸注；快速給藥易嘔吐（MSD Manual Professional 引述，原始出處請確認）。注意高血糖、低鉀、低鈣。",u:"https://www.merckmanuals.com/professional/immunology-allergic-disorders/allergic-autoimmune-and-other-hypersensitivity-disorders/anaphylaxis"},
+  epipenTW:{t:"EpiPen 台灣許可證",f:"艾筆腎上腺素注射筆 0.3 毫克／次（EpiPen Epinephrine Auto-Injector），衛署藥輸字第 025223 號；大腿前外側 IM，可隔衣物；兒童 ≥30 kg 用 0.3 mg。光田醫院藥品資訊列為自費；健保給付待確認；0.15 mg 劑型在台許可狀態未查到。",u:"https://mcp.fda.gov.tw/im_detail_1/%E8%A1%9B%E7%BD%B2%E8%97%A5%E8%BC%B8%E5%AD%97%E7%AC%AC025223%E8%99%9F"},
+  neffy24:{t:"FDA neffy 2024",f:"2024-08-09 美國 FDA 核准 neffy（epinephrine 鼻噴劑 2 mg），用於體重 ≥30 kg 之 type I 過敏反應（含 anaphylaxis）緊急治療，為第一個非注射劑型。台灣 TFDA 許可狀態未查到（請確認）。",u:"https://www.upi.com/health_news/2024/08/09/fda-approves-nasal-epinephrine-anaphylaxis/5971723228413"}
+});
+REF.rcukAna.f="Resuscitation Council UK. Emergency treatment of anaphylaxis: guidelines for healthcare providers (2021)。成人 adrenaline 0.5 mg IM（1 mg/mL 0.5 mL）大腿前外側，5 分鐘無改善重複；平躺抬腿，呼吸困難可坐起，不可突然站立；低血壓、休克或對第一劑反應差 → 非含糖晶體液 500–1,000 mL 快速輸注（嚴重休克可能需 3–5 L）。Refractory：兩劑適當 IM adrenaline 後仍有呼吸或循環問題 → 專家協助下 IV adrenaline 輸注：1 mg 加入 0.9% NaCl 100 mL（10 µg/mL），獨立管路、幫浦，不與量血壓同側；中度 0.5 mL/kg/h 起（約 0.1 µg/kg/min），低血壓或低血氧 1 mL/kg/h；每次調整後 5–10 分鐘達穩態；改善後減至約一半，症狀全部緩解 1 小時後 30 分鐘內逐步停。不建議 IV bolus（非心跳停止）。抗組織胺非初始急救，穩定後可用非鎮靜口服（cetirizine 10–20 mg）處理皮膚症狀，避免快速 IV chlorphenamine（低血壓）；類固醇不建議常規使用，refractory 或持續氣喘、休克時可考慮，不可取代 adrenaline。β-blocker 對輸注與輸液無反應 → 考慮 glucagon。雙相反應約 5%，中位約 12 小時。Tryptase：至少 1 次（理想 2 小時內、最遲 4 小時）；理想 3 次：儘早、1–2 小時（≤4 小時）、緩解後 ≥24 小時（基準）；正常值不排除過敏。觀察期依劑數分層 2／6／12 小時。";
+Object.assign(GLOSS,{"NMBA":"neuromuscular blocking agent，神經肌肉阻斷劑","ADR":"adverse drug reaction，藥物不良反應"});
+const cpBtn = t => `<button type="button" class="copy" data-copy="${esc(t)}">複製</button>`;
+const AN_TRIG={abx:"抗生素",contrast:"顯影劑",blood:"輸血",periop:"術中（NMBA、抗生素等）",chemo:"化療或生物製劑",nsaid:"NSAID",food:"食物",insect:"昆蟲叮螫",unk:"不明"};
+function anaCtx(){
+  const sbp=num(S.sbp), w=num(S.wt), sp=num(S.spo2);
+  const hypot=(sbp!==null&&sbp<90)||!!S.an_cv;
+  const nEpi=S.an_epi===""?null:+S.an_epi;
+  const bb=!!(S.an_bb||S.bp_bb||S.bpd_biso||S.bpd_carv||S.bpd_labe);
+  const c1=!!(S.an_skin&&(S.an_resp||hypot||S.an_gi));
+  const c2=!!(S.an_expo&&(hypot||S.an_resp));
+  const dose=(w!==null&&w>0)?Math.min(0.5,Math.round(w*0.01*100)/100):0.5;
+  const persist=!!S.an_persist&&!S.an_resolved;
+  const refr=nEpi!==null&&nEpi>=2&&persist;
+  const lowO2=sp!==null&&sp<94;
+  const any=!!(S.an_skin||S.an_resp||S.an_cv||S.an_gi||S.an_expo||nEpi!==null);
+  return {sbp,w,sp,hypot,nEpi,bb,c1,c2,dose,persist,refr,lowO2,any};
+}
+function anaObs(c){
+  if(c.nEpi===null||c.nEpi===0) return null;
+  const R=[];
+  if(c.nEpi>=3) R.push(">2 劑 epinephrine"); if(S.an_sevresp) R.push("嚴重氣喘或嚴重呼吸窘迫"); if(S.an_slow) R.push("過敏原可能持續吸收");
+  if(R.length) return {h:12,why:R,ref:"1.1.9"};
+  if(c.nEpi===2) R.push("需 2 劑"); if(S.an_biph) R.push("曾有雙相反應");
+  if(R.length) return {h:6,why:R,ref:"1.1.8"};
+  return {h:2,why:["單劑"],ref:"1.1.7"};
+}
+function renderAna(){
+  const c=anaCtx(); const H=[]; const st=stepper(); const crit=c.c1||c.c2;
+  const d=fmt(c.dose,2);
+  const doseTxt=`epinephrine ${d} mg IM（1 mg/mL 取 ${d} mL）`;
+  const ord=`Epinephrine (1 mg/mL) ${d} mg (${d} mL) IM 大腿前外側 st；5 分鐘無改善可重複`;
+  const skinOnly=S.an_skin&&!S.an_resp&&!c.hypot&&!S.an_gi&&!(c.nEpi>0);
+  if(skinOnly) H.push(st({k:"wait",t:"目前僅皮膚黏膜症狀",c:ul([`停用可疑藥物、顯影劑或輸血，保留 IV 管路`,`每 5–15 分鐘量生命徵象，觀察呼吸、循環、腸胃症狀`,`皮膚症狀：非鎮靜口服抗組織胺（cetirizine 10 mg）${src("rcukAna")}`,`<b>出現呼吸、循環或嚴重腸胃症狀 → 立即 ${doseTxt}</b>，大腿前外側 ${cpBtn(ord)}`]),x:`臨床懷疑過敏性反應時不需等符合診斷條件即可給 epinephrine ${src("aaaai23","Rec 6・conditional")}`}));
+  else H.push(st({k:(crit||c.hypot||S.an_resp)?"bx":"go",t:"立即處置（不需等符合診斷條件）",
+    c:ul([`<b>${doseTxt}</b>，大腿中段前外側；${c.w===null?"未填體重，以成人 0.5 mg 計":`0.01 mg/kg × ${c.w} kg，上限 0.5 mg`}；<b>5 分鐘</b>無改善重複 ${src("rcukAna")}${src("wao20")} ${cpBtn(ord)}`,
+      `停止可疑藥物、顯影劑或輸血，保留 IV 管路；呼叫支援${S.an_trig==="blood"?"；保留血袋與輸血管路，依院內輸血反應流程通知血庫":""}`,
+      `平躺抬腿；呼吸困難可半坐；不可突然站起或行走 ${src("rcukAna")}`,
+      `高流量氧氣，心電、血壓、SpO₂ 監測；低血壓或對第一劑反應差 → <b>晶體液 500–1,000 mL</b> 快速輸注 ${src("rcukAna")}`]),
+    x:`懷疑就給：符合診斷條件不是給藥前提，對藥的反應也不能用來診斷 ${src("aaaai23","Rec 6–7・conditional")}`}));
+  let dx;
+  if(!c.any) dx=`<span class="muted">勾選表現與暴露後判斷。</span>`;
+  else if(crit) dx=`<b>符合${[c.c1&&"條件 1（皮膚黏膜＋呼吸、循環或嚴重腸胃症狀）",c.c2&&"條件 2（暴露後低血壓、支氣管痙攣或喉部侵犯）"].filter(Boolean).join("、")}</b>：anaphylaxis 高度可能。`;
+  else if(skinOnly) dx=`<span class="cau">只有皮膚黏膜症狀、生命徵象穩定：未符合 WAO 條件</span>，處置見上。`;
+  else dx=`<span class="cau">目前未符合 WAO 條件</span>；臨床仍懷疑過敏時仍可給 epinephrine ${src("aaaai23","Rec 6")}。`;
+  H.push(st({k:"info",t:"診斷條件（WAO 2020）",c:dx,x:`低血壓：SBP <90 或較基準下降 >30%。${S.an_trig?`可疑誘因：${AN_TRIG[S.an_trig]}。`:""}`,why:src("wao20")+src("eaaci21")}));
+  if(c.refr){
+    const r1=c.w!==null?`${fmt(c.w*0.5,0)} mL/h`:"0.5 mL/kg/h", r2=c.w!==null?`${fmt(c.w,0)} mL/h`:"1 mL/kg/h";
+    const hi=c.hypot||c.lowO2;
+    const ord2=`Epinephrine 1 mg + NS 100 mL (10 µg/mL) IV pump，獨立管路；start ${hi?r2:r1}${c.w!==null?`（${hi?"1":"0.5"} mL/kg/h）`:""}，每 5–10 分鐘依反應調整`;
+    H.push(st({k:"bx",t:"Refractory anaphylaxis（兩劑 IM 後仍有呼吸或循環問題）",c:ul([`<b>叫上級、ICU／麻醉科</b>；持續積極輸液`,
+      `<b>epinephrine 輸注</b>：1 mg 加入 NS 100 mL（10 µg/mL），獨立管路、幫浦；起始 <b>${hi?r2:r1}</b>（${hi?"低血壓或低血氧：1 mL/kg/h":"0.5 mL/kg/h，約 0.1 µg/kg/min"}）${hi?"":`；低血壓或低血氧改 ${r2}`}；每次調整等 5–10 分鐘 ${src("rcukAna")}${src("asciaAna")} ${cpBtn(ord2)}`,
+      `不建議 IV bolus（非心跳停止）${src("asciaAna")}`,
+      c.bb?`<b>使用 β-blocker</b>：輸注與輸液仍無反應 → <b>glucagon 1–5 mg IV</b>（5 分鐘以上），之後 5–15 µg/min；易嘔吐 ${src("glucAna")}`:"",
+      S.an_resp?`持續 wheeze：吸入 salbutamol；此時可考慮類固醇（不可取代 epinephrine）${src("rcukAna")}`:""]),
+      x:`低血氧依 SpO₂ <94% 判定（本工具取法）。AAAAI 2023 refractory 定義：≥3 劑適當 epinephrine 或已開始 IV 輸注仍持續 ${src("aaaai23")}`}));
+  } else if(c.nEpi===1&&c.persist){
+    H.push(st({k:"bx",t:"第一劑後仍有症狀",c:ul([`5 分鐘後給第 2 劑 <b>${doseTxt}</b> ${cpBtn(ord)}`,`晶體液 500–1,000 mL；叫上級，準備 epinephrine 輸注 ${src("rcukAna")}`])}));
+  }
+  if(S.an_persist&&S.an_resolved) H.push(`<div class="alert a-warn">「仍有症狀」與「已完全緩解」同時勾選，請擇一。</div>`);
+  H.push(`<div class="sec">其他藥物</div>`+optCard({cls:"",title:"抗組織胺、類固醇、支氣管擴張劑",tags:src("rcukAna")+src("aaaai20"),open:true,lead:"不是第一線，不能取代或延遲 epinephrine。",
+    rows:[["抗組織胺",`不改善呼吸道或循環；穩定後皮膚症狀用非鎮靜口服（cetirizine 10 mg）；避免快速 IV chlorphenamine（低血壓）${src("rcukAna")}`],
+      ["類固醇",`不常規使用；不能預防雙相反應 ${src("aaaai20","Rec 4・conditional")}；refractory、持續氣喘或休克時可考慮 ${src("rcukAna")}`],
+      ["支氣管痙攣",`epinephrine 後仍 wheeze → 吸入 salbutamol ${src("rcukAna")}`]]}));
+  const ob=anaObs(c);
+  H.push(st({k:ob&&ob.h>=6?"wait":"info",t:"觀察時間（症狀完全緩解後起算）",
+    c:ob?`<b>至少 ${ob.h} 小時</b>心電與血壓監測（${ob.why.join("、")}）${src("nice26Ana",ob.ref)}${ob.h===2?`<div class="small muted">2 小時僅適用：發作 30 分鐘內給藥、5–10 分鐘內反應良好且完全緩解；否則至少 6 小時。</div>`:""}`:`<span class="muted">選「已給 IM epinephrine」劑數後顯示。</span>`,
+    x:`雙相反應約 5%，中位約 12 小時 ${src("rcukAna")}；嚴重或需 >1 劑者延長觀察 ${src("aaaai20","Rec 3・conditional")}。住院病人：交班時註明雙相反應風險。`}));
+  const ta=num(S.an_tryp), tb=num(S.an_tryb);
+  let tr="";
+  if(ta!==null&&tb!==null){ const thr=tb*1.2+2; tr=`<div class="hl">急性 ${ta} ng/mL；門檻 ${fmt(thr,1)}（基準 ${tb} × 1.2 ＋ 2）→ ${ta>=thr?"<b>支持肥大細胞活化</b>":"<b>未達門檻</b>（不排除過敏）"} ${src("aaaai23")}</div>`; }
+  H.push(st({k:"info",t:"Tryptase",c:ul([`第 1 次：儘早（不延誤治療）`,`第 2 次：發作後 1–2 小時（最遲 4 小時）`,`第 3 次：緩解後 ≥24 小時或回診時（基準值）`])+tr,
+    x:`至少抽 1 次，理想在 2 小時內 ${src("aaaai23","Rec 2・conditional")}${src("rcukAna")}；記錄發作與抽血時間；正常值不排除過敏。`}));
+  const F=[`病歷與手圈記錄<b>藥物過敏</b>（藥名、反應、日期），避免再次使用；依院內流程通報 ADR`,
+    `轉介過敏免疫專科評估（本工具建議，依院內流程）`,
+    `出院帶 <b>epinephrine 自動注射器</b>並教導使用：曾需多劑或雙相反應者開 >1 支 ${src("aaaai23","Rec 23–24")}；NICE 以 2 支為出院條件之一 ${src("nice26Ana","1.1.7")}`,
+    `台灣：EpiPen 0.3 mg 有輸入許可證，健保給付待確認（常為自費）${src("epipenTW")}；epinephrine 鼻噴劑 neffy 已獲 FDA 核准，台灣未查到 ${upd("2024-08 FDA 核准第一個非注射 epinephrine（neffy 鼻噴劑 2 mg，≥30 kg）；台灣許可狀態未查到")}${src("neffy24")}`];
+  if(S.an_trig==="periop") F.push(`術中過敏：通知麻醉科；死亡率較其他過敏高；抗生素與 NMBA 最常見，過敏原檢測約 4–6 週後 ${src("aaaai23")}`);
+  if(S.an_trig==="chemo") F.push(`化療藥物：日後是否 premedication 與腫瘤科討論 ${src("aaaai20","Rec 5・conditional")}`);
+  if(S.an_trig==="contrast") F.push(`顯影劑：病歷註記；日後需顯影檢查時與放射科討論替代或預防方案`);
+  if(S.an_trig==="blood") F.push(`輸血：依院內輸血反應流程送檢；日後輸血前與血庫討論`);
+  H.push(st({k:"info",t:"後續",c:ul(F)}));
+  H.push(escStep(st,[c.refr?"Refractory anaphylaxis：ICU":"",S.an_cv&&!(c.sbp!==null&&c.sbp<=90)?"循環受影響：ICU 層級評估":"",S.an_resp&&c.lowO2?"呼吸道受侵犯合併低血氧：準備困難氣道，通知麻醉科":""],c.refr||c.hypot));
+  return H.join("");
+}
+
+/* ================= v1.0 暈厥分頁 ================= */
+Object.assign(REF,{
+  escSyn18:{t:"ESC 暈厥 2018",f:"Brignole M, et al. 2018 ESC Guidelines for the diagnosis and management of syncope. Eur Heart J 2018;39:1883–1948. doi:10.1093/eurheartj/ehy037。初始評估：病史、理學檢查含站立血壓、12 導程 ECG。站立測試：平躺與主動站立 3 分鐘間歇量血壓心跳（I, C）；異常：SBP 下降 ≥20 或 DBP 下降 ≥10 mmHg，或 SBP <90 mmHg（平躺 SBP <110 時尤其有用）；心跳上升不足（通常 ≤10/min）提示神經性 OH；重現症狀可確診 OH 暈厥（I, C）。ECG 診斷心律性暈厥（I, C）：清醒時竇性 <40/min 或停頓 >3 s、Mobitz II 或三度 AV block、左右束支交替、VT 或快速 PSVT、非持續多形性 VT 或長／短 QT、節律器或 ICD 故障合併停頓。急診分層（Table 6）：低風險 → 可出院（I, B）；高風險 → 早期密集評估（暈厥單位、急診觀察或住院）（I, B）；兩者皆無 → 觀察而非住院（I, B）；風險分數可考慮（IIb, B），不宜單獨使用。高風險特徵疑心律性暈厥者應住院心電監測。",u:"https://academic.oup.com/eurheartj/article/39/21/1883/4939241"},
+  escSyn18t:{t:"ESC 2018 Table 6",f:"ESC 2018 暈厥高／低風險特徵（依 Exploration of Cardiology 2026 轉載之 Table 6 整理）。主要高風險：事件—新發胸痛、喘、腹痛或頭痛；運動中或平躺時暈厥；突發心悸後立即暈厥。病史—嚴重結構性或冠狀動脈疾病（心衰竭、LVEF 低、曾 MI）。理學—急診中不明原因 SBP <90；肛診疑消化道出血；清醒時持續心搏過慢 <40（非運動員）；未診斷之收縮期雜音。ECG—急性缺血變化；Mobitz II 或三度 AV block；slow AF <40；清醒持續竇性 <40、竇房阻滯或停頓 >3 s；束支阻滯、心室內傳導延遲、心室肥厚或 Q 波；持續或非持續 VT；植入裝置功能異常；Brugada type 1；重複 ECG QTc >460 ms。次要（僅在合併結構性心臟病或 ECG 異常時為高風險；ECG 次要特徵僅在病史疑心律性暈厥時）：無或極短（<10 s）前驅、年輕猝死家族史、坐姿暈厥；Mobitz I 或 PR 明顯延長、無症狀輕度竇性心搏過慢或 slow AF（40–50）、PSVT 或 AF、預激、短 QTc（≤340）、非典型 Brugada、ARVC 特徵。低風險：反射性前驅（頭暈、熱、冒汗、噁心、嘔吐）、誘因（不悅刺激、久站、悶熱擁擠、用餐、咳嗽、排便、排尿）、轉頭或頸動脈受壓、由躺或坐起身；長期反覆且特徵相同；無結構性心臟病；理學與 ECG 正常。",u:"https://www.explorationpub.com/Journals/Tables/1012114/t1"},
+  accSyn17:{t:"ACC/AHA/HRS 暈厥 2017",f:"Shen WK, et al. 2017 ACC/AHA/HRS Guideline for the Evaluation and Management of Patients With Syncope. Circulation 2017;136:e60–e122。初始評估含 12 導程 ECG（Class I）；詳細病史與理學含姿勢性生命徵象；不建議常規全套檢驗（Class III: No Benefit），依臨床選擇檢驗；無局部神經學表現時不常規做腦部影像或 EEG；疑心因時做心臟超音波；疑心因者急性照護場所心電監測；有嚴重內科情況（心律不整、心肌缺血、嚴重主動脈瓣狹窄、急性心衰竭等）住院評估；中度風險可用急診觀察流程。（強度除 ECG 與常規檢驗外依 The Hospitalist 摘要，未逐條核對）",u:"https://blogs.the-hospitalist.org/content/management-adults-syncope"},
+  csrs:{t:"Canadian Syncope Risk Score",f:"Thiruganasambandamoorthy V, et al. CMAJ 2016;188:E289–E298（推導，4,030 名急診成人）；JAMA Intern Med 2020;180:737–744（9 家急診 3,819 人前瞻驗證，AUC 0.91）。項目：易有血管迷走症狀（悶熱擁擠、久站、恐懼、情緒或疼痛誘發）−1；心臟病史 +1；任何 SBP <90 或 >180 +2；troponin >第 99 百分位 +2；QRS 軸 <−30° 或 >100° +1；QRS >130 ms +1；QTc >480 ms +2；急診診斷血管迷走性 −2、心因性 +2。30 天嚴重不良事件：≤−2 極低 0.2%、−1–0 低 0.7%、1–3 中 8%、4–5 高 19%、≥6 極高 51%（依 AAFP 2021 摘要）。僅在急診病人驗證。",u:"https://www.aafp.org/pubs/afp/issues/2021/0315/p375.html"}
+});
+Object.assign(GLOSS,{"OH":"orthostatic hypotension，姿勢性低血壓","CSRS":"Canadian Syncope Risk Score","SHD":"structural heart disease，結構性心臟病","ARVC":"arrhythmogenic right ventricular cardiomyopathy"});
+const SY_MAJ=[["sy_pain","新發胸痛、喘、腹痛或頭痛"],["sy_exert","運動或用力時暈厥"],["sy_supine","平躺時暈厥"],["sy_palp","突發心悸後立即暈厥"],["sy_gib","肛診或黑便疑消化道出血"],["sy_murmur","未診斷之收縮期雜音"]];
+const SY_ECGMAJ=[["sy_e_isch","急性缺血變化"],["sy_e_avb","Mobitz II 或三度 AV block"],["sy_e_brady","清醒竇性 <40、停頓 >3 s 或 slow AF <40"],["sy_e_bbb","束支阻滯、IVCD、心室肥厚或 Q 波"],["sy_e_vt","持續或非持續 VT"],["sy_e_dev","節律器／ICD 功能異常"],["sy_e_brug","Brugada type 1"],["sy_e_qt","QTc >460 ms（重複 ECG）"]];
+const SY_ECGMIN=[["sy_e_min1","Mobitz I、PR 明顯延長、無症狀 HR 40–50 或 slow AF 40–50"],["sy_e_min2","PSVT 或 AF、預激、短 QT、非典型 Brugada、ARVC 特徵"]];
+function ohCalc(){
+  const s1=num(S.sy_lsbp), d1=num(S.sy_ldbp), s3=num(S.sy_ssbp), d3=num(S.sy_sdbp), h1=num(S.sy_lhr), h3=num(S.sy_shr);
+  if(s1===null||s3===null) return null;
+  const ds=s1-s3, dd=(d1!==null&&d3!==null)?d1-d3:null, dh=(h1!==null&&h3!==null)?h3-h1:null;
+  const oh=ds>=20||(dd!==null&&dd>=10)||s3<90;
+  return {s1,s3,ds,dd,dh,oh,neuro:oh&&dh!==null&&dh<=10};
+}
+function synCtx(){
+  const shd=!!(S.sy_shd||S.hx_hf), sbp=num(S.sbp), hr=num(S.hr), glu=num(S.glu);
+  const maj=SY_MAJ.filter(x=>S[x[0]]).map(x=>x[1]);
+  if(shd) maj.push("嚴重結構性心臟病或冠心病");
+  if(sbp!==null&&sbp<90) maj.push(`不明原因 SBP ${sbp}`);
+  if(hr!==null&&hr<40) maj.push(`HR ${hr}（清醒時 <40）`);
+  const ecgMaj=SY_ECGMAJ.filter(x=>S[x[0]]).map(x=>x[1]);
+  const ecgMin=SY_ECGMIN.filter(x=>S[x[0]]).map(x=>x[1]);
+  const ecgAbn=ecgMaj.length>0||ecgMin.length>0;
+  const minEvt=[S.sy_nowarn&&"無或極短（<10 s）前驅",S.sy_fhx&&"年輕猝死家族史",S.sy_sit&&"坐姿暈厥"].filter(Boolean);
+  const arrHx=!!(S.sy_nowarn||S.sy_palp||S.sy_exert||S.sy_supine||S.sy_sit);
+  const minHigh=(shd||ecgAbn)?minEvt:[];
+  const ecgMinHigh=arrHx?ecgMin:[];
+  const low=[S.sy_prod&&"典型反射性前驅",S.sy_trig&&"情境誘因",S.sy_stand&&"由躺或坐起身時",S.sy_recur&&"長期反覆、特徵相同",S.sy_ecg_ok&&"ECG 正常"].filter(Boolean);
+  const high=maj.length+ecgMaj.length+minHigh.length+ecgMinHigh.length>0;
+  const other=!!(S.sy_bleed||S.sy_gib||S.sy_seiz||(glu!==null&&glu<70));
+  const tier=high?"high":(low.length&&!ecgAbn&&!shd&&!other?"low":(maj.length||low.length||minEvt.length||ecgAbn||S.sy_ecg_ok)?"mid":null);
+  const oh=ohCalc();
+  const any=!!(tier||oh||S.sy_pulse||S.sy_seiz||S.sy_head||S.sy_drug||S.sy_bleed);
+  return {shd,sbp,hr,glu,maj,ecgMaj,ecgMin,minEvt,minHigh,ecgMinHigh,low,high,tier,oh,any,ecgAbn,arrHx,other};
+}
+function csrsCalc(){
+  const sbp=num(S.sbp);
+  const it=[]; let s=0; const add=(c,p,l)=>{ if(c){ s+=p; it.push(`${l} ${p>0?"+":""}${p}`); } };
+  add(S.cs_vv,-1,"易有血管迷走症狀"); add(S.cs_hd,1,"心臟病史"); add(S.cs_bp||(sbp!==null&&(sbp<90||sbp>180)),2,"SBP <90 或 >180");
+  add(S.cs_trop,2,"troponin >99th"); add(S.cs_axis,1,"QRS 軸異常"); add(S.cs_qrs,1,"QRS >130 ms"); add(S.cs_qt,2,"QTc >480 ms");
+  add(S.cs_dx==="vv",-2,"診斷血管迷走性"); add(S.cs_dx==="card",2,"診斷心因性");
+  const cat=s<=-2?["極低","0.2%"]:s<=0?["低","0.7%"]:s<=3?["中","8%"]:s<=5?["高","19%"]:["極高","51%"];
+  return {s,it,cat,started:it.length>0||S.cs_dx!==""};
+}
+function csrsBox(){
+  const r=csrsCalc();
+  return `<div class="kv"><div><div class="k">CSRS</div><span class="big">${r.s}</span><span class="unit">（−3 至 11）</span></div><div><div class="k">30 天嚴重不良事件</div><b>${r.cat[0]}風險 ${r.cat[1]}</b></div></div>
+  <div class="note">${r.it.length?r.it.join("、"):"尚未勾選項目（全部未勾 = 0 分）"}。僅在急診病人驗證，住院病人僅供參考；ESC 2018：風險分數可考慮（IIb），不宜單獨使用 ${src("csrs")}${src("escSyn18","IIb")}</div>`;
+}
+function csrsInputs(){
+  return `<div class="chks">${chk("cs_vv","易有血管迷走症狀（悶熱擁擠、久站、恐懼、情緒或疼痛誘發）")}${chk("cs_hd","心臟病史（冠心病、心律不整、心衰竭、瓣膜疾病）")}${chk("cs_bp","任何一次 SBP <90 或 >180（病人資料 SBP 也會自動判定）")}${chk("cs_trop","Troponin >第 99 百分位")}${chk("cs_axis","QRS 軸 <−30° 或 >100°")}${chk("cs_qrs","QRS >130 ms")}${chk("cs_qt","QTc >480 ms")}</div>
+  <div class="grid">${sel("cs_dx","目前診斷",[["","未確定"],["vv","血管迷走性"],["card","心因性"]])}</div>`;
+}
+function synCauses(c){
+  const {L,push}=causeList();
+  const post=postop(), ac=!!S.med_ac;
+  push("arrest",S.sy_pulse?"must":null,"未恢復意識或無脈搏",["不是暈厥：依 ACLS"]);
+  push("hypo",c.glu!==null&&c.glu<70?"must":null,"低血糖",[`血糖 ${c.glu}`]);
+  push("cardiac",c.high?"must":((c.shd||c.ecgAbn)?"consider":null),"心因性（心律不整、結構性）",c.maj.concat(c.ecgMaj,c.minHigh,c.ecgMinHigh).slice(0,5));
+  push("bleed",(S.sy_bleed||S.sy_gib)?"must":((post||ac)&&(c.sbp!==null&&c.sbp<100||num(S.hr)!==null&&num(S.hr)>100)?"consider":null),"出血／低血容",[S.sy_bleed&&"術後出血或 Hb 下降",S.sy_gib&&"疑消化道出血",post&&`POD ${num(S.pod)}`,ac&&"使用抗凝血劑"]);
+  push("pe",(post||S.hx_vte||S.hx_cancer)&&((num(S.hr)!==null&&num(S.hr)>100)||(num(S.spo2)!==null&&num(S.spo2)<94)||S.sy_pain)?"consider":null,"肺栓塞",[post&&"術後",S.hx_vte&&"曾 VTE",num(S.hr)!==null&&num(S.hr)>100&&`HR ${num(S.hr)}`,num(S.spo2)!==null&&num(S.spo2)<94&&`SpO₂ ${num(S.spo2)}%`]);
+  push("seiz",S.sy_seiz?"likely":null,"癲癇發作（非暈厥）",["抽搐、舌咬傷或發作後混亂"]);
+  push("oh",(c.oh&&c.oh.oh)?"likely":(S.sy_stand||S.sy_drug?"consider":null),"姿勢性低血壓",[c.oh&&c.oh.oh&&`站立 SBP ${c.oh.s1}→${c.oh.s3}`,S.sy_stand&&"起身時發生",S.sy_drug&&"新加或調升降壓、利尿、α-blocker、鎮靜藥"]);
+  push("reflex",(S.sy_prod||S.sy_trig)&&!c.high?"likely":null,"反射性（血管迷走、情境性）",[S.sy_prod&&"典型前驅",S.sy_trig&&"情境誘因（排尿、排便、咳嗽、疼痛、抽血、久站）"]);
+  return L;
+}
+function synCard(cs,c){
+  const o={rows:[]};
+  switch(cs.id){
+  case "arrest": o.lead=`檢查脈搏，無脈搏立即 CPR ${tabBtn("acls","ACLS")}`; break;
+  case "hypo": o.lead=`立即處理低血糖（口服 15–20 g 或 D50W IV），15 分鐘後複測 ${jump("dka","dka-gluc","血糖控制")}`; break;
+  case "cardiac": o.tags=src("escSyn18","I")+src("accSyn17");
+    o.lead=`<b>持續心電監測</b>、通知上級，早期心臟科評估；12 導程 ECG 對照舊圖；驗 K、Mg${S.sy_pain?"、troponin":""}；疑結構性心臟病（雜音、心衰竭）安排心臟超音波。`;
+    o.rows=[["ECG 可確診",`清醒竇性 <40 或停頓 >3 s、Mobitz II／三度 AV block、左右束支交替、VT 或快速 PSVT、非持續多形性 VT、長／短 QT、節律器故障合併停頓 ${src("escSyn18","I, C")}`],
+      ["相關頁面",`${tabBtn("brady","心搏過慢")}${tabBtn("tachy","心搏過速")}${S.sy_pain?tabBtn("cp","胸痛"):""}`]]; break;
+  case "bleed": o.lead=`Hb、凝血功能；檢查傷口、引流量、黑便；備血。${tabBtn("gib","GI bleeding")}${S.med_ac?tabBtn("peri","抗血栓藥"):""}`; break;
+  case "pe": o.lead=`術後或 VTE 風險加上心搏過速、低血氧或胸痛 → 評估 PE（Wells／YEARS、CTPA）${tabBtn("dysp","喘：PE")}`; break;
+  case "seiz": o.lead=`以癲癇處理：見意識改變頁 ${tabBtn("ams","意識改變")}`; break;
+  case "oh": o.tags=src("escSyn18");
+    o.lead=c.oh?`站立 3 分鐘：SBP ${c.oh.s1}→${c.oh.s3}（${c.oh.ds>=0?"−":"+"}${Math.abs(c.oh.ds)}）${c.oh.dd!==null?`、DBP −${c.oh.dd}`:""}${c.oh.dh!==null?`、HR ${c.oh.dh>=0?"+":""}${c.oh.dh}`:""} → ${c.oh.oh?"<b>符合 OH</b>":"未達 OH 標準"}${c.oh.neuro?"；心跳上升 ≤10 提示神經性 OH":""}`:`<span class="muted">填平躺與站立 3 分鐘血壓後判定。</span>`;
+    o.rows=[["處置",ul([`檢視並減停降壓、利尿、α-blocker（doxazosin、tamsulosin）、nitrate、鎮靜藥 ${jump("htn","htn-med","降壓藥調整")}`,"評估容積：NPO、引流或腹瀉流失、攝取差；補液","起身分段（先坐再站）、防跌、下床前協助"])],
+      ["切點",`SBP 下降 ≥20 或 DBP 下降 ≥10，或站立 SBP <90 ${src("escSyn18","I, C")}`]]; break;
+  case "reflex": o.tags=src("escSyn18");
+    o.lead=`常見情境：排尿、排便、咳嗽、疼痛、抽血、久站。解釋誘因、教導前驅時立即坐下或躺下與肢體加壓動作；處理疼痛與便秘。`; break;
+  }
+  return cardWrap(cs,o);
+}
+function renderSyn(){
+  const c=synCtx(); const H=[]; const st=stepper();
+  H.push(st({k:S.sy_pulse?"bx":"go",t:"先確認",c:ul([`<b>是否真的是暈厥</b>：短暫意識喪失、自行完全恢復；${S.sy_pulse?'<span class="ng">未恢復或無脈搏 → ACLS</span> '+tabBtn("acls","ACLS"):"意識未恢復見意識改變頁"}`,
+    `POC 血糖${c.glu!==null?`：<b>${c.glu}</b>${c.glu<70?' <span class="ng">低血糖</span>':""}`:""}`,
+    S.sy_seiz?`抽搐、舌咬傷或發作後混亂 → 較像癲癇 ${tabBtn("ams","意識改變")}`:"",
+    S.sy_head?`<b>跌倒或頭部外傷</b>：檢查外傷${S.med_ac?"；使用抗凝血劑者即使 CT 陰性仍需密切神經學觀察":""} ${tabBtn("ams","顱內出血判斷")}`:""])}));
+  H.push(st({k:"go",t:"必做檢查",c:ul([`<b>12 導程 ECG</b> ${src("escSyn18","I")}${src("accSyn17","I")}`,
+    `<b>姿勢性血壓</b>：平躺 5 分鐘後量，再站立 1 與 3 分鐘量血壓心跳（無法安全站立則坐起）${src("escSyn18","I, C")}`,
+    `依臨床選檢驗：Hb（出血）、電解質、血糖${S.sy_pain?"、troponin":""}；不做常規全套檢驗 ${src("accSyn17","III: No Benefit")}`,
+    `無局部神經學表現不常規做腦部影像或 EEG ${src("accSyn17")}`,
+    c.high?"高風險特徵：<b>持續心電監測</b>":""]),x:"住院中暈厥：先查出血（術後、抗凝）、PE、低血容、藥物（降壓、利尿、α-blocker、opioid、鎮靜）、電解質、心律不整（本工具整理）。"}));
+  let rc;
+  if(!c.tier) rc=`<span class="muted">勾選事件、病史、理學與 ECG 後分層。</span>`;
+  else {
+    const L=[];
+    if(c.maj.length) L.push(`<b class="ng">主要高風險</b>：${c.maj.join("、")}`);
+    if(c.ecgMaj.length) L.push(`<b class="ng">ECG 主要</b>：${c.ecgMaj.join("、")}`);
+    if(c.minHigh.length) L.push(`<b class="cau">次要（合併結構性心臟病或 ECG 異常）</b>：${c.minHigh.join("、")}`);
+    if(c.ecgMinHigh.length) L.push(`<b class="cau">ECG 次要（病史疑心律性）</b>：${c.ecgMinHigh.join("、")}`);
+    const minNot=c.minEvt.filter(x=>!c.minHigh.includes(x)).concat(c.ecgMin.filter(x=>!c.ecgMinHigh.includes(x)));
+    if(minNot.length) L.push(`<span class="muted">次要特徵（目前條件下不列高風險）：${minNot.join("、")}</span>`);
+    if(c.low.length) L.push(`<b class="ok">低風險</b>：${c.low.join("、")}`);
+    const act={high:`<b>高風險</b>：早期密集評估（住院心電監測、通知上級與心臟科）${src("escSyn18","I, B")}`,
+      mid:`<b>非高非低</b>${c.other?"（另有出血、低血糖或癲癇等原因待處理）":""}：病房觀察與監測，依原因處理 ${src("escSyn18","I, B")}`,
+      low:`<b>低風險</b>：多為反射性或姿勢性，處理誘因；不需進一步心臟檢查 ${src("escSyn18","I, B")}`}[c.tier];
+    rc=`<div class="hl">${act}</div>${ul(L)}`;
+  }
+  H.push(st({k:c.tier==="high"?"bx":"info",t:"風險分層（ESC 2018）",c:rc,x:"ESC 分層設計用於急診；住院病人僅供參考（本工具取法）。",why:src("escSyn18t")+src("escSyn18")}));
+  const cs=synCauses(c);
+  H.push(ddxStep(st,cs,c.any,"勾選線索或填姿勢性血壓後顯示可能原因。",""));
+  const cards=sortCauses(cs).map(x=>synCard(x,c)).join("");
+  if(cards) H.push(`<div class="sec">處置與原因</div>`+cards);
+  H.push(escStep(st,[c.high?"高風險暈厥：心電監測，通知上級與心臟科":"",S.sy_bleed||S.sy_gib?"疑出血：通知主治／開刀醫師":""],c.high&&(c.ecgMaj.length>0||(c.sbp!==null&&c.sbp<90))));
+  return H.join("");
+}
+function synLab(){ const o=ohCalc(); return `<div class="kv"><div><div class="k">站立 SBP 變化</div><span class="big">${o?(o.ds>=0?"−":"+")+Math.abs(o.ds):"—"}</span><span class="unit">mmHg</span></div><div><div class="k">判定</div>${o?(o.oh?tag("符合 OH","t-mid"):tag("未達標準","t-low")):tag("未填","t-gray")}</div>${o&&o.dh!==null?`<div><div class="k">HR 變化</div><b>${o.dh>=0?"+":""}${o.dh}</b></div>`:""}</div>`; }
+
+/* ================= v1.0 抗血栓藥圍術期分頁 ================= */
+Object.assign(REF,{
+  chest22:{t:"CHEST 2022 圍術期",f:"Douketis JD, et al. Perioperative Management of Antithrombotic Therapy: An American College of Chest Physicians Clinical Practice Guideline. Chest 2022（2022/8/11 線上）。VKA：術前停 ≥5 天（conditional／low），術後 24 小時內（當晚或隔天）恢復原劑量；AF 不建議 bridging（strong／moderate）；機械瓣不建議 bridging（conditional／very low），例外：機械二尖瓣合併 ≥1 個栓塞危險因子、舊型瓣膜、3 個月內栓塞、曾發生圍術期栓塞；AF 例外：3 個月內中風／TIA、CHA₂DS₂-VASc ≥7 或 CHADS₂ 5–6；VTE 為唯一適應症不建議 bridging（conditional／very low），例外 3 個月內 VTE 等高風險；節律器／ICD 植入建議不中斷 VKA（strong／moderate）；LMWH bridging 不常規測 anti-Xa（conditional／very low）。LMWH 治療量 bridging：最後一劑術前一天早上、給每日總量一半；術後先預防量（enoxaparin 40 mg QD）24–72 小時，2–3 天後恢復治療量。DOAC：apixaban、edoxaban、rivaroxaban 停 1–2 天，dabigatran 停 1–4 天（conditional／very low）；不建議 bridging（conditional／very low）；術後 >24 小時恢復（低／中出血 ~24 小時、高出血 48–72 小時）；不建議常規術前 DOAC 濃度檢測（conditional／very low）。Aspirin：非心臟手術建議繼續（conditional／moderate）；若需停，術前 ≤7 天（conditional／very low）。支架 3–12 個月、DAPT 中：術前停 P2Y12（conditional／very low）；ticagrelor 3–5 天、clopidogrel 5 天、prasugrel 7–10 天，術後 24 小時內恢復；不建議以 GP IIb/IIIa、cangrelor 或 LMWH bridging（conditional／low）；必須持續 DAPT 時延後擇期手術（conditional／very low）。（依 Guideline Central 摘要與 Douketis CSIM 2023 簡報核對，全文未取得）",u:"https://www.guidelinecentral.com/guideline/9269/"},
+  chestRisk:{t:"CHEST 2022 風險分類",f:"Douketis CSIM 2023 簡報（CHEST 2022 第一作者）。栓塞風險 高：機械二尖瓣合併主要危險因子、caged-ball 或 tilting-disc 瓣膜、風濕性心臟病；AF CHA₂DS₂-VASc ≥7 或 CHADS₂ 5–6、3 個月內中風／TIA；VTE <3 個月（尤其 <1 個月）、嚴重血栓傾向、抗磷脂抗體、高風險活動性癌症。中：雙葉主動脈機械瓣合併主要危險因子；CHA₂DS₂-VASc 5–6 或 CHADS₂ 3–4；VTE 3–12 個月、復發 VTE、非嚴重血栓傾向、活動性或近期癌症。低：雙葉主動脈機械瓣無主要危險因子；CHA₂DS₂-VASc 1–4 且無中風／TIA；VTE >12 個月。手術出血風險（30 天大出血）高（≥2%）：癌症手術、大型骨科、大型胸腔／泌尿／腸胃（尤其吻合）、心臟、顱內或脊椎手術、neuraxial 麻醉或硬膜外注射、手術 >45 分鐘。低／中（0–2%）：關節鏡、內視鏡 ± 切片、大腸鏡、腹腔鏡膽囊切除、疝氣修補、痔瘡手術、支氣管鏡、手足手術、冠狀動脈攝影。極低（~0%）：小型皮膚手術、白內障、小型牙科、節律器或 ICD 植入。",u:"https://csim.ca/wp-content/uploads/documents/meeting2023/slides/2023-10-11_1300_Controversial%20Issues%20in%20Preoperative%20Anticoagulant%20Management_Douketis.pdf"},
+  pause19:{t:"PAUSE 2019",f:"Douketis JD, et al. Perioperative Management of Patients With Atrial Fibrillation Receiving a Direct Oral Anticoagulant (PAUSE). JAMA Intern Med 2019;179:1469–1478。不 bridging、不測濃度之標準化流程：apixaban、rivaroxaban 低出血風險停 1 天、高出血風險停 2 天；dabigatran CrCl ≥50 停 1／2 天、CrCl <50 停 2／4 天；術後低出血 1 天、高出血 2–3 天恢復。30 天大出血與動脈栓塞率低。",u:"https://doi.org/10.1001/jamainternmed.2019.2431"},
+  bridge15:{t:"BRIDGE 2015",f:"Douketis JD, et al. Perioperative Bridging Anticoagulation in Patients with Atrial Fibrillation. N Engl J Med 2015;373:823–833。AF 停用 warfarin 時，不 bridging 之動脈栓塞率不劣於 dalteparin bridging，且大出血較少。"},
+  ehraNoac21:{t:"EHRA NOAC 2021",f:"Steffel J, et al. 2021 European Heart Rhythm Association Practical Guide on the Use of Non-Vitamin K Antagonist Oral Anticoagulants in Patients with Atrial Fibrillation. Europace 2021;23:1612–1676。擇期手術最後一劑距手術：dabigatran CrCl ≥80 低出血 ≥24 h／高出血 ≥48 h；50–79 ≥36／≥72 h；30–49 ≥48／≥96 h；15–29 不適用。apixaban、edoxaban、rivaroxaban CrCl ≥30 ≥24／≥48 h；15–29 ≥36／≥48 h（此列 PDF 表格擷取不完整，請確認）。極低出血風險於谷值（12 或 24 小時）手術。術後低出血 ~24 h、高出血 48（–72）h 恢復全劑量；不建議 heparin bridging。",u:"https://escardio.org/static-file/Escardio/Subspecialty/EHRA/Documents/KM/EHRA-KM-NOAC-2021.pdf"},
+  asra25:{t:"ASRA 2025",f:"Kopp SL, Vandermeulen E, McBane RD, Perlas A, Leffert L, Horlocker T. Regional anesthesia in the patient receiving antithrombotic or thrombolytic therapy: ASRA Pain Medicine Evidence-Based Guidelines (fifth edition). Reg Anesth Pain Med 2025. doi:10.1136/rapm-2024-105766。Neuraxial 或深部阻斷前：warfarin 停 5 天且 INR 正常（1B）；apixaban、rivaroxaban、edoxaban 高劑量 ≥72 h（2C），術後第一劑距穿刺或拔管 ≥24 h；apixaban 低劑量 ≥36 h、rivaroxaban 低劑量 ≥24 h（CrCl <30 為 30 h）；dabigatran 高劑量 CrCl ≥50 ≥72 h、30–49 120 h、<30 建議不做（除非濃度 <30 ng/mL）；LMWH 低劑量 ≥12 h（1C）、高劑量 ≥24 h（1C），高劑量術後 24 h（非高出血）或 48–72 h（高出血）恢復；UFH IV 停 4–6 h 並確認凝血正常（1A）；UFH SC 低劑量 4–6 h（2C）；aspirin、NSAID 不需調整（1C）；clopidogrel 5–7 天、prasugrel 7–10 天、ticagrelor 5 天、cilostazol 2 天（2C）。（依 Guideline Central 摘要核對）",u:"https://www.guidelinecentral.com/guideline/4293939/"},
+  escNcsAt:{t:"ESC 非心臟手術 2022（抗血栓）",f:"Halvorsen S, et al. 2022 ESC Guidelines on cardiovascular assessment and management of patients undergoing non-cardiac surgery. Eur Heart J 2022;43:3826–3924。擇期手術延後至 elective PCI 後 6 個月、ACS 後 12 個月（I, A）；時間敏感手術：elective PCI 後至少 DAPT 1 個月（I, B），高風險 ACS 後至少 3 個月（IIa, C）。P2Y12 停藥：ticagrelor 3–5 天、clopidogrel 5 天、prasugrel 7 天（I, B）；高出血風險（顱內、脊椎）aspirin 停 7 天（I, C）；未曾 PCI 且出血風險大於缺血風險 aspirin 可停 ≥3 天（IIb, B）；術後 48 小時內或止血安全時恢復抗血小板（I, C）。NOAC：急迫手術立即停（I, C）；非極低出血風險依藥物、半衰期、腎功能決定停藥（I, B）；極低出血風險不中斷或谷值（12–24 小時）手術（I, B／C）；neuraxial 或極高出血風險停 5 個半衰期（IIa, C）；neuraxial 後 ≥24 小時（或拔管後）恢復（IIa, C）；不建議減量（III, C）。機械瓣高手術風險 LMWH 可替代 IV UFH bridging（I, B）；AVR 合併任一栓塞危險因子、舊型主動脈瓣、機械二尖瓣或三尖瓣應考慮 bridging（IIa, C）；低／中栓塞風險不建議 bridging（III, B）。（依 ACC Key Points 摘要核對）",u:"https://www.acc.org/latest-in-cardiology/ten-points-to-remember/2022/09/01/13/18/2022-esc-guidelines-on-noncardiac-surgery-esc-2022"}
+});
+REF.ahaPeri24.f+="抗凝血劑：多數治療量抗凝者術前暫停 DOAC 或 warfarin 為適當；一般病人以 heparin bridging 可能因出血增加而有害（Class 3: Harm）；高栓塞風險（機械二尖瓣、3 個月內 LV 血栓、AF 合併近期中風）bridging 可降低栓塞（Class 2a）（ACC Key Points）。";
+Object.assign(GLOSS,{"DAPT":"dual antiplatelet therapy","PCI":"percutaneous coronary intervention","MHV":"mechanical heart valve，機械瓣","AVR":"aortic valve replacement","ATE":"arterial thromboembolism"});
+const tabBtn=(tab,label)=>`<button type="button" class="jump" data-tab="${tab}">${label} →</button>`;
+const PE_DRUGS=[["pe_warf","warfarin"],["pe_apix","apixaban"],["pe_riva","rivaroxaban"],["pe_edox","edoxaban"],["pe_dabi","dabigatran"],["pe_lmwh","enoxaparin（LMWH）"],["pe_ufh","heparin（UFH）"],["pe_asa","aspirin"],["pe_clop","clopidogrel"],["pe_tica","ticagrelor"],["pe_pras","prasugrel"],["pe_cilo","cilostazol"]];
+const PE_BLEED={min:"極低（小型皮膚、白內障、小型牙科、節律器／ICD）",low:"低／中（內視鏡切片、腹腔鏡膽囊、疝氣、痔瘡、手足手術）",high:"高（癌症、大型骨科、胸腔、泌尿、腸胃吻合、心臟、顱內、脊椎、>45 分鐘）"};
+function periCtx(){
+  const r=renal(), ch=chads(), rx=rv("crcl");
+  const hd=!!(rx&&rx.hd), crcl=rx&&!rx.hd?rx.v:null, crSub=!!(rx&&rx.sub);
+  const drugs=PE_DRUGS.filter(([f])=>S[f]&&S[f]!=="none").map(([f,n])=>({f,n}));
+  const bleed=S.pe_neur?"high":S.pe_bleed;
+  const warf=!!S.pe_warf, doac=!!(S.pe_apix||S.pe_riva||S.pe_edox||S.pe_dabi);
+  // 栓塞風險（CHEST 2022 分類）
+  const te=[];
+  if(S.pe_af){ const v=ch.vasc; const lv=(S.pe_strk3||S.pe_rheum||v>=7)?"high":v>=5?"mod":"low";
+    te.push({ind:"AF",lv,why:[S.pe_strk3&&"3 個月內中風／TIA",S.pe_rheum&&"風濕性瓣膜病",`CHA₂DS₂-VASc ${v}${ch.ageMiss||ch.sexMiss?"（缺年齡或性別）":""}`].filter(Boolean)}); }
+  if(S.pe_mhv){ const mit=S.pe_mhvpos==="mitral"; const lv=(S.pe_mhvold||(mit&&S.pe_mhvrf)||S.pe_strk3||S.pe_periTE)?"high":((S.pe_mhvpos==="aortic"&&S.pe_mhvrf)||mit)?"mod":S.pe_mhvpos==="aortic"?"low":null;
+    te.push({ind:"機械瓣",lv,why:[S.pe_mhvpos==="mitral"?(mit&&!S.pe_mhvrf&&!S.pe_mhvold&&!S.pe_strk3&&!S.pe_periTE?"二尖瓣或三尖瓣、無其他危險因子（列中風險為本工具取法）":"二尖瓣或三尖瓣位置"):S.pe_mhvpos==="aortic"?"主動脈瓣位置":"未選位置",S.pe_mhvold&&"舊型（caged-ball／tilting-disc）",S.pe_mhvrf&&"合併栓塞危險因子",S.pe_strk3&&"3 個月內栓塞",S.pe_periTE&&"曾發生圍術期栓塞"].filter(Boolean),mitNoRf:mit&&!S.pe_mhvrf&&!S.pe_mhvold&&!S.pe_strk3&&!S.pe_periTE}); }
+  if(S.pe_vte){ const t=S.pe_vtet; const lv=(t==="lt3"||S.pe_thromS)?"high":(t==="3to12"||S.pe_thromN||S.pe_vterec||S.hx_cancer)?"mod":t==="gt12"?"low":null;
+    te.push({ind:"VTE",lv,why:[{lt3:"<3 個月",["3to12"]:"3–12 個月",gt12:">12 個月"}[t]||"未選時間",S.pe_thromS&&"嚴重血栓傾向",S.pe_thromN&&"非嚴重血栓傾向",S.pe_vterec&&"復發 VTE",S.hx_cancer&&"活動性癌症"].filter(Boolean)}); }
+  const rank={high:3,mod:2,low:1};
+  const teMax=te.reduce((m,x)=>x.lv&&rank[x.lv]>(rank[m]||0)?x.lv:m,null);
+  // CHEST bridging 例外
+  const bridgeX=[];
+  if(S.pe_af&&(S.pe_strk3||ch.vasc>=7)) bridgeX.push("AF：3 個月內中風／TIA 或 CHA₂DS₂-VASc ≥7");
+  if(S.pe_mhv&&((S.pe_mhvpos==="mitral"&&S.pe_mhvrf)||S.pe_mhvold||S.pe_strk3||S.pe_periTE)) bridgeX.push("機械瓣：二尖瓣合併危險因子、舊型瓣膜、3 個月內栓塞或曾圍術期栓塞");
+  if(S.pe_vte&&(S.pe_vtet==="lt3"||S.pe_thromS)) bridgeX.push("VTE：<3 個月或嚴重血栓傾向");
+  return {r,hd,crcl,crSub,ch,drugs,bleed,warf,doac,te,teMax,bridgeX,any:drugs.length>0};
+}
+function doacDays(id,bleed,crcl){
+  if(bleed==="min") return null;
+  const hi=bleed==="high";
+  if(id==="pe_dabi"){ if(crcl===null) return {d:hi?"2–4":"1–2",miss:true}; return {d:crcl>=50?(hi?2:1):(hi?4:2)}; }
+  return {d:hi?2:1};
+}
+function ehraHours(id,bleed,crcl){
+  if(bleed==="min") return "極低出血風險：不中斷，或於谷值（最後一劑後 12–24 小時）手術";
+  const hi=bleed==="high";
+  if(crcl===null) return "缺 CrCl：無法對照 EHRA 時數";
+  if(id==="pe_dabi"){ if(crcl<30) return "CrCl <30：dabigatran 不適用（EHRA）"; return `最後一劑距手術 ≥${crcl>=80?(hi?48:24):crcl>=50?(hi?72:36):(hi?96:48)} 小時`; }
+  if(crcl<15) return "CrCl <15：無適應症（EHRA）";
+  return `最後一劑距手術 ≥${crcl>=30?(hi?48:24):(hi?48:36)} 小時${crcl<30?"（CrCl 15–29 列請確認）":""}`;
+}
+function asraDoac(id,crcl){
+  if(id==="pe_dabi"){ if(crcl===null) return "dabigatran：CrCl ≥50 ≥72 小時、30–49 120 小時、<30 不建議 neuraxial（缺 CrCl）"; return crcl>=50?"≥72 小時":crcl>=30?"120 小時":"<30：不建議 neuraxial（除非濃度 <30 ng/mL）"; }
+  return "≥72 小時（治療劑量）";
+}
+function periDrugCard(x,c){
+  const hi=c.bleed==="high", mn=c.bleed==="min", nr=!!S.pe_neur, R=[], tags=[];
+  let lead="", ord="", stop="", res="";
+  const resTxt=hi?"術後 48–72 小時（止血確認後）":"術後約 24 小時";
+  switch(x.f){
+  case "pe_warf":
+    if(mn){ lead=`<b>不中斷</b>：節律器／ICD 植入建議繼續 VKA ${src("chest22","strong")}；小型牙科、皮膚、白內障多可不中斷（依出血分類，請與執行科別確認）`; ord="Warfarin：照常服用（極低出血風險手術）"; stop="不中斷"; res="—"; }
+    else { stop="最後一劑：術前第 6 天（術前 5 天停）"; res="術後當晚或隔天恢復原劑量"; lead=`<b>術前停 5 天</b>（最後一劑在術前第 6 天）${src("chest22","conditional")}；術前確認 INR 已回復（切點依院內與執行科別）；<b>術後 24 小時內</b>（當晚或隔天）恢復原維持劑量 ${src("chest22")}`;
+      if(nr) R.push(["Neuraxial",`停 5 天且 INR 正常 ${src("asra25","1B")}；INR <1.5 再拔管 ${src("asra25")}`]);
+      ord=`Warfarin：術前 5 天停用（最後一劑 術前第 6 天）；術前驗 INR；術後 24 小時內恢復原劑量`; }
+    break;
+  case "pe_apix": case "pe_riva": case "pe_edox": case "pe_dabi": {
+    const dd=doacDays(x.f,c.bleed,c.crcl);
+    if(mn){ lead=`極低出血風險：<b>不中斷</b>，或於谷值（最後一劑後 12–24 小時）手術 ${src("escNcsAt","I")}`; ord=`${x.n}：不中斷，或手術當天早上那劑延後至術後`; stop="不中斷或谷值手術"; }
+    else {
+      stop=`停 ${dd.d} 天（最後一劑：術前第 ${typeof dd.d==="number"?dd.d+1:dd.d.replace(/(\d)–(\d)/,(m,a,b)=>(+a+1)+"–"+(+b+1))} 天）`; res=resTxt;
+      lead=`<b>術前停 ${dd.d} 天</b>（${hi?"高":"低／中"}出血風險${x.f==="pe_dabi"?`；${c.hd?"透析":`CrCl ${c.crcl===null?"未知":fmt(c.crcl,0)}${c.crSub?"（以 eGFR 代）":""}`}`:""}）${src("chest22","conditional")}${src("pause19")}；<b>不 bridging</b> ${src("chest22")}；${resTxt}恢復 ${src("chest22")}${src("ehraNoac21")}`;
+      if(c.hd) R.push(["透析",`<span class="cau">透析中：${x.f==="pe_dabi"?"dabigatran 不適用":"停藥時間仿單與指引未訂，請與腎臟科、麻醉科確認"}</span>`]);
+      else if(dd.miss) R.push(["缺資料",`dabigatran 停藥天數依 CrCl（≥50 或 <50）：請填年齡、性別、體重、Cr`]);
+      else if(x.f==="pe_dabi"&&c.crcl<30) R.push(["腎功能",`<span class="cau">CrCl <30：dabigatran 不適用（EHRA），請重新評估抗凝藥</span>`]);
+      R.push(["EHRA 時數",(c.hd?"透析：EHRA 表未列":ehraHours(x.f,c.bleed,c.crcl))+src("ehraNoac21")]);
+      if(nr) R.push(["Neuraxial",`最後一劑距穿刺 <b>${asraDoac(x.f,c.crcl)}</b> ${src("asra25","2C")}；穿刺或拔管後 ≥24 小時再給第一劑 ${src("asra25")}${src("escNcsAt","IIa")}`]);
+      R.push(["高 VTE 風險",`恢復全劑量前可先給預防量（enoxaparin 40 mg QD）48–72 小時 ${src("chest22")}`]);
+      ord=`${x.n}：術前停 ${dd.d} 天（${stop.replace(/^停 [^（]*（|）$/g,"")}），${nr?`neuraxial 前最後一劑距穿刺 ${asraDoac(x.f,c.crcl)}，`:""}${resTxt}恢復`;
+    }
+    break; }
+  case "pe_lmwh":
+    if(S.pe_lmwh==="high"){ stop="最後一劑：術前 24 小時（術前一天早上，給每日總量一半）"; res=hi?"術後 48–72 小時恢復治療量":"術後約 24 小時恢復治療量";
+      lead=`治療劑量：<b>最後一劑在術前約 24 小時</b>（術前一天早上、每日總量一半）${src("chest22")}；${res} ${src("asra25","1C")}${hi?"；期間可先給預防量":""}`;
+      if(nr) R.push(["Neuraxial",`最後一劑距穿刺 ≥24 小時；術後第一劑在拔管 4 小時後且距穿刺 ≥24 小時 ${src("asra25","1C")}`]);
+      ord=`Enoxaparin（治療量）：最後一劑術前一天早上（每日總量一半，距手術約 24 小時）；${res}`; }
+    else { lead=`預防劑量：依開刀科別決定術前最後一劑時間${nr?"":"（一般手術多於術前一晚或術後開始）"}`;
+      if(nr) R.push(["Neuraxial",`最後一劑距穿刺 ≥12 小時 ${src("asra25","1C")}；每日一次者術後第一劑距穿刺 ≥12 小時，拔管後 ≥4 小時再給 ${src("asra25")}`]);
+      stop=nr?"neuraxial 前 ≥12 小時":"依開刀科別"; ord=`Enoxaparin（預防量）：${nr?"neuraxial 前最後一劑距穿刺 ≥12 小時；拔管後 ≥4 小時再給":"依開刀科別"}`; }
+    R.push(["腎功能",c.hd?`<span class="cau">透析：仿單未訂劑量，改 UFH 或依腎臟科</span> ${src("enoxPI")}`:c.crcl!==null&&c.crcl<30?`<span class="cau">CrCl <30：治療量改 1 mg/kg q24h、預防量 30 mg q24h</span> ${src("enoxPI")}`:`CrCl <30 需調整 ${src("enoxPI")}`]);
+    R.push(["健保",nhiQ("enoxaparin 圍術期用法未查到專屬條文")+src("nhi")]);
+    break;
+  case "pe_ufh":
+    if(S.pe_ufh==="iv"){ stop="停輸注：術前 4–6 小時"; lead=`IV 輸注：<b>術前 4–6 小時停</b>並確認凝血正常 ${src("asra25","1A")}（ASRA 為 neuraxial 建議；一般手術本工具沿用同一時間，CHEST 原文未核對）`;
+      if(nr) R.push(["Neuraxial",`穿刺後 ≥1 小時再恢復；持續 IV heparin 時不建議留置導管 ${src("asra25","1A")}`]);
+      ord="Heparin IV：術前 4–6 小時停止輸注，術前確認 aPTT"; }
+    else { lead=`SC 預防量：${nr?`neuraxial 前距最後一劑 ≥4–6 小時（或確認凝血正常）；拔管距最後一劑 ≥4–6 小時，拔管後可立即恢復 ${src("asra25","2C")}`:"依開刀科別"}`; stop=nr?"neuraxial 前 ≥4–6 小時":"依開刀科別"; ord=`Heparin SC：${nr?"neuraxial 前最後一劑距穿刺 ≥4–6 小時":"依開刀科別"}`; }
+    break;
+  case "pe_asa":
+    if(hi&&S.pe_cns){ stop="最後一劑：術前第 8 天（停 7 天）"; lead=`顱內或脊椎手術：<b>術前停 7 天</b> ${src("escNcsAt","I, C")}；CHEST：若需停，≤7 天 ${src("chest22","conditional")}`; ord="Aspirin：術前 7 天停用（顱內／脊椎手術）；術後止血安全後恢復"; }
+    else { lead=`<b>繼續服用</b> ${src("chest22","conditional／moderate")}${S.pe_pci?"；曾 PCI 者出血風險允許時繼續 "+src("escNcsAt"):""}${!S.pe_pci&&!S.pe_af?`；初級預防且出血風險大於缺血風險者可停 ≥3 天 ${src("escNcsAt","IIb")}`:""}`; ord="Aspirin：圍術期繼續服用"; stop="繼續"; res="—"; }
+    if(nr) R.push(["Neuraxial",`aspirin 不需停 ${src("asra25","1C")}`]);
+    break;
+  case "pe_clop": case "pe_tica": case "pe_pras": {
+    const d={pe_clop:"5",pe_tica:"3–5",pe_pras:"7"}[x.f], dc={pe_clop:"5",pe_tica:"3–5",pe_pras:"7–10"}[x.f], dn={pe_clop:"5–7",pe_tica:"5",pe_pras:"7–10"}[x.f];
+    stop=`術前停 ${d} 天`; res="術後 24–48 小時內（止血安全時）恢復";
+    lead=`<b>術前停 ${d} 天</b> ${src("escNcsAt","I, B")}${dc!==d?`；CHEST：${dc} 天 ${src("chest22")}`:""}；恢復：CHEST 術後 24 小時內 ${src("chest22")}、ESC 48 小時內或止血安全時 ${src("escNcsAt","I, C")}`;
+    if(nr) R.push(["Neuraxial",`停 ${dn} 天 ${src("asra25","2C")}${x.f!=="pe_clop"?"；不建議留置導管":""}`]);
+    if(S.pe_pci) R.push(["支架",`見下方「冠狀動脈支架」：是否停 P2Y12 先與心臟科討論`]);
+    ord=`${x.n}：術前 ${nr?dn:d} 天停用；術後止血安全後 24–48 小時內恢復`;
+    break; }
+  case "pe_cilo":
+    lead=nr?`Neuraxial：<b>停 2 天</b>；拔管後 6 小時再給 ${src("asra25","2C")}`:`<span class="cau">CHEST 2022、ESC 2022 未列 cilostazol 停藥時間（請確認）</span>；neuraxial 前需停 2 天 ${src("asra25")}`;
+    stop=nr?"術前停 2 天":"請確認"; ord=nr?"Cilostazol：術前 2 天停用；拔管後 6 小時恢復":"Cilostazol：停藥時間請與執行科別確認";
+    break;
+  }
+  return {html:optCard({cls:"",title:x.n,tags:"",open:true,lead:lead+(ord?" "+cpBtn(ord):""),rows:R}),ord,stop,res};
+}
+function renderPeri(){
+  const c=periCtx(); const H=[]; const st=stepper();
+  if(S.pe_when==="urgent"){
+    H.push(st({k:"bx",t:"急迫手術",c:ul([`<b>立即停用</b>抗凝血劑 ${src("escNcsAt","I, C")}`,
+      S.pe_warf?`warfarin：4F-PCC ＋ vitamin K IV（依 INR、體重與院內流程）`:"",
+      S.pe_dabi?`dabigatran：idarucizumab 5 g IV ${src("idaPI")}（緊急手術適應症請以仿單確認）`:"",
+      (S.pe_apix||S.pe_riva||S.pe_edox)?`FXa 抑制劑：與麻醉科、血液科討論（andexanet 仿單適應症為危及生命出血；本工具未查核手術用途）`:"",
+      (S.pe_clop||S.pe_tica||S.pe_pras||S.pe_asa)?"抗血小板：與心臟科、麻醉科討論；不常規輸血小板":""]),x:tabBtn("drug","藥物頁：逆轉劑劑量")}));
+  }
+  H.push(st({k:"info",t:"手術出血風險",c:c.bleed?`${S.pe_neur?"<b>Neuraxial 或深部神經阻斷</b>：以高出血風險處理，並另依 ASRA 時間":`<b>${PE_BLEED[c.bleed]}</b>`}`:`<span class="muted">選擇手術出血風險（neuraxial 自動列為高）。</span>`,why:src("chestRisk")}));
+  if(!c.any){ H.push(st({k:"info",t:"停藥時程",c:`<span class="muted">勾選目前使用的抗血栓藥後顯示。</span>`})); return H.join(""); }
+  if(!c.bleed&&S.pe_when!=="urgent"){ H.push(st({k:"info",t:"停藥時程",c:`<span class="muted">缺：手術出血風險。</span>`})); }
+  const urg=S.pe_when==="urgent";
+  const cards=c.bleed?c.drugs.map(x=>periDrugCard(x,c)):[];
+  if(urg&&cards.length){
+    H.push(st({k:"info",t:"術後恢復（止血確認後）",c:`<div class="tscroll"><table class="t"><thead><tr><th>藥物</th><th>術後恢復</th></tr></thead><tbody>${cards.map((k,i)=>`<tr><td style="white-space:nowrap">${c.drugs[i].n}</td><td>${k.res||"依開刀科別"}</td></tr>`).join("")}</tbody></table></div>`,x:"急迫手術不適用術前停藥天數。"}));
+  } else if(cards.length){
+    const rows=cards.map((k,i)=>[c.drugs[i].n,k.stop||"—",k.res||"—"]);
+    const all=cards.map(k=>k.ord).filter(Boolean).join("\n");
+    H.push(st({k:"go",t:"時程摘要",c:`<div class="tscroll"><table class="t"><thead><tr><th>藥物</th><th>術前</th><th>術後恢復</th></tr></thead><tbody>${rows.map(r=>`<tr><td style="white-space:nowrap">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("")}</tbody></table></div><div style="margin-top:6px">${cpBtn(all)} <span class="small muted">複製全部醫囑文字</span></div>`,
+      x:"「術前停 N 天」＝手術前 N 天不服用（最後一劑在術前第 N+1 天）。恢復時間以止血確認為前提。"}));
+    H.push(`<div class="sec">各藥處理</div>`+cards.map(k=>k.html).join(""));
+  }
+  if(c.warf&&c.bleed&&c.bleed!=="min"&&!urg){
+    const lvTxt={high:"高",mod:"中",low:"低"};
+    const teL=c.te.length?c.te.map(t=>`${t.ind}：<b>${t.lv?lvTxt[t.lv]:"資料不足"}</b>（${t.why.join("、")}）`):["<span class='cau'>未勾選抗凝適應症（AF、機械瓣、VTE）</span>"];
+    const yes=c.bridgeX.length>0;
+    const R=[["CHEST 2022",yes?`<b>建議 bridging</b>（高風險例外：${c.bridgeX.join("；")}）${src("chest22")}`:`<b>不 bridging</b>：AF ${src("chest22","strong／moderate")}；機械瓣、VTE ${src("chest22","conditional／very low")}`]];
+    const mhv=c.te.find(t=>t.ind==="機械瓣");
+    if(mhv&&mhv.lv){ const escB=S.pe_mhvpos==="mitral"||S.pe_mhvold||(S.pe_mhvpos==="aortic"&&S.pe_mhvrf);
+      R.push(["ESC 2022（機械瓣）",escB?`應考慮 bridging（AVR 合併危險因子、舊型主動脈瓣、機械二尖瓣或三尖瓣）${src("escNcsAt","IIa, C")}`:`低／中栓塞風險不建議 bridging ${src("escNcsAt","III, B")}`]);
+      if(mhv.mitNoRf) R.push(["指引差異",`<span class="cau">機械二尖瓣無其他危險因子：CHEST 列為不 bridging，ESC 2022 應考慮 bridging（IIa），ACC/AHA 2024 機械二尖瓣 bridging 為 2a。</span>由主治與心臟科決定。`]); }
+    R.push(["AHA/ACC 2024",`一般病人 bridging 可能有害（3: Harm）；機械二尖瓣、3 個月內 LV 血栓、AF 合併近期中風 bridging 合理（2a）${src("ahaPeri24")}`]);
+    if(S.pe_af) R.push(["試驗",`BRIDGE：AF 不 bridging 栓塞不增加、大出血較少 ${src("bridge15")}`]);
+    if(yes&&c.hd) R.push(["Bridging 用法",`<span class="cau">透析：enoxaparin 仿單未訂劑量，bridging 改 IV UFH 或依腎臟科</span> ${src("enoxPI")}`]);
+    if(yes&&!c.hd){ const w=num(S.wt), lowC=c.crcl!==null&&c.crcl<30;
+      const dose=w!==null?(lowC?`${fmt(w,0)} mg SC q24h（1 mg/kg，CrCl <30）`:`${fmt(w,0)} mg SC q12h（1 mg/kg）`):(lowC?"1 mg/kg SC q24h（CrCl <30）":"1 mg/kg SC q12h（或 1.5 mg/kg q24h）");
+      const bo=`Bridging：warfarin 術前 5 天停；INR 低於治療範圍起 enoxaparin ${dose}；最後一劑術前一天早上（每日總量一半）；術後${periHi(c)?"先預防量 40 mg QD 24–72 小時，2–3 天後恢復治療量":"約 24 小時恢復治療量"}；warfarin 術後 24 小時內恢復，INR 回到治療範圍後停 enoxaparin`;
+      R.push(["Bridging 用法",`enoxaparin <b>${dose}</b>${lowC?' <span class="cau">已依腎功能調整</span>':""}；INR 低於治療範圍時開始（常見為術前第 3 天，請確認）；<b>最後一劑術前一天早上、給每日總量一半</b>；術後${periHi(c)?"高出血：先預防量（40 mg QD）24–72 小時，2–3 天後恢復治療量":"約 24 小時恢復治療量"} ${src("chest22")}${src("enoxPI")} ${cpBtn(bo)}`]);
+      R.push(["健保",nhiQ("未查到 LMWH 用於 bridging 之給付條文")+src("nhi")]); }
+    H.push(st({k:yes?"wait":"info",t:"Warfarin：栓塞風險與 bridging",c:ul(teL),x:"",why:src("chestRisk")})+optCard({cls:yes?"pref":"",title:yes?"Bridging：符合高風險例外":"Bridging：不建議",tags:src("chest22")+src("escNcsAt")+src("ahaPeri24"),open:true,lead:"",rows:R}));
+  }
+  if(c.doac&&c.bleed&&!urg) H.push(`<div class="note">DOAC：不 bridging、不常規測藥物濃度 ${src("chest22","conditional")}；不建議以減量取代停藥 ${src("escNcsAt","III")}</div>`);
+  if(S.pe_pci){
+    const m=S.pe_pci, acs=!!S.pe_pciacs;
+    const early=(m==="lt1"||m==="1to3"||m==="3to6")||(acs&&m==="6to12");
+    const L=[early?`<b class="ng">擇期手術宜延後</b>：elective PCI 後 6 個月、ACS 後 12 個月 ${src("escNcsAt","I, A")}`:`距 PCI ${m==="gt12"?">12 個月":"≥6 個月（非 ACS）"}：可依一般原則`,
+      m==="lt1"?`<b>PCI 未滿 1 個月</b>：時間敏感手術至少 DAPT 1 個月 ${src("escNcsAt","I, B")}；須與心臟科討論，盡量不中斷 DAPT`:"",
+      acs&&(m==="lt1"||m==="1to3")?`ACS 後時間敏感手術：至少 DAPT 3 個月 ${src("escNcsAt","IIa, C")}`:"",
+      (m==="3to6"||m==="6to12")?`支架 3–12 個月：術前停 P2Y12、繼續 aspirin ${src("chest22","conditional")}`:"",
+      `必須持續 DAPT 時延後擇期手術 ${src("chest22")}；不以 GP IIb/IIIa、cangrelor 或 LMWH bridging ${src("chest22","conditional／low")}`];
+    H.push(st({k:early?"bx":"info",t:"冠狀動脈支架",c:ul(L),x:"支架病人停任何抗血小板藥前先與心臟科討論。"}));
+  }
+  H.push(`<div class="note">心臟手術與 CABG 依心臟外科；院內規範與執行科別的要求優先。</div>`);
+  return H.join("");
+}
+function periHi(c){ return c.bleed==="high"; }
+
+const TABS=[{id:"dysp",t:"喘"},{id:"ams",t:"意識改變"},{id:"cp",t:"胸痛"},{id:"hypo",t:"低血壓／休克"},{id:"tachy",t:"心搏過速／心悸"},{id:"brady",t:"心搏過慢"},{id:"syn",t:"暈厥"},{id:"fev",t:"發燒"},{id:"uo",t:"尿少"},{id:"abd",t:"腹痛"},{id:"gib",t:"GI bleeding"},{id:"htn",t:"高血壓"},{id:"hd",t:"頭痛"},{id:"dka",t:"高血糖／血糖控制"},{id:"hk",t:"高血鉀"},{id:"na",t:"低血鈉"},{id:"lyte",t:"其他電解質"},{id:"nv",t:"噁心嘔吐"},{id:"pain",t:"疼痛控制"},{id:"sleep",t:"失眠"},{id:"peri",t:"抗血栓藥圍術期"},{id:"acls",t:"ACLS"},{id:"ana",t:"過敏反應"},{id:"calc",t:"計算工具"},{id:"drug",t:"藥物"},{id:"ref",t:"來源・版本"}];
+const MENU=[["急救",["acls","ana"]],["心血管",["cp","hypo","htn","tachy","brady","syn"]],["呼吸・神經",["dysp","ams","hd"]],["感染・腹部",["fev","abd","gib"]],["腎・電解質・代謝",["uo","hk","na","lyte","dka"]],["症狀照護",["nv","pain","sleep"]],["圍術期",["peri"]],["工具・參考",["calc","drug","ref"]]];
+const MODS=[{id:"dysp",r:()=>renderDysp()},{id:"ams",r:()=>renderAMS()},{id:"cp",r:()=>renderCP(),lab:()=>cpLab()},{id:"fev",r:()=>renderFev(),lab:()=>fevLab()},{id:"uo",r:()=>renderUO(),lab:()=>uoLab()},{id:"abd",r:()=>renderAbd(),lab:()=>abdLab()},{id:"gib",r:()=>renderGIB(),lab:()=>gibLab()},{id:"hypo",r:()=>renderShock(),lab:()=>shockLab()},{id:"tachy",r:()=>renderTachy(),lab:()=>tachyLab()},{id:"brady",r:()=>renderBrady(),lab:()=>bradyLab()},{id:"dka",r:()=>renderDKA(),lab:()=>dkaLab()},{id:"acls",r:()=>renderACLS()},{id:"hk",r:()=>renderHK(),lab:()=>hkLab()},{id:"na",r:()=>renderNa(),lab:()=>naLab()},{id:"lyte",r:()=>renderLyte(),lab:()=>lyteLab()},{id:"htn",r:()=>renderHTN(),lab:()=>htnLab()},{id:"nv",r:()=>renderNV()},{id:"pain",r:()=>renderPain(),lab:()=>painLab()},{id:"sleep",r:()=>renderSleep()},{id:"hd",r:()=>renderHD()},{id:"ana",r:()=>renderAna()},{id:"syn",r:()=>renderSyn(),lab:()=>synLab()},{id:"peri",r:()=>renderPeri()}];
 const YN=[["","—"],["y","是"],["n","否"]];
 function buildPanels(){
   const P={};
@@ -4638,7 +5082,40 @@ function buildPanels(){
     ${chk("hd_thunder","雷擊式：1 小時內達最痛、用力時發作")}${chk("hd_new","新的或與平常不同的頭痛")}${chk("a_focal","局部神經學症狀")}${chk("a_neck","頸部僵硬")}${chk("a_fall","跌倒或頭部外傷")}${chk("hd_post","5 天內脊椎／硬膜外麻醉或腰椎穿刺")}${chk("hd_pos","坐起加重、平躺緩解")}${chk("hd_jaw","≥50 歲、顳動脈壓痛、咀嚼痛或視力症狀")}${chk("hd_eye","紅眼、視力模糊、光暈")}${chk("hd_peri","懷孕或產後")}${chk("hd_prior","與平常頭痛相同（偏頭痛等）")}${chk("hd_caff","咖啡因或藥物戒斷、nitrate")}
   </div></div></div>
   <div class="card"><h2>處置流程</h2><div class="cb" id="r-hd"></div></div>`;
-  P.calc=calcPanel();
+  P.calc=calcPanel()+`<div class="card" id="calc-csrs"><h3>Canadian Syncope Risk Score <span class="sub">暈厥 30 天風險（急診驗證）</span></h3><div class="cb">${csrsInputs()}</div><div class="res" id="r-csrs-calc"></div></div>`;
+  P.ana=`<div id="r-rf-ana"></div>${ptCard("ana")}
+  <div class="card"><h3>表現與暴露 <span class="sub">勾選後判斷</span></h3><div class="cb">
+    <div class="chks">${chk("an_skin","皮膚或黏膜：蕁麻疹、搔癢或潮紅、唇舌或懸雍垂腫")}${chk("an_resp","呼吸：喘、wheeze、stridor、聲音沙啞、低血氧")}${chk("an_cv","循環：低血壓、昏厥、意識改變或失禁")}${chk("an_gi","嚴重腸胃症狀：劇烈腹痛、反覆嘔吐")}${chk("an_expo","數分鐘至數小時前暴露於已知或高度可能的過敏原")}</div>
+    <div class="grid" style="margin-top:6px">${sel("an_trig","可疑誘因",[["","—"]].concat(Object.entries(AN_TRIG)))}${sel("an_epi","已給 IM epinephrine",[["","—"],["0","尚未給"],["1","1 劑"],["2","2 劑"],["3","≥3 劑"]])}</div>
+    <div class="chks" style="margin-top:6px">${chk("an_persist","給藥後仍有呼吸或循環問題")}${chk("an_resolved","症狀已完全緩解")}${chk("an_bb","使用 β-blocker（高血壓頁已選 β-blocker 時自動計入）")}${chk("an_biph","曾有雙相反應")}${chk("an_sevresp","嚴重氣喘，或這次有嚴重呼吸窘迫")}${chk("an_slow","可疑藥物為長效劑型或仍持續吸收")}</div>
+    ${advBox("Tryptase（選填）",`<div class="grid">${fld("an_tryp","急性 tryptase（ng/mL）")}${fld("an_tryb","基準 tryptase（ng/mL）")}</div>`)}
+  </div></div>
+  <div class="card"><h2>處置流程</h2><div class="cb" id="r-ana"></div></div>`;
+  P.syn=`<div id="r-rf-syn"></div>${ptCard("syn")}
+  <div class="card"><h3>事件與病史 <span class="sub">勾選後分層</span></h3><div class="cb">
+    <div class="sec" style="margin-top:0">先排除</div><div class="chks">${chk("sy_pulse","意識未恢復或無脈搏")}${chk("sy_seiz","抽搐、舌咬傷或發作後混亂")}${chk("sy_head","跌倒或頭部外傷")}</div>
+    <div class="sec">高風險線索</div><div class="chks">${SY_MAJ.slice(0,4).map(x=>chk(x[0],x[1])).join("")}${chk("sy_nowarn","無或極短（<10 秒）前驅")}${chk("sy_sit","坐著時暈厥")}${chk("sy_fhx","年輕猝死家族史")}</div>
+    <div class="sec">低風險線索</div><div class="chks">${chk("sy_prod","典型前驅：頭暈、發熱感、冒汗、噁心")}${chk("sy_trig","情境誘因：排尿、排便、咳嗽、疼痛、抽血、久站、悶熱")}${chk("sy_stand","由躺或坐起身時")}${chk("sy_recur","長期反覆、特徵相同")}</div>
+    <div class="sec">病史與理學</div><div class="chks">${chk("sy_shd","嚴重結構性心臟病或冠心病（心衰竭、LVEF 低、曾 MI）")}${SY_MAJ.slice(4).map(x=>chk(x[0],x[1])).join("")}${chk("sy_bleed","術後出血、引流量增加或 Hb 下降")}${chk("sy_drug","新加或調升降壓、利尿、α-blocker、opioid、鎮靜藥")}</div>
+  </div></div>
+  <div class="card"><h3>ECG</h3><div class="cb"><div class="chks">${chk("sy_ecg_ok","ECG 正常")}${SY_ECGMAJ.concat(SY_ECGMIN).map(x=>chk(x[0],x[1])).join("")}</div><div class="note">「ECG 正常」以外，前 8 項為主要高風險、最後 2 項為次要特徵。${src("escSyn18t")}</div></div></div>
+  <div class="card"><h3>姿勢性血壓 <span class="sub">平躺 5 分鐘 → 站立 3 分鐘</span></h3><div class="cb"><div class="grid">${fld("sy_lsbp","平躺 SBP")}${fld("sy_ldbp","平躺 DBP")}${fld("sy_lhr","平躺 HR")}${fld("sy_ssbp","站立 SBP")}${fld("sy_sdbp","站立 DBP")}${fld("sy_shr","站立 HR")}</div></div><div class="res" id="r-lab-syn"></div></div>
+  <div class="card"><h2>處置流程</h2><div class="cb" id="r-syn"></div></div>
+  <div class="card" id="syn-csrs"><h3>Canadian Syncope Risk Score <span class="sub">選填，與計算工具頁同步</span></h3><div class="cb">${csrsInputs()}</div><div class="res" id="r-csrs-syn"></div></div>`;
+  P.peri=`${ptCard("peri",true)}
+  <div class="card"><h3>手術 <span class="sub">時程與出血風險</span></h3><div class="cb"><div class="grid">${sel("pe_when","時程",[["","—"],["elective","擇期或隔天"],["urgent","急迫（數小時內）"]])}${sel("pe_bleed","手術出血風險",[["","—"],["min","極低"],["low","低／中"],["high","高"]])}</div>
+    <div class="chks" style="margin-top:6px">${chk("pe_neur","預計 neuraxial 或深部神經阻斷")}${chk("pe_cns","顱內或脊椎手術")}</div>
+    <div class="note">極低：小型皮膚、白內障、小型牙科、節律器／ICD。低／中：內視鏡切片、腹腔鏡膽囊、疝氣、痔瘡、手足手術。高：癌症、大型骨科、胸腔、泌尿、腸胃吻合、心臟、顱內、脊椎、手術 >45 分鐘。${src("chestRisk")}</div></div></div>
+  <div class="card"><h3>目前抗血栓藥</h3><div class="cb"><div class="chks">${[["pe_warf","warfarin"],["pe_apix","apixaban"],["pe_riva","rivaroxaban"],["pe_edox","edoxaban"],["pe_dabi","dabigatran"],["pe_asa","aspirin"],["pe_clop","clopidogrel"],["pe_tica","ticagrelor"],["pe_pras","prasugrel"],["pe_cilo","cilostazol"]].map(x=>chk(x[0],x[1])).join("")}</div>
+    <div class="grid" style="margin-top:6px">${sel("pe_lmwh","Enoxaparin（LMWH）",[["","未使用"],["low","預防量"],["high","治療量"]])}${sel("pe_ufh","Heparin（UFH）",[["","未使用"],["sc","SC 預防量"],["iv","IV 輸注"]])}</div>
+    <div class="note">CrCl 由病人資料背景欄自動計算（年齡、性別、體重、Cr）；dabigatran 與 enoxaparin 依 CrCl 調整。</div></div></div>
+  <div class="card"><h3>抗凝適應症與支架 <span class="sub">判斷 bridging</span></h3><div class="cb">
+    <div class="sec" style="margin-top:0">心房顫動</div><div class="chks">${chk("pe_af","心房顫動")}${chk("pe_strk3","3 個月內中風、TIA 或全身栓塞")}${chk("pe_rheum","風濕性瓣膜病")}${chk("t_htn","高血壓")}${chk("hx_dm","糖尿病")}${chk("hx_hf","心衰竭")}${chk("t_stroke","曾中風／TIA／全身栓塞")}${chk("t_vasc","血管疾病（MI、周邊動脈、主動脈斑塊）")}</div>
+    <div class="sec">機械瓣</div><div class="chks">${chk("pe_mhv","機械瓣")}${chk("pe_mhvold","舊型（caged-ball、tilting-disc）")}${chk("pe_mhvrf","合併栓塞危險因子（AF、曾栓塞、LV 功能差、高凝狀態）")}${chk("pe_periTE","曾發生圍術期栓塞")}</div><div class="grid">${sel("pe_mhvpos","位置",[["","—"],["aortic","主動脈瓣"],["mitral","二尖瓣或三尖瓣"]])}</div>
+    <div class="sec">VTE</div><div class="chks">${chk("pe_vte","VTE（DVT／PE）")}${chk("pe_thromS","嚴重血栓傾向（AT、protein C／S 缺乏、抗磷脂抗體）")}${chk("pe_thromN","非嚴重血栓傾向（FVL、prothrombin 異型合子）")}${chk("pe_vterec","復發 VTE")}${chk("hx_cancer","活動性癌症")}</div><div class="grid">${sel("pe_vtet","距 VTE",[["","—"],["lt3","<3 個月"],["3to12","3–12 個月"],["gt12",">12 個月"]])}</div>
+    <div class="sec">冠狀動脈支架</div><div class="grid">${sel("pe_pci","距 PCI",[["","無支架"],["lt1","<1 個月"],["1to3","1–3 個月"],["3to6","3–6 個月"],["6to12","6–12 個月"],["gt12",">12 個月"]])}</div><div class="chks">${chk("pe_pciacs","因 ACS 置放")}</div>
+  </div></div>
+  <div class="card"><h2>處置流程</h2><div class="cb" id="r-peri"></div></div>`;
   P.drug=`<div class="filters seg" id="dSeg" style="margin-bottom:10px">${Object.entries(DCLS).map(([k,v])=>`<button type="button" class="btn" data-dc="${k}">${v}</button>`).join("")}</div><div class="note" style="margin-bottom:10px">腎功能列依病人資料的 CrCl（Cockcroft-Gault；需年齡、性別、體重、Cr）或 eGFR 自動標出適用劑量（▶）。抗生素劑量與腎調整見 <a href="https://aaa0015100-coder.github.io/abx-helper/" target="_blank" rel="noopener">abx-helper</a>。</div><div id="r-drugs"></div>`;
   P.ref=renderRefPanel();
   return P;
@@ -4666,16 +5143,27 @@ function renderRefPanel(){
     ["電解質",["spsK","spsMg","sfeHypoCa","sfeHyperCa","ukmiP","eurHypoNaSl","usHypoNa13"]],
     ["高血壓急症、頭痛",["ahaBp24","accHtn25","escHtnEm","urapSmPC","acepHa19","ahs16","pdph24"]],
     ["噁心嘔吐、疼痛、失眠",["ponv20","fdaOnd12","emaMcp13","asaAps16","cdcMme22","nhsPara","beers23","aasm17","zolpPI","belsPI","alosa24","hypDose","zopiSmPC"]],
+    ["過敏反應",["wao20","aaaai23","aaaai20","eaaci21","nice26Ana","glucAna","epipenTW","neffy24"]],
+    ["暈厥",["escSyn18","escSyn18t","accSyn17","csrs"]],
+    ["抗血栓藥圍術期",["chest22","chestRisk","pause19","bridge15","ehraNoac21","asra25","escNcsAt"]],
     ["健保",["nhi","nhi71","nhi543","nhiDoac"]]
   ];
   const list=groups.map(([h,ks])=>`<div class="sec">${h}</div><div class="card"><div class="cb small">${ks.map(k=>`<p style="margin:0 0 8px"><b>${esc(REF[k].t)}</b>　${esc(REF[k].f)}${REF[k].u?` <a href="${REF[k].u}" target="_blank" rel="noopener">連結</a>`:""}</p>`).join("")}</div></div>`).join("");
   return `<div class="card"><h2>版本</h2><div class="cb">
-    <div class="kv"><div><div class="k">版本</div>v${APP_VERSION}</div><div><div class="k">最後查證</div>${CHECKED}</div><div><div class="k">涵蓋主訴</div>喘、意識改變、胸痛、低血壓／休克、心搏過速／心悸、心搏過慢、高血壓急症、頭痛、發燒、尿少、腹痛、GI bleeding、高血糖、高血鉀、低血鈉、其他電解質、噁心嘔吐、疼痛控制、失眠、ACLS（含 RSI）；計算工具（點滴速率、升壓藥換算、類固醇、輸血）</div></div>
+    <div class="kv"><div><div class="k">版本</div>v${APP_VERSION}</div><div><div class="k">最後查證</div>${CHECKED}</div><div><div class="k">涵蓋主訴</div>喘、意識改變、胸痛、低血壓／休克、心搏過速／心悸、心搏過慢、暈厥、高血壓、頭痛、發燒、尿少、腹痛、GI bleeding、高血糖／血糖控制、高血鉀、低血鈉、其他電解質、噁心嘔吐、疼痛控制、失眠、抗血栓藥圍術期、ACLS（含 RSI）、過敏反應；計算工具（點滴速率、升壓藥換算、類固醇、輸血、Canadian Syncope Risk Score）</div></div>
     <div class="legend" style="margin-top:8px"><span>${upd("示例")} 2024 年後指引改版、新核准或已發表 phase 3 帶來的改變</span><span>${src("bts","示例")} 點選看完整出處</span><span><abbr class="gl" data-gl="NEWS2">NEWS2</abbr> 點選看縮寫全稱</span></div>
     <div class="note">建議強度標示：AHA/ACC、AHA/ASA＝Class 1／2a／2b／3 ＋ LOE；ESC＝I／IIa／IIb／III；ERS/ATS、GRADE＝strong／conditional；BTS＝Grade A–D。「依輸入推導」的鑑別排序為本工具的規則，不是指引分類。</div>
   </div></div>
   <div class="card"><h2>Changelog</h2><div class="cb small">
-    <p style="margin:0 0 6px"><b>v0.9（${CHECKED}）</b></p>
+    <p style="margin:0 0 6px"><b>v1.0（${CHECKED}）</b></p>
+    <ul class="tight"><li>介面：輸入卡（病人資料、檢驗、各頁線索）可收合，收合時顯示已填摘要；切換分頁時已填的卡自動收合。手機版底部動作列：主訴、搜尋、跳到建議（已在建議區時變回頂端）、SBAR、清除。清除全部後 5 秒內可復原。</li>
+    <li>搜尋：頁名、段落標題、藥名（含商品名）、計算工具、出處；內建中英文與縮寫同義詞（K、PE、AF、bridging 等），點結果切頁並捲到該段。寬螢幕在頁首。</li>
+    <li>新頁「過敏反應」（急救群組）：WAO 2020 診斷條件、依體重 epinephrine IM 劑量（可複製）、refractory 輸注速率（RCUK 2021）、β-blocker 時 glucagon、抗組織胺與類固醇定位、依劑數的觀察時間（NICE 2026）、tryptase 抽血時機與 20%＋2 判讀、出院自動注射器（台灣許可證、健保待確認）。喘、低血壓頁改為連到本頁。</li>
+    <li>新頁「暈厥」（心血管群組）：住院病人暈倒情境；ESC 2018 高／低風險特徵分層、姿勢性血壓判讀、住院常見原因（出血、PE、姿勢性、藥物、反射性）與處置；計算工具與本頁加 Canadian Syncope Risk Score（標明急診驗證）。</li>
+    <li>新頁「抗血栓藥圍術期」（圍術期群組）：12 種藥依手術出血風險、CrCl、neuraxial 給術前停藥天數與術後恢復時間（CHEST 2022、PAUSE、EHRA 2021、ASRA 2025、ESC 2022 並列），時程摘要與醫囑可複製；warfarin 依 CHEST 2022 栓塞風險判斷 bridging，與 ESC 2022、AHA/ACC 2024 差異並列；冠狀動脈支架時機；急迫手術導向逆轉。</li>
+    <li>效能：輸入時只重繪目前分頁（每次輸入約 37 ms → 約 2 ms）；切換分頁時重繪該頁。</li>
+    <li>測試（v1.0 完整）：fuzz 3,000 組隨機病人 × 48 個輸出區（144,000 次）0 失敗，新增過敏反應、暈厥、抗血栓藥不變式（epinephrine 劑量、WAO 判定、refractory 條件、觀察時數、ESC 高風險、OH 判定、DOAC 停藥天數、dabigatran 依 CrCl、bridging 例外、neuraxial ASRA 時數、急迫手術不列術前天數），5 種刻意改錯均被抓到；Playwright 320／390／768／1280 px 深淺色、所有分頁所有選項、跨頁同步、收合、跳到建議、搜尋、清除後復原、主題切換，無橫向溢出、無 console 錯誤、零網路請求。</li></li></ul>
+    <p style="margin:8px 0 6px"><b>v0.9（2026-10-20）</b></p>
     <ul class="tight"><li>「高血糖」頁改名「高血糖／血糖控制」，新增住院血糖控制：目標（非重症 100–180、重症 140–180、圍術期 100–180）、低血糖提示、平常口服藥（metformin、SGLT2i、DPP-4i、GLP-1 RA、SU）入院時停續與腎調整、insulin 起始（家中 insulin 減 20–30%；未用 insulin 依體重 0.4／0.5 U/kg，老人或腎功能不全 ≤0.3；第一型 0.2–0.4），自動拆 basal／餐前／管灌劑量；NPO 與手術、早上類固醇（NPH）、連續或間歇管灌。依據 Endocrine Society 2022、Endotext 2026、RABBIT 2、JBDS 2023、FDA。</li>
     <li>住院血糖改為<b>明確醫囑</b>：insulin glargine（長效）X U SC 每日一次、insulin aspart／lispro／glulisine（速效）Y U SC 三餐隨餐或餐後立即（或 regular 三餐前 30 分鐘）、連續管灌速效 Z U q4h、間歇管灌 NPH、早上類固醇 NPH 10 U 早上（或 gliclazide 40 mg）、輕度高血糖 sitagliptin（依 eGFR 100／50／25 mg）；附 Endotext 矯正量表（依 BMI 或每日總量選敏感／一般／阻抗欄，含睡前欄）、POC 監測頻次、低血糖處置；手術當天長效減 25% 並算出劑量；新增「其中長效 insulin」欄位。</li>
     <li>高血壓用藥改為<b>點選平常用藥與劑量</b>（13 種常用藥：amlodipine、nifedipine ER、losartan、valsartan、olmesartan、ramipril、hydrochlorothiazide、indapamide、bisoprolol、carvedilol、labetalol、spironolactone、doxazosin）：逐一顯示可增至的下一劑量或已達仿單上限、同類重複、需暫停的藥名（低血壓、AKI、K ≥5.5、懷孕、ACEi ＋ ARB、手術）；非急症血壓 ≥140/90 給明確醫囑：未用的類別依 A → C → D 順序加藥並附起始劑量（已用利尿劑或 CrCl <40 時 RAS 抑制劑從低劑量起始），或現用藥增量；A ＋ C ＋ D 仍不足且 K ≤5.0、eGFR ≥30 才加 spironolactone；痛風不加或增 thiazide、氣喘不增 β-blocker；懷孕改 labetalol／nifedipine ER。</li>
@@ -4798,16 +5286,168 @@ function syncField(f){
 }
 function syncAll(){ Object.keys(S0).forEach(syncField); }
 function setHTML(id,h){ const e=document.getElementById(id); if(e) e.innerHTML=h; }
-function renderAll(){
+function renderAll(full){
   const g=gcsCalc(); if(g!==null && g!==S._gcsLast){ S._gcsLast=g; S.gcs=g; syncField("gcs"); }
   renderStrip();
-  const sb=scoreBox(), rb=redBanner(), ab=abgRes();
-  MODS.forEach(m=>{ setHTML("r-score-"+m.id,sb); setHTML("r-rf-"+m.id,rb); setHTML("r-"+m.id,hypoX(m.id)+o2X(m.id)+m.r()); if(m.lab) setHTML("r-lab-"+m.id,m.lab()); });
-  setHTML("r-rsi",rsiCard()); setHTML("r-gluc",renderGluc()); setHTML("r-bpmed",renderBPmed()); renderTools();
-  setHTML("r-abg-dysp",ab); setHTML("r-abg-ams",ab); setHTML("r-gcs",gcsBox());
+  // v1.0：只重繪目前分頁（切換分頁時再重繪該頁）；先確認容器在目前分頁，再計算內容
+  const on=full?null:document.querySelector(".panel.on");
+  const put=(id,f)=>{ const e=document.getElementById(id); if(e&&(!on||on.contains(e))) e.innerHTML=f(); };
+  let sb=null, rb=null, ab=null;
+  const SB=()=>sb===null?(sb=scoreBox()):sb, RB=()=>rb===null?(rb=redBanner()):rb, AB=()=>ab===null?(ab=abgRes()):ab;
+  MODS.forEach(m=>{ put("r-score-"+m.id,SB); put("r-rf-"+m.id,RB); put("r-"+m.id,()=>hypoX(m.id)+o2X(m.id)+m.r()); if(m.lab) put("r-lab-"+m.id,m.lab); });
+  put("r-rsi",rsiCard); put("r-gluc",renderGluc); put("r-bpmed",renderBPmed);
+  put("r-drip",dripRes); put("r-st",steroidRes); put("r-tx",txRes);
+  ["hypo","calc"].forEach(w=>{ put("r-prs-"+w,prStatus); put("r-prc-"+w,prCalcRes); });
+  put("r-o2",o2Res);
+  put("r-abg-dysp",AB); put("r-abg-ams",AB); put("r-gcs",gcsBox);
   document.querySelectorAll("#dSeg [data-dc]").forEach(b=>b.classList.toggle("pri",b.dataset.dc===S.dflt));
-  setHTML("r-drugs",renderDrugs());
-  markGloss(document.getElementById("panels"));
+  put("r-csrs-syn",csrsBox); put("r-csrs-calc",csrsBox);
+  put("r-drugs",renderDrugs);
+  markGloss(on||document.getElementById("panels"));
+  updSummaries(on||undefined);
+}
+/* ================= v1.0 介面：輸入卡收合、跳到建議、搜尋、復原 ================= */
+const COL_SKIP=new Set(["acls","calc","drug","ref"]);
+function curTab(){ return (document.querySelector("nav [data-tab].on")||{dataset:{}}).dataset.tab; }
+function setupInputCards(){
+  document.querySelectorAll(".panel").forEach(p=>{
+    if(COL_SKIP.has(p.id.slice(2))) return;
+    for(const c of p.querySelectorAll(":scope > .card")){
+      if(c.querySelector(":scope > h2")) break;
+      const h=c.querySelector(":scope > h3"); if(!h||!c.querySelector("[data-f]")) continue;
+      c.classList.add("icard");
+      h.insertAdjacentHTML("beforeend",`<button type="button" class="icol" aria-expanded="true">收合</button>`);
+      h.insertAdjacentHTML("afterend",`<div class="isum" role="button" tabindex="0"></div>`);
+    }
+  });
+}
+function fieldFilled(f){ const v=S[f]; return !(v===null||v===undefined||v===""||v===false||v===S0[f]); }
+function fieldLabel(el){
+  const lb=el.closest("label"); const sp=lb&&lb.querySelector(":scope > span");
+  let t=(sp?sp.textContent:"").replace(/（[^）]*）|\([^)]*\)/g,"").trim();
+  if(t.length>14) t=t.slice(0,13)+"…"; return t;
+}
+function cardSummary(c){
+  const seen=new Set(), out=[];
+  c.querySelectorAll(".cb [data-f]").forEach(el=>{ const f=el.dataset.f; if(seen.has(f)) return; seen.add(f); if(!fieldFilled(f)) return;
+    const l=fieldLabel(el);
+    if(el.type==="checkbox") out.push(esc(l));
+    else if(el.tagName==="SELECT"){ const o=[...el.options].find(x=>x.value===String(S[f])); out.push(`${esc(l)} <b>${esc(o?o.textContent.replace(/（[^）]*）/g,""):S[f])}</b>`); }
+    else out.push(`${esc(l)} <b>${esc(S[f])}</b>`); });
+  return out;
+}
+function updSummaries(scope){
+  (scope||document).querySelectorAll(".card.icard").forEach(c=>{ const s=c.querySelector(":scope > .isum"); if(!s) return;
+    const L=cardSummary(c); s.innerHTML=(L.length?L.join("・"):'<span class="muted">尚未填寫</span>')+' <span class="muted">（點此展開）</span>'; });
+}
+function setCol(c,on){ c.classList.toggle("col",on); const b=c.querySelector(":scope > h3 .icol"); if(b){ b.textContent=on?"展開":"收合"; b.setAttribute("aria-expanded",String(!on)); } }
+function autoCollapse(p){ if(!p) return; p.querySelectorAll(".card.icard").forEach(c=>setCol(c,cardSummary(c).length>0)); updSummaries(p); }
+function recTarget(){ const p=document.querySelector(".panel.on"); if(!p) return null; const h=p.querySelector(".card > h2"); return h?h.parentElement:null; }
+function updJumpBtn(){
+  const b=document.getElementById("bbJump"); if(!b) return; const t=recTarget();
+  if(!t){ b.textContent="回頂端"; b.disabled=window.scrollY<40; return; }
+  b.disabled=false; b.textContent=(t.getBoundingClientRect().top<=130)?"回頂端":"跳到建議";
+}
+function scrollToEl(el){ const top=el.getBoundingClientRect().top+window.scrollY-110; window.scrollTo({top:Math.max(0,top)}); }
+function openTo(el){
+  let d=el.closest("details"); while(d){ d.open=true; d=d.parentElement&&d.parentElement.closest("details"); }
+  const c=el.closest(".card.col"); if(c) setCol(c,false);
+}
+function flash(el){ el.classList.add("flash"); setTimeout(()=>el.classList.remove("flash"),1400); }
+let toastT=null, UNDO=null;
+function toast(html,ms){ const t=document.getElementById("toast"); if(!t) return; t.innerHTML=html; t.hidden=false; clearTimeout(toastT); toastT=setTimeout(()=>{ t.hidden=true; UNDO=null; },ms||1800); }
+function clearAllUndo(){
+  UNDO=JSON.stringify(S); S=JSON.parse(JSON.stringify(S0)); syncAll(); renderAll(); autoCollapse(document.querySelector(".panel.on"));
+  toast(`已清除全部<button type="button" id="undoBtn">復原</button>`,5000);
+}
+function undoClear(){ if(!UNDO) return; S=JSON.parse(UNDO); UNDO=null; syncAll(); renderAll(); updSummaries(); document.getElementById("toast").hidden=true; toast("已復原",1500); }
+function copyText(txt){
+  const done=()=>toast("已複製",1500);
+  const fb=()=>{ const ta=document.createElement("textarea"); ta.value=txt; ta.style.position="fixed"; ta.style.opacity="0"; document.body.appendChild(ta); ta.select(); try{ document.execCommand("copy"); done(); }catch(e){ toast("請手動選取複製",2000); } ta.remove(); };
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done,fb); else fb();
+}
+/* 搜尋：同義詞表（中英、縮寫互通）→ 指定頁面與段落；其餘比對頁名、段落標題、藥名（含商品名）、REF */
+const SYN=[
+  {w:["k","鉀","hyperkalemia","hyperk","高鉀"],tab:"hk"},
+  {w:["na","鈉","hyponatremia","低鈉","siadh"],tab:"na"},
+  {w:["pe","肺栓塞","pulmonary embolism","wells","years","d-dimer"],tab:"dysp",q:/PE|肺栓塞|血栓/},
+  {w:["af","afib","a-fib","心房顫動","atrial fibrillation","rvr"],tab:"tachy",q:/AF|心房顫動/},
+  {w:["svt","psvt","vt","心搏過速"],tab:"tachy"},
+  {w:["低血糖","hypoglycemia","hypo"],tab:"dka",q:/低血糖/},
+  {w:["dka","hhs","酮酸","高血糖"],tab:"dka"},
+  {w:["insulin","胰島素","sliding scale","矯正"],tab:"dka",q:/住院血糖控制|血糖控制建議/},
+  {w:["sepsis","敗血","shock","休克","lactate"],tab:"hypo"},
+  {w:["stemi","nstemi","acs","心肌梗塞","troponin","主動脈剝離","dissection"],tab:"cp"},
+  {w:["stroke","中風","cva","ich","腦出血","tpa","alteplase","tenecteplase"],tab:"ams",q:/中風|腦出血/},
+  {w:["seizure","癲癇","抽搐","status epilepticus"],tab:"ams",q:/癲癇/},
+  {w:["delirium","譫妄","躁動","agitation"],tab:"ams",q:/譫妄/},
+  {w:["gcs","昏迷","coma"],tab:"ams",q:/GCS|神經學評估/},
+  {w:["吐血","黑便","血便","melena","hematemesis","ugib","lgib","靜脈瘤","varix"],tab:"gib"},
+  {w:["逆轉","reversal","pcc","idarucizumab","andexanet","vitamin k","protamine"],tab:"gib",q:/抗血栓|逆轉/},
+  {w:["aki","急性腎損傷","oliguria","尿少","尿滯留","foley"],tab:"uo"},
+  {w:["bp","血壓","hypertension","降壓"],tab:"htn"},
+  {w:["ca","鈣","hypercalcemia","低血鈣","mg","鎂","磷","phosphate"],tab:"lyte"},
+  {w:["ponv","嘔吐","vomiting","nausea"],tab:"nv"},
+  {w:["opioid","morphine","嗎啡","pca","止痛"],tab:"pain"},
+  {w:["insomnia","安眠","睡不著"],tab:"sleep"},
+  {w:["cpr","arrest","心跳停止","急救","vf","pea","asystole","rosc"],tab:"acls"},
+  {w:["rsi","插管","intubation"],tab:"acls",id:"acls-rsi"},
+  {w:["升壓藥","vasopressor","norepinephrine","levophed","泡法"],tab:"calc",q:/升壓藥/},
+  {w:["輸血","transfusion","prbc","血小板輸注"],tab:"calc",q:/輸血/},
+  {w:["類固醇","steroid","stress dose","hydrocortisone"],tab:"calc",q:/類固醇/},
+  {w:["點滴","pump","drip","幫浦"],tab:"calc",q:/點滴/},
+  {w:["anaphylaxis","過敏","過敏性休克","allergy","allergic"],tab:"ana"},
+  {w:["syncope","暈厥","昏倒","暈倒","昏厥","csrs","canadian syncope"],tab:"syn"},
+  {w:["bridging","術前停藥","停藥","抗凝","抗血小板","doac","noac","warfarin","antithrombotic","neuraxial","dapt"],tab:"peri"},
+  {w:["sbar","交班","duty note"],act:"sbar"},
+];
+function synHits(q){
+  return SYN.filter(s=>(s.act||TABS.some(t=>t.id===s.tab))&&s.w.some(w=>w===q||(q.length>=3&&w.startsWith(q))||(q.length>=4&&w.length>=3&&q.includes(w))));
+}
+const ANCHOR_SEL=".card > h2, .card > h3, .sec, details > summary, .opt-h b, .st-t, .rf h3";
+function findAnchor(tab,re){ const p=document.getElementById("p-"+tab); if(!p) return null; return [...p.querySelectorAll(ANCHOR_SEL)].find(e=>re.test(e.textContent))||null; }
+let SID=0;
+function anchorId(el){ if(!el.id) el.id="sx-"+(++SID); return el.id; }
+function searchHits(raw){
+  const q=raw.trim().toLowerCase(); if(!q) return [];
+  const tl=Object.fromEntries(TABS.map(x=>[x.id,x.t])); const H=[], seen=new Set();
+  const short=/^[a-z0-9.\-]{1,3}$/.test(q);
+  const re=short?new RegExp("(^|[^a-z0-9])"+q.replace(/[.\-]/g,"\\$&")+"([^a-z0-9]|$)","i"):null;
+  const has=s=>re?re.test(s):s.toLowerCase().includes(q);
+  const add=o=>{ const k=o.kind==="頁面"&&!o.id?"P|"+o.tab:o.tab+"|"+(o.id||"")+"|"+o.t; if(seen.has(k)) return; seen.add(k); H.push(o); };
+  for(const s of synHits(q)){
+    if(s.act) { add({kind:"功能",t:"SBAR 交班摘要",act:s.act,tab:""}); continue; }
+    let el=s.id?document.getElementById(s.id):(s.q?findAnchor(s.tab,s.q):null);
+    add({kind:"頁面",tab:s.tab,t:tl[s.tab]+(el?" › "+el.textContent.trim().slice(0,30):""),id:el?anchorId(el):""});
+  }
+  for(const t of TABS){ const en=(typeof CC_EN!=="undefined"&&CC_EN[t.id])||""; if(has(t.t)||(q.length>=3&&has(en))) add({kind:"頁面",tab:t.id,t:t.t+(en?"（"+en+"）":""),id:""}); }
+  if(q.length>=2){
+    for(const t of TABS){ if(t.id==="ref") continue; const p=document.getElementById("p-"+t.id); if(!p) continue;
+      for(const el of p.querySelectorAll(ANCHOR_SEL)){ const tx=el.textContent.replace(/\s+/g," ").replace(/(收合|展開)$/,"").trim(); if(!has(tx)) continue;
+        add({kind:t.id==="drug"?"藥物":"段落",tab:t.id,t:tx.slice(0,60),p:t.id==="drug"?"":tl[t.id],el}); if(H.length>60) break; } }
+    for(const [k,v] of Object.entries(REF)){ if(has(short?v.t:v.t+" "+v.f)) add({kind:"出處",ref:k,t:v.t,tab:"ref"}); if(H.length>80) break; }
+  }
+  return H.slice(0,40);
+}
+function renderSearch(raw){
+  const H=searchHits(raw);
+  const out=document.getElementById("sres"); if(!out) return;
+  if(!raw.trim()){ out.innerHTML=`<li class="small muted" style="padding:8px 4px">可輸入主訴、藥名（學名或商品名）、縮寫，例如 K、PE、AF、bridging、labetalol。</li>`; return; }
+  if(!H.length){ out.innerHTML=`<li class="small muted" style="padding:8px 4px">找不到「${esc(raw.trim())}」。試試中文、英文或縮寫的其他寫法。</li>`; return; }
+  out.innerHTML=H.map(o=>{
+    if(o.act) return `<li><button type="button" id="sbarBtn2"><span class="sk">${o.kind}</span>${esc(o.t)}</button></li>`;
+    if(o.ref) return `<li><button type="button" data-ref="${o.ref}"><span class="sk">${o.kind}</span>${esc(o.t)}</button></li>`;
+    const id=o.el?anchorId(o.el):o.id;
+    return `<li><button type="button" data-tab="${o.tab}"${id?` data-jump="${id}"`:""}><span class="sk">${o.kind}</span>${esc(o.t)}${o.p?`<span class="sp">${esc(o.p)}</span>`:""}</button></li>`;
+  }).join("");
+}
+function showSearch(){
+  showOv(`<h4>搜尋</h4><input id="sq" type="search" autocomplete="off" enterkeyhint="search" placeholder="主訴、藥名、縮寫（K、PE、AF…）" aria-label="搜尋"><ul class="sres" id="sres"></ul>`);
+  renderSearch(""); const i=document.getElementById("sq"); if(i) i.focus();
+}
+function showMenu(){
+  const cur=curTab(); const tl=Object.fromEntries(TABS.map(x=>[x.id,x.t]));
+  showOv(`<h4>主訴選單</h4><div class="mgrid">${MENU.map(([g,ids])=>`<h4>${g}</h4><div class="mg">${ids.map(i=>`<button type="button" data-tab="${i}" class="${cur===i?"on":""}">${tl[i]}</button>`).join("")}</div>`).join("")}</div>`);
 }
 
 /* ================= 彈出說明 ================= */
@@ -4822,32 +5462,44 @@ function init(){
   const P=buildPanels();
   document.getElementById("tabs").innerHTML=TABS.map((t,i)=>`<button type="button" data-tab="${t.id}" class="${i===0?"on":""}">${t.t}</button>`).join("");
   document.getElementById("panels").innerHTML=TABS.map((t,i)=>`<section class="panel ${i===0?"on":""}" id="p-${t.id}">${P[t.id]}</section>`).join("");
-  syncAll(); renderAll();
+  setupInputCards();
+  syncAll(); renderAll(true);
   document.addEventListener("input",onInput); document.addEventListener("change",onInput);
   document.addEventListener("click",e=>{
     const t=e.target;
     const tab=t.closest("[data-tab]");
-    if(tab){ const id=tab.dataset.tab; document.querySelectorAll("nav [data-tab]").forEach(b=>b.classList.toggle("on",b.dataset.tab===id));
+    if(tab){ const id=tab.dataset.tab; const prev=curTab(); document.querySelectorAll("nav [data-tab]").forEach(b=>b.classList.toggle("on",b.dataset.tab===id));
       document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+id)); hideOv();
       const nb=document.querySelector(`nav [data-tab="${id}"]`); if(nb&&nb.scrollIntoView) nb.scrollIntoView({block:"nearest",inline:"center"});
       const jt=tab.dataset.jump&&document.getElementById(tab.dataset.jump);
-      if(jt){ jt.querySelectorAll("details").forEach(d=>d.open=true); const top=jt.getBoundingClientRect().top+window.scrollY-110; window.scrollTo({top:Math.max(0,top)}); jt.classList.add("flash"); setTimeout(()=>jt.classList.remove("flash"),1200); }
-      else window.scrollTo({top:0}); return; }
-    if(t.id==="sbarBtn"){ showSbar("zh"); return; }
+      if(id!==prev){ renderAll(); autoCollapse(document.getElementById("p-"+id)); }
+      if(jt){ openTo(jt); jt.querySelectorAll("details").forEach(d=>d.open=true); scrollToEl(jt); flash(jt); }
+      else window.scrollTo({top:0}); updJumpBtn(); return; }
+    if(t.id==="sbarBtn"||t.id==="bbSbar"||t.closest("#sbarBtn2")){ showSbar("zh"); return; }
+    if(t.id==="searchBtn"||t.id==="bbSearch"){ showSearch(); return; }
+    if(t.id==="bbMenu"){ showMenu(); return; }
+    if(t.id==="bbJump"){ const r=recTarget(); if(r&&r.getBoundingClientRect().top>130) scrollToEl(r); else window.scrollTo({top:0}); return; }
+    if(t.id==="undoBtn"){ undoClear(); return; }
+    const ic=t.closest(".icol,.isum"); if(ic){ const c=ic.closest(".card"); setCol(c,!c.classList.contains("col")); if(!c.classList.contains("col")) updSummaries(c.parentElement); return; }
+    const cp=t.closest("[data-copy]"); if(cp){ copyText(cp.dataset.copy); return; }
     const sb=t.closest("[data-sbar]"); if(sb){ showSbar(sb.dataset.sbar); return; }
     if(t.id==="sbarCopy"){ copySbar(); return; }
-    if(t.id==="menuBtn"){ const cur=(document.querySelector("nav [data-tab].on")||{}).dataset; const tl=Object.fromEntries(TABS.map(x=>[x.id,x.t]));
-      showOv(`<h4>主訴選單</h4><div class="mgrid">${MENU.map(([g,ids])=>`<h4>${g}</h4><div class="mg">${ids.map(i=>`<button type="button" data-tab="${i}" class="${cur&&cur.tab===i?"on":""}">${tl[i]}</button>`).join("")}</div>`).join("")}</div>`); return; }
+    if(t.id==="menuBtn"){ showMenu(); return; }
     const dc=t.closest("[data-dc]"); if(dc){ S.dflt=dc.dataset.dc; document.querySelectorAll("#dSeg [data-dc]").forEach(b=>b.classList.toggle("pri",b.dataset.dc===S.dflt)); setHTML("r-drugs",renderDrugs()); markGloss(document.getElementById("p-drug")); return; }
     const r=t.closest("[data-ref]"); if(r){ const x=REF[r.dataset.ref]; if(x) showOv(`<h4>${esc(x.t)}</h4><p>${esc(x.f)}</p>${x.u?`<p><a href="${x.u}" target="_blank" rel="noopener">開啟原始出處</a></p>`:""}`); return; }
     const u=t.closest("[data-upd]"); if(u){ showOv(`<h4><span class="upd">更新</span> 變更內容</h4><p>${esc(u.dataset.upd)}</p>`); return; }
     const gl=t.closest("abbr.gl"); if(gl){ showOv(`<h4>${esc(gl.dataset.gl||gl.textContent)}</h4><p>${esc(GLOSS[gl.dataset.gl||gl.textContent]||"")}</p>`); return; }
     if(t.id==="ovClose"||t.id==="ov"){ hideOv(); return; }
-    if(t.id==="clearAll"){ S=JSON.parse(JSON.stringify(S0)); syncAll(); renderAll(); return; }
+    if(t.id==="clearAll"||t.id==="bbClear"){ clearAllUndo(); return; }
     if(t.id==="themeBtn"){ const root=document.documentElement; const cur=root.dataset.theme||"auto"; const nx=cur==="auto"?"light":cur==="light"?"dark":"auto";
       if(nx==="auto") delete root.dataset.theme; else root.dataset.theme=nx; t.textContent={auto:"自動",light:"淺色",dark:"深色"}[nx]; return; }
   });
-  document.addEventListener("keydown",e=>{ if(e.key==="Escape") hideOv(); });
+  document.addEventListener("keydown",e=>{ if(e.key==="Escape") hideOv();
+    if((e.key==="Enter"||e.key===" ")&&e.target.classList&&e.target.classList.contains("isum")){ e.preventDefault(); e.target.click(); }
+    if(e.key==="Enter"&&e.target.id==="sq"){ const b=document.querySelector("#sres button"); if(b){ e.preventDefault(); b.click(); } } });
+  document.addEventListener("input",e=>{ if(e.target.id==="sq") renderSearch(e.target.value); });
+  let raf=0; window.addEventListener("scroll",()=>{ if(raf) return; raf=requestAnimationFrame(()=>{ raf=0; updJumpBtn(); }); },{passive:true});
+  updJumpBtn();
 }
 function onInput(e){
   const el=e.target; if(!el.dataset||!el.dataset.f) return;

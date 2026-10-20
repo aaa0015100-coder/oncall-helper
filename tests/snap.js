@@ -18,7 +18,7 @@ for(const [n,o] of Object.entries(SC)){
   set(o); try{ const g=A.gcsCalc(); if(g!==null){A.S.gcs=g;} }catch(e){}
   add(n+" score",A.scoreBox); add(n+" redBanner",A.redBanner); add(n+" abg",A.abgRes); add(n+" gcsBox",A.gcsBox);
   for(const m of A.MODS){ add(n+" "+m.id,()=>A.hypoX(m.id)+A.o2X(m.id)+m.r()); if(m.lab) add(n+" "+m.id+" lab",m.lab); }
-  if(A.renderGluc) add(n+" gluc",A.renderGluc); if(A.renderBPmed) add(n+" bpmed",A.renderBPmed); add(n+" rsi",A.rsiCard); add(n+" calc",A.calcPanel); add(n+" drugs",A.renderDrugs); // sbarText 需 DOM，由 e2e 檢查
+  if(A.renderGluc) add(n+" gluc",A.renderGluc); if(A.renderBPmed) add(n+" bpmed",A.renderBPmed); add(n+" rsi",A.rsiCard); add(n+" calc",A.calcPanel); add(n+" drugs",A.renderDrugs); if(A.csrsBox) add(n+" csrs",A.csrsBox); // sbarText 需 DOM，由 e2e 檢查
 }
 add("ref",A.renderRefPanel);
 fs.writeFileSync(out,L.join("\n\n")+"\n");

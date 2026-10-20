@@ -14,7 +14,8 @@ for(const m of all.matchAll(/<input[^>]*>/g)){ const f=(m[0].match(/data-f="([^"
   F[f]= /type="checkbox"/.test(m[0])?{t:'bool'}:{t:'num'}; }
 const R={age:[16,100],wt:[35,150],ht:[140,195],egfr:[5,120],pod:[0,30],hr:[25,200],sbp:[50,250],dbp:[25,150],rr:[4,50],spo2:[70,100],fio2:[21,100],temp:[34,42],gcs:[3,15],glu:[20,1200],
   ph:[6.8,7.7],pco2:[15,120],po2:[30,500],hco3:[3,50],na:[105,175],k:[1.5,9],cl:[70,130],alb:[1,5],lac:[0.5,15],hb:[3,18],bun:[5,200],ca:[5,16],bhb:[0,10],cr:[0.3,12],cr_base:[0.3,6],
-  inr:[0.9,9],plt:[5,600],wbc:[0.2,60],anc:[0,30],bili:[0.2,30],uo:[0,1500],uo_h:[1,24],ne:[0.01,1.5],mg:[0.5,5],phos:[0.5,9],sosm:[220,380],uosm:[50,1200],una:[5,200],na_prev:[105,175],na_h:[1,48],o2_flow:[1,60]};
+  inr:[0.9,9],plt:[5,600],wbc:[0.2,60],anc:[0,30],bili:[0.2,30],uo:[0,1500],uo_h:[1,24],ne:[0.01,1.5],mg:[0.5,5],phos:[0.5,9],sosm:[220,380],uosm:[50,1200],una:[5,200],na_prev:[105,175],na_h:[1,48],o2_flow:[1,60],
+  an_tryp:[1,120],an_tryb:[1,30],sy_lsbp:[60,220],sy_ldbp:[30,120],sy_lhr:[30,160],sy_ssbp:[50,220],sy_sdbp:[25,120],sy_shr:[30,180]};
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 function rnd(f){ const s=F[f]; if(s.t==='bool') return Math.random()<.25; if(s.t==='sel') return pick(s.v);
   if(Math.random()<.35) return null; const r=R[f]||[0,100]; const x=r[0]+Math.random()*(r[1]-r[0]); return Math.random()<.5?Math.round(x):+x.toFixed(2); }
@@ -45,12 +46,35 @@ for(const m of A.MODS){ if(MODSEL.length&&!MODSEL.includes(m.id)) continue;
     const w=num(o.wt), ht=num(o.ht);
     if(/30 mL\/kg 晶體液/.test(t)&&w!==null&&ht!==null&&ht>=120&&w/Math.pow(ht/100,2)>30&&(o.sex==='m'||o.sex==='f')&&!/調整體重/.test(t)) return 'BMI>30 未用調整體重';
     if(m.id==='ams'&&o.hx_pd&&/haloperidol<\/b>：<b>0\.5–1 mg/.test(h)) return 'Parkinson 仍給 haloperidol 劑量';
+    // v1.0 過敏反應
+    if(m.id==='ana'){ const w=num(o.wt); const d=(t.match(/epinephrine ([\d.]+) mg IM/)||[])[1];
+      if(d&&+d>0.5) return 'epinephrine IM >0.5 mg';
+      if(d&&w!==null&&w<50&&Math.abs(+d-Math.round(w)/100)>0.011) return 'epinephrine 未依體重 '+d;
+      const sbp=num(o.sbp), hyp=(sbp!==null&&sbp<90)||o.an_cv, c1=o.an_skin&&(o.an_resp||hyp||o.an_gi), c2=o.an_expo&&(hyp||o.an_resp);
+      if(/符合條件/.test(t)!==!!(c1||c2)) return 'WAO 判定不一致';
+      if(o.an_epi==='3'&&/觀察時間/.test(t)&&!/至少 12 小時/.test(t)) return '>2 劑未列 12 小時';
+      if(/Refractory anaphylaxis（/.test(t)&&!(+o.an_epi>=2&&o.an_persist&&!o.an_resolved)) return 'refractory 條件錯';
+      if(/目前僅皮膚黏膜症狀/.test(t)&&(o.an_resp||hyp||o.an_gi)) return '有全身症狀仍判僅皮膚'; }
+    // v1.0 暈厥
+    if(m.id==='syn'){ const maj=['sy_pain','sy_exert','sy_supine','sy_palp','sy_gib','sy_murmur','sy_shd','hx_hf','sy_e_isch','sy_e_avb','sy_e_brady','sy_e_bbb','sy_e_vt','sy_e_dev','sy_e_brug','sy_e_qt'].some(f=>o[f])||(num(o.sbp)!==null&&num(o.sbp)<90)||(num(o.hr)!==null&&num(o.hr)<40);
+      if(maj&&!/高風險 ：早期密集評估/.test(t)) return '有主要高風險特徵未列高風險';
+      if(/低風險 ：多為反射性/.test(t)&&(maj||o.sy_bleed||o.sy_gib)) return '高風險或出血仍列低風險';
+      const s1=num(o.sy_lsbp), s3=num(o.sy_ssbp); if(s1!==null&&s3!==null){ const oh=s1-s3>=20||s3<90||(num(o.sy_ldbp)!==null&&num(o.sy_sdbp)!==null&&num(o.sy_ldbp)-num(o.sy_sdbp)>=10); if(/符合 OH/.test(t)!==oh) return 'OH 判定錯'; } }
+    // v1.0 抗血栓藥圍術期
+    if(m.id==='peri'){ const urg=o.pe_when==='urgent', hiB=o.pe_bleed==='high'||o.pe_neur;
+      if(urg&&/術前停 \d/.test(t)) return '急迫手術仍列術前停藥天數';
+      if(/建議 bridging （高風險例外/.test(t)&&/不 bridging ：AF/.test(t)) return 'bridging 互斥';
+      if(/Bridging：符合高風險例外/.test(t)&&!(o.pe_warf&&((o.pe_af&&(o.pe_strk3||A.chads().vasc>=7))||(o.pe_mhv&&(o.pe_mhvold||o.pe_strk3||o.pe_periTE||(o.pe_mhvpos==='mitral'&&o.pe_mhvrf)))||(o.pe_vte&&(o.pe_vtet==='lt3'||o.pe_thromS))))) return 'bridging 無例外條件';
+      if(!urg&&o.pe_bleed){ for(const [f,n] of [['pe_apix','apixaban'],['pe_riva','rivaroxaban'],['pe_edox','edoxaban']]) if(o[f]){ const d=(t.match(new RegExp(n+' 術前停 (\\d) 天'))||[])[1]; if(o.pe_bleed!=='min'&&d!==(hiB?'2':'1')) return n+' 停藥天數錯 '+d; if(o.pe_bleed==='min'&&!o.pe_neur&&d) return '極低出血仍停 '+n; }
+        if(o.pe_warf&&o.pe_bleed==='min'&&!o.pe_neur&&/warfarin 術前停/.test(t)) return '極低出血仍停 warfarin';
+        if(o.pe_neur&&(o.pe_apix||o.pe_riva||o.pe_edox)&&!/≥72 小時（治療劑量）/.test(t)) return 'neuraxial 未列 ASRA 72 小時'; } }
     if(m.id!=='acls'){ const ns=[...h.matchAll(/class="st-n">(\d+)</g)].map(x=>+x[1]); for(let j=0;j<ns.length;j++) if(ns[j]!==j+1) return '步驟編號不連續 '+ns.join(','); }
     // 腎功能（v0.8）：rv() 不存在時（舊版）略過
     if(A.rv){ const x=A.rv('crcl'), sev=x&&(x.hd||x.v<30);
       if(sev&&/enoxaparin [\d.]+ mg SC q12h/.test(t)) return 'CrCl <30 或透析仍給 enoxaparin q12h';
       if(x&&!x.hd&&x.v>=30&&/enoxaparin [\d.]+ mg SC q24h/.test(t)) return 'CrCl ≥30 卻給 enoxaparin q24h';
       if(m.id==='ams'&&/levetiracetam [\d.]+ mg IV/.test(t)&&A.rv('egfr')&&!/之後 維持/.test(t)) return '有腎功能但未顯示 levetiracetam 維持劑量';
+      if(m.id==='peri'&&x&&o.pe_dabi&&!x.hd&&(o.pe_bleed==='high'||o.pe_neur)&&o.pe_when!=='urgent'){ const d=(t.match(/dabigatran 術前停 (\S+) 天/)||[])[1]; if(d&&d!==(x.v>=50?'2':'4')) return 'dabigatran 高出血停藥天數錯 '+d; }
       if(sev&&/NSAID 合併使用/.test(t)) return 'CrCl <30 仍建議 NSAID';
       if(x&&(x.hd||x.v<40)&&/metoclopramide 10 mg IV/.test(t)) return 'CrCl <40 仍 metoclopramide 10 mg';
       if(x&&(x.hd||x.v<50)&&/desmopressin 2 µg IV/.test(t)&&!/CrCl <50 禁忌/.test(t)) return 'CrCl <50 desmopressin 未標禁忌';

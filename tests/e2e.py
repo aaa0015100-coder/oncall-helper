@@ -33,6 +33,7 @@ with sync_playwright() as p:
                 chk(pg,W,t)
                 if (FULL or (TABSEL and t in TABSEL)) and W==390:
                     sel=f"#p-{t}"
+                    pg.evaluate("document.querySelectorAll('.card.col').forEach(c=>c.classList.remove('col'))")  # v1.0：先展開收合的輸入卡
                     for d in pg.query_selector_all(sel+" details"): 
                         try: d.evaluate("e=>e.open=true")
                         except: pass
@@ -67,6 +68,22 @@ with sync_playwright() as p:
                     issues.append(f"{W} {s} 點擊後 #ov 無內容")
                 pg.keyboard.press("Escape")
             if W==390 and scheme=="light":
+                # v1.0 介面：收合、跳到建議、搜尋、清除後復原、跨頁同步
+                pg.goto(FILE.as_uri()); pg.wait_for_timeout(150)
+                pg.fill('#p-dysp [data-f="hr"]','121'); pg.click('#bbMenu'); pg.click('#ovBox [data-tab="hk"]'); pg.wait_for_timeout(60)
+                if pg.input_value('#p-hk [data-f="hr"]')!="121": issues.append("跨頁同步失敗")
+                if not pg.evaluate("document.querySelector('#p-hk .card.icard').classList.contains('col')"): issues.append("已填病人資料換頁未自動收合")
+                if "HR" not in pg.inner_text('#p-hk .card.icard .isum'): issues.append("收合摘要缺 HR")
+                pg.click('#bbJump'); pg.wait_for_timeout(60)
+                if pg.evaluate("Math.abs(document.querySelector('#p-hk .card>h2').getBoundingClientRect().top-110)")>40: issues.append("跳到建議位置錯")
+                pg.click('#bbSearch'); pg.fill('#sq','k'); pg.wait_for_timeout(40)
+                if "高血鉀" not in pg.inner_text('#sres'): issues.append("搜尋 k 未找到高血鉀")
+                pg.fill('#sq','bridging'); pg.wait_for_timeout(40); pg.click('#sres button'); pg.wait_for_timeout(60)
+                if pg.evaluate("curTab()")!="peri": issues.append("搜尋 bridging 未跳到抗血栓藥頁")
+                pg.click('#bbClear'); pg.wait_for_timeout(40)
+                if pg.evaluate("S.hr")is not None: issues.append("清除後 HR 未清空")
+                pg.click('#undoBtn'); pg.wait_for_timeout(40)
+                if pg.evaluate("S.hr")!=121: issues.append("復原失敗")
                 for _ in range(3): pg.click("#themeBtn")
                 if pg.evaluate("document.documentElement.dataset.theme||'auto'")!="auto": issues.append("主題切換 3 次後不是自動")
             pg.close()
