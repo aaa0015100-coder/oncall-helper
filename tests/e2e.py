@@ -11,6 +11,9 @@ SHOTS=next((a.split("=",1)[1] for a in sys.argv if a.startswith("--shots=")),Non
 WIDTHS=[320,390,768,1280] if (FULL or "--wide" in sys.argv) else [390,1280]
 errs=[];issues=[]
 BADJS="(()=>{const t=document.body.innerText;const m=t.match(/.{0,30}(\\bundefined\\b|\\bNaN\\b|\\[object|Infinity).{0,30}/);return m?m[0]:''})()"
+def go(pg,t):
+    # v1.1：手機版頂部分頁列隱藏（改「目前主訴 ▾」＋最近），一律用與點選相同的 goTab()
+    pg.evaluate(f"goTab('{t}')")
 def chk(pg,W,where):
     sw=pg.evaluate("document.documentElement.scrollWidth")
     if sw>W: 
@@ -29,7 +32,7 @@ with sync_playwright() as p:
             pg.goto(FILE.as_uri()); pg.wait_for_timeout(200)
             tabs=pg.eval_on_selector_all("#tabs [data-tab]","e=>e.map(x=>x.dataset.tab)")
             for t in tabs:
-                pg.click(f'#tabs [data-tab="{t}"]'); pg.wait_for_timeout(40)
+                go(pg,t); pg.wait_for_timeout(40)
                 chk(pg,W,t)
                 if (FULL or (TABSEL and t in TABSEL)) and W==390:
                     sel=f"#p-{t}"
@@ -55,13 +58,13 @@ with sync_playwright() as p:
                 if SHOTS and W in (390,1280) and t in ("dysp","hypo","acls","calc"):
                     os.makedirs(SHOTS,exist_ok=True); pg.screenshot(path=f"{SHOTS}/{W}_{scheme}_{t}.png",full_page=False)
             # 彈出層：.src / .upd / abbr 各 1 個
-            pg.click('#tabs [data-tab="dysp"]')
+            go(pg,"dysp")
             for s in [".panel.on .src",".panel.on .upd","#panels abbr.gl"]:
                 el=pg.query_selector(s) if s!=".panel.on .upd" else (pg.query_selector(".panel.on .upd") or pg.query_selector(".upd"))
                 if not el: issues.append(f"{W} 找不到 {s}"); continue
                 if not el.is_visible():
                     tab=el.evaluate("e=>{const p=e.closest('.panel');return p?p.id.slice(2):null}")
-                    if tab: pg.click(f'#tabs [data-tab="{tab}"]')
+                    if tab: go(pg,tab)
                     el.evaluate("e=>{let d=e.closest('details');while(d){d.open=true;d=d.parentElement.closest('details')}}")
                 el.click(); pg.wait_for_timeout(30)
                 if not pg.evaluate("document.getElementById('ov').classList.contains('on') && document.getElementById('ovBox').innerText.trim().length>5"):
@@ -86,6 +89,43 @@ with sync_playwright() as p:
                 if pg.evaluate("S.hr")!=121: issues.append("復原失敗")
                 for _ in range(3): pg.click("#themeBtn")
                 if pg.evaluate("document.documentElement.dataset.theme||'auto'")!="auto": issues.append("主題切換 3 次後不是自動")
+                # v1.1：結論卡、手機主訴列、網址 hash、免責收合
+                pg.goto(FILE.as_uri()); pg.wait_for_timeout(150)
+                for t in pg.evaluate("MODS.map(m=>m.id).filter(x=>!COL_SKIP.has(x))"):
+                    go(pg,t); pg.wait_for_timeout(20)
+                    if not pg.query_selector(f"#p-{t} > #r-cc-{t} .concl, #p-{t} .pmain > #r-cc-{t} .concl"): issues.append(f"{t} 無結論卡")
+                    if pg.evaluate(f"document.querySelector('#p-{t}').firstElementChild.id")!=f"r-cc-{t}": issues.append(f"{t} 結論卡不在最上方")
+                go(pg,"hypo"); pg.wait_for_timeout(30)
+                pg.fill('#p-hypo [data-f="sbp"]','78'); pg.wait_for_timeout(30)
+                if "紅旗" not in pg.inner_text("#r-cc-hypo"): issues.append("SBP 78 結論卡未列紅旗")
+                pg.click('#r-cc-hypo [data-cj="rf"]'); pg.wait_for_timeout(40)
+                if abs(pg.evaluate("document.getElementById('r-rf-hypo').getBoundingClientRect().top")-110)>40: issues.append("結論卡紅旗未跳到紅框")
+                b=pg.query_selector('#r-cc-hypo [data-cj^="st:"]')
+                if b: b.click(); pg.wait_for_timeout(40)
+                else: issues.append("結論卡無可跳轉的步驟")
+                if not pg.is_visible("#ccCur"): issues.append("手機未顯示目前主訴鈕")
+                if pg.is_visible("#tabs"): issues.append("手機仍顯示頂部分頁列")
+                if "低血壓" not in pg.inner_text("#ccCur"): issues.append("目前主訴鈕文字錯")
+                go(pg,"hk"); pg.wait_for_timeout(30)
+                if not pg.query_selector('#ccbar [data-tab="hypo"]'): issues.append("最近主訴未列低血壓")
+                pg.click('#ccbar [data-tab="hypo"]'); pg.wait_for_timeout(30)
+                if pg.evaluate("curTab()")!="hypo" or not pg.evaluate("location.hash")=="#hypo": issues.append("最近主訴點選或 hash 失敗")
+                pg.click("#ccCur"); pg.wait_for_timeout(30)
+                if not pg.evaluate("document.getElementById('ov').classList.contains('on')"): issues.append("目前主訴鈕未開選單")
+                pg.keyboard.press("Escape")
+                pg.click("#discOk"); pg.wait_for_timeout(20)
+                if pg.is_visible("#disc") or not pg.evaluate("!document.getElementById('discF').hidden"): issues.append("免責聲明收合失敗")
+                pg.goto("about:blank"); pg.goto(FILE.as_uri()+"#peri"); pg.wait_for_timeout(150)
+                if pg.evaluate("curTab()")!="peri": issues.append("網址 #peri 未開到抗血栓藥頁")
+                if not pg.is_visible("#disc"): issues.append("重新整理後免責聲明應再出現")
+                # 寬螢幕雙欄 ↔ 手機切換
+                pg.set_viewport_size({"width":1280,"height":800}); pg.wait_for_timeout(60)
+                if not pg.query_selector("#p-hypo .pcols .pside .card.shr"): issues.append("1280 未成雙欄")
+                if pg.evaluate("document.querySelectorAll('#p-hypo .pside .card').length")<2: issues.append("1280 左欄卡片不足")
+                pg.set_viewport_size({"width":390,"height":800}); pg.wait_for_timeout(60)
+                if pg.query_selector("#p-hypo .pcols"): issues.append("回 390 仍為雙欄")
+                if not pg.evaluate("document.querySelector('#p-hypo > .card').classList.contains('shr')"): issues.append("回 390 病人資料卡位置錯")
+                chk(pg,390,"版面切換後")
             pg.close()
     br.close()
 print("E2E", "OK" if not issues and not errs else "FAIL")

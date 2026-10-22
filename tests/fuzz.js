@@ -168,6 +168,32 @@ if(!MODSEL.length||MODSEL.includes('drug')) outs.push(['drugs',()=>{ A.S.dflt='a
     if(!known&&n) return name+' 無腎功能資料卻標 ▶'; }
   return ''; }]);
 
+/* v1.1 目前結論卡：只能摘錄本頁實際輸出，不可自創或矛盾 */
+if(A.conclData&&(!MODSEL.length||MODSEL.includes('cc'))) for(const m of A.MODS.filter(m=>!['acls','calc','drug','ref'].includes(m.id))) outs.push(['cc.'+m.id,()=>{ const r=A.pageOut(m); A.__cc={rows:A.conclData(m.id,r.steps),page:r.h,steps:r.steps}; return A.concl(m.id,r.steps); },(t,h,o)=>{
+  const {rows,page,steps}=A.__cc; const pt=txt(page).replace(/\s+/g,''); const row=k=>rows.find(r=>r.k===k);
+  const nf=A.redFlags().length, now=row('now'), dx=row('dx'), miss=row('miss');
+  const T=s=>txt(s.t);
+  // 1. 紅旗數與頁首紅框一致；有紅旗必列「立即」
+  const m1=now&&txt(now.items[0].h).match(/紅旗 (\d+) 項/);
+  if(nf&&!(m1&&+m1[1]===nf)) return `紅旗 ${nf} 項未正確列於結論`;
+  if(!nf&&m1) return '無紅旗卻列紅旗';
+  // 2. 立即處置步驟標題必須是本頁的 st-bx 步驟
+  if(now) for(const it of now.items){ const j=it.j||''; if(j.startsWith('st:')){ const s=steps.find(x=>!x.opt&&T(x)===j.slice(3)); if(!s) return '立即列出不存在的步驟'; if(s.k!=='bx') return '立即列出非立即處置步驟 '+T(s); } }
+  // 3. 鑑別名稱必須出現在頁面，且「先排除」只能是 must 等級
+  if(dx){ const d=steps.find(x=>'ddx' in x); if(!d||!d.ddx) return '鑑別列卻無鑑別步驟';
+    for(const it of dx.items){ const s=txt(it.h); if(s==='線索未指向特定病因'){ if(d.ddx.length) return '有鑑別卻寫未指向'; continue; } const lab=s.split(' ')[0]; const rest=s.slice(lab.length).replace(/ 等$/,'').trim(); const names=d.ddx.some(v=>txt(v.name)===rest)?[rest]:rest.split(/；/.test(rest)?/；/:/、(?![^（]*）)/).map(x=>x.trim()).filter(Boolean);
+      const lv={先排除:'must',先處理:'must',最可能:'likely',也考慮:'consider'}[lab]; if(!lv) return '鑑別標籤錯 '+lab;
+      for(const nm of names){ const c=d.ddx.find(v=>txt(v.name)===nm); if(!c) return '鑑別名稱不在頁面 '+nm; if(c.lvl!==lv) return `${nm} 等級 ${c.lvl} 卻列為${lab}`; if(!pt.includes(nm.replace(/\s+/g,''))) return '鑑別名稱未顯示於頁面 '+nm; } } }
+  // 4. 有生命徵象（或已勾穩定）不可再列「缺：生命徵象」；淺色頁（症狀照護、圍術期）不列
+  const vit=!!(A.S.vs_ok||A.news2().parts.length);
+  if(miss&&miss.items.some(i=>i.h==='生命徵象')&&(vit||['nv','pain','sleep','peri'].includes(m.id))) return '已有生命徵象仍列缺';
+  if(!vit&&!['nv','pain','sleep','peri'].includes(m.id)&&!(miss&&miss.items.some(i=>i.h==='生命徵象'))) return '無生命徵象卻未列缺';
+  // 5. 每個跳轉目標都存在於本頁
+  for(const r of rows) for(const it of r.items){ const j=it.j||''; if(j.startsWith('st:')&&!steps.some(x=>!x.opt&&T(x)===j.slice(3))) return '跳轉目標不存在 '+j; if(j.startsWith('op:')&&!steps.some(x=>x.opt&&txt(x.title)===j.slice(3))) return '跳轉卡片不存在 '+j; }
+  // 6. 內容不可空白
+  if(!rows.length||rows.some(r=>!r.items.length||r.items.some(i=>!txt(i.h)))) return '結論列空白';
+  return ''; }]);
+
 for(let i=0;i<N;i++){
   const o={}; for(const f of Object.keys(F)) o[f]=rnd(f);
   // 30% 回合偏向住院血糖情境（糖尿病、血糖 140–400、有體重），提高血糖模組覆蓋
@@ -176,6 +202,8 @@ for(let i=0;i<N;i++){
   else if(Math.random()<.25&&F.bpd_amlo){ o.sbp=Math.round(140+Math.random()*60); o.dbp=Math.round(70+Math.random()*40); if(Math.random()<.7) o.bp_aki=false; if(Math.random()<.7) o.k=+(3.5+Math.random()*1.4).toFixed(1);
     const bf=Object.keys(F).filter(f=>f.startsWith('bpd_')); for(const f of bf) o[f]=''; if(Math.random()<.3){ o.cr=+(2.5+Math.random()*3).toFixed(1); o.age=Math.round(60+Math.random()*30); o.wt=Math.round(45+Math.random()*30); }
     for(let j=0;j<2;j++){ const f=pick(bf); o[f]=pick(F[f].v.filter(Boolean)); } }
+  // v1.1：15% 回合為稀疏輸入（多數欄位空白、可能只勾「穩定」），覆蓋結論卡的「缺」與單一紅旗情境
+  if(Math.random()<.15){ for(const f of Object.keys(o)) if(Math.random()>.06) o[f]=F[f].t==='bool'?false:F[f].t==='sel'?'':null; if(Math.random()<.4) o.vs_ok=true; }
   set(o); const g=A.gcsCalc(); if(g!==null) A.S.gcs=g;
   for(const [lab,fn,inv] of outs){
     let h; try{ h=fn(); }catch(e){ fail(lab+' | EXC '+e.message,o); continue; }

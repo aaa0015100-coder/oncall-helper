@@ -203,24 +203,73 @@ textarea.sbar{width:100%;font:13.5px/1.55 var(--f-mono);color:var(--ink);backgro
 }
 .copy{border:1px solid var(--line);background:var(--surface2);border-radius:6px;padding:1px 9px;font-size:12px;cursor:pointer;margin-left:4px;vertical-align:1px}
 pre.ord{white-space:pre-wrap;font:13px/1.55 var(--f-mono);background:var(--surface2);border:1px solid var(--line2);border-radius:7px;padding:7px 9px;margin:6px 0}
+/* v1.1 介面：目前結論、免責收合、手機主訴列、寬螢幕雙欄、生命徵象 3 欄、頁尾依據收合 */
+.concl{background:var(--accent-weak);border-radius:var(--r);padding:8px 12px 6px;margin:0 0 12px}
+.cc-h{font-size:12.5px;font-weight:700;color:var(--accent);letter-spacing:.04em;margin-bottom:2px}
+.cc-h .sub{font-weight:400;color:var(--muted);letter-spacing:0;margin-left:4px}
+.cc-r{display:grid;grid-template-columns:42px minmax(0,1fr);gap:8px;padding:3px 0;border-top:1px dashed color-mix(in srgb,var(--accent) 30%,transparent)}
+.cc-h+.cc-r{border-top:0}
+.cc-k{font-size:12.5px;font-weight:700;padding-top:4px;white-space:nowrap}
+.cc-now .cc-k,.cc-now .cc-i b{color:var(--danger)}
+.cc-miss .cc-k{color:var(--warn)}
+.cc-dx .cc-k,.cc-next .cc-k{color:var(--accent)}
+.cc-v{display:flex;flex-direction:column;min-width:0}
+.cc-miss .cc-v{flex-direction:row;flex-wrap:wrap;column-gap:12px}
+.cc-i{display:block;text-align:left;background:none;border:0;padding:4px 0;font-size:14px;line-height:1.45;color:var(--ink);overflow-wrap:anywhere;min-height:30px}
+button.cc-i{cursor:pointer}
+button.cc-i::after{content:" ›";color:var(--muted)}
+.disc{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+.disc[hidden]{display:none}
+.discOk{flex:0 0 auto;background:var(--surface);border:1px solid var(--warn);color:var(--warn);border-radius:6px;padding:2px 10px;font-size:12.5px;cursor:pointer;min-height:28px}
+footer details{border-top:0;margin-top:4px}
+footer details>summary{padding:4px 0;font-size:12px}
+footer .fref{margin:4px 0 0;line-height:1.6}
+.ver .vd{font-size:inherit}
+.ccbar{display:none}
+@media (max-width:919px){
+  #tabs{display:none}
+  .ccbar{display:flex;gap:6px;align-items:center;overflow-x:auto;scrollbar-width:none;padding:6px max(14px,env(safe-area-inset-right)) 6px max(14px,env(safe-area-inset-left))}
+  .ccbar::-webkit-scrollbar{display:none}
+  nav.tabs .ccbar button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:999px;padding:5px 12px;font-size:14px;cursor:pointer;white-space:nowrap;min-height:34px}
+  nav.tabs .ccbar #ccCur{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+  .ccbar .ccl{font-size:12px;color:var(--muted);flex:0 0 auto;margin-left:2px}
+}
+@media (max-width:520px){
+  .grid.v3{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  .grid.v3 .f{justify-content:flex-end}
+  .grid.v3 .f>span{font-size:12px}
+}
+@media (max-width:400px){
+  .ver{line-height:1.25;text-align:center;padding:2px 6px}
+  .ver .vd{display:block;font-size:10.5px}
+  .ver .vs{display:none}
+}
+@media (min-width:920px){
+  .wrap{max-width:1260px}
+  .pcols{display:grid;grid-template-columns:360px minmax(0,1fr);gap:16px;align-items:start}
+  .pside{position:sticky;top:calc(107px + env(safe-area-inset-top));max-height:calc(100vh - 115px - env(safe-area-inset-top));overflow:auto;overscroll-behavior:contain;border-radius:var(--r)}
+  .pside .card:last-child{margin-bottom:0}
+  .panel.on:not(.two){max-width:960px;margin:0 auto}
+}
 </style>
 </head>
 <body>
 <header class="top"><div class="wrap">
   <button class="themeBtn menuBtn" id="menuBtn" type="button" aria-label="主訴選單">☰ 主訴</button>
-  <div class="brand"><h1>病房決策輔助</h1><small>On-call Chief Complaint Decision Support</small></div>
+  <div class="brand"><h1>病房決策輔助</h1><small>Ward Decision Support</small></div>
   <button class="themeBtn" id="searchBtn" type="button" aria-label="搜尋">搜尋</button>
   <button class="themeBtn" id="themeBtn" type="button" aria-label="切換深淺色">自動</button>
   <span class="ver" id="ver"></span>
 </div></header>
-<nav class="tabs"><div class="wrap" id="tabs"></div></nav>
+<nav class="tabs"><div class="wrap" id="tabs"></div><div class="ccbar" id="ccbar" aria-label="目前與最近主訴"></div></nav>
 <div class="strip"><div class="wrap" id="strip"></div></div>
 <main><div class="wrap">
-  <div class="disc">僅供臨床決策參考，不取代臨床判斷、院內規範與最新指引原文。本頁不儲存任何病人資料，重新整理即清空。</div>
+  <div class="disc" id="disc"><span>僅供臨床決策參考，不取代臨床判斷、院內規範與最新指引原文。本頁不儲存任何病人資料，重新整理即清空。</span><button type="button" class="discOk" id="discOk">知道了</button></div>
   <div id="panels" style="margin-top:12px"></div>
   <footer>
+    <div id="discF" hidden>僅供臨床決策參考，不取代臨床判斷、院內規範與最新指引原文。本頁不儲存任何病人資料，重新整理即清空。</div>
     <div>v<span id="ver2"></span>　最後查證日期：<span id="checked"></span></div>
-    <div>主要依據：BTS 氧氣 2017、GOLD 2026、GINA 2026、ESC 心衰竭 2021／2023、AHA/ACC 急性 PE 2026、ESC PE 2019、ERS/ATS NIV 2017、ERS HFNC 2022、BTS 肋膜 2023、AHA/ASA 急性缺血性中風 2026、AHA/ASA 腦出血 2022、AES 癲癇重積 2016、NICE 譫妄、ESAIC 2024、歐洲低血鈉 2014、ADA/EASD 高血糖危象 2024、EASL 肝性腦病變 2022、AHA ACLS 2025、SSC 2026、ACC/AHA ACS 2025、ESC AF 2024、ACC/AHA AF 2023、ESC SVT 2019、ADA 等高血糖危象共識 2024、UKKA 高血鉀 2023、歐洲低血鈉 2014、AHA 急性照護血壓 2024、ESC 高血壓急症 2019、ACEP 頭痛 2019、PONV 共識 2020、APS/ASA 術後疼痛 2016、AGS Beers 2023、ACC/AHA 主動脈 2022、ESC 心肌炎與心包炎 2025、SCCM/IDSA 新發燒 2023、IDSA 嗜中性球低下發燒、IDSA/SHEA C. difficile 2021、KDIGO AKI 2012、UKKA 高血鉀 2023、WSES 腸繫膜缺血 2022、ACG 胰臟炎 2024、TG18、ACG 上／下消化道出血 2021／2023、ESGE 靜脈瘤 2022、ACG-CAG 抗血栓 2022、NEWS2（RCP 2017）、SCCM RSI 2023、AABB 紅血球 2023、AABB/ICTMG 血小板 2025、CHEST 血漿與血小板 2025、ESE/ES 類固醇相關腎上腺功能不全 2024、ACEP 癲癇 2024、AAN/AES 首次發作 2015、WAO 2020、AAAAI/ACAAI 2023、NICE NG258 2026、ESC 暈厥 2018、ACC/AHA/HRS 暈厥 2017、CHEST 圍術期抗血栓 2022、EHRA NOAC 2021、ASRA 2025 ／ 健保藥品給付規定。詳見「來源・版本」。</div>
+    <details><summary>主要依據（<span id="frefN"></span> 份）</summary><div class="fref" id="fref"></div></details>
   </footer>
 </div></main>
 <div id="ov" role="dialog" aria-modal="true"><div id="ovBox"></div></div>
@@ -229,8 +278,10 @@ pre.ord{white-space:pre-wrap;font:13px/1.55 var(--f-mono);background:var(--surfa
 <script>
 "use strict";
 /* ================= 基本設定 ================= */
-const APP_VERSION="1.0";
-const CHECKED = "2026-10-20";
+const APP_VERSION="1.1";
+const CHECKED = "2026-10-21";
+/* 頁尾「主要依據」：完整清單見「來源・版本」 */
+const FOOT_REFS=["BTS 氧氣 2017", "GOLD 2026", "GINA 2026", "ESC 心衰竭 2021／2023", "AHA/ACC 急性 PE 2026", "ESC PE 2019", "ERS/ATS NIV 2017", "ERS HFNC 2022", "BTS 肋膜 2023", "AHA/ASA 急性缺血性中風 2026", "AHA/ASA 腦出血 2022", "AES 癲癇重積 2016", "NICE 譫妄", "ESAIC 2024", "歐洲低血鈉 2014", "ADA/EASD 高血糖危象 2024", "EASL 肝性腦病變 2022", "AHA ACLS 2025", "SSC 2026", "ACC/AHA ACS 2025", "ESC AF 2024", "ACC/AHA AF 2023", "ESC SVT 2019", "ADA 等高血糖危象共識 2024", "UKKA 高血鉀 2023", "AHA 急性照護血壓 2024", "ESC 高血壓急症 2019", "ACEP 頭痛 2019", "PONV 共識 2020", "APS/ASA 術後疼痛 2016", "AGS Beers 2023", "ACC/AHA 主動脈 2022", "ESC 心肌炎與心包炎 2025", "SCCM/IDSA 新發燒 2023", "IDSA 嗜中性球低下發燒", "IDSA/SHEA C. difficile 2021", "KDIGO AKI 2012", "WSES 腸繫膜缺血 2022", "ACG 胰臟炎 2024", "TG18", "ACG 上／下消化道出血 2021／2023", "ESGE 靜脈瘤 2022", "ACG-CAG 抗血栓 2022", "NEWS2（RCP 2017）", "SCCM RSI 2023", "AABB 紅血球 2023", "AABB/ICTMG 血小板 2025", "CHEST 血漿與血小板 2025", "ESE/ES 類固醇相關腎上腺功能不全 2024", "ACEP 癲癇 2024", "AAN/AES 首次發作 2015", "WAO 2020", "AAAAI/ACAAI 2023", "NICE NG258 2026", "ESC 暈厥 2018", "ACC/AHA/HRS 暈厥 2017", "CHEST 圍術期抗血栓 2022", "EHRA NOAC 2021", "ASRA 2025", "健保藥品給付規定"];
 
 /* ================= 出處 ================= */
 const REF = {
@@ -476,7 +527,9 @@ function nhiQuick(rows){
   const k=[...st][0];
   return {ok:tag("健保 ✔","t-low"),ng:tag("健保 ✘","t-high"),self:tag("健保未給付／自費","t-gray"),q:tag("健保 待確認","t-mid")}[k];
 }
+let STEPLOG=null; // v1.1：結論卡收集本頁步驟（只在 pageOut() 期間）
 function optCard(o){
+  if(STEPLOG) STEPLOG.push({opt:true,cls:o.cls||"",title:o.title||""});
   const all=(o.rows||[]).filter(r=>r&&r[1]);
   const R=r=>`<div class="row"><div class="k">${r[0]}</div><div>${r[1]}</div></div>`;
   const open = !!o.open;
@@ -488,6 +541,7 @@ function optCard(o){
     (hid.length?`<details><summary>詳細：${hid.map(r=>r[0]).join("、")}</summary><div class="opt-b">${hid.map(R).join("")}</div></details>`:"")+`</div>`;
 }
 function stepCard(o){
+  if(STEPLOG) STEPLOG.push(o);
   const cls={go:"st-go",stop:"st-stop",wait:"st-wait",info:"st-info",bx:"st-bx"}[o.k||"info"];
   return `<div class="step ${cls}"><div class="st-h"><span class="st-n">${o.n}</span><span class="st-t">${o.t}</span></div>
     <div class="st-c">${o.c}</div>${o.x?`<div class="st-x">${o.x}</div>`:""}
@@ -650,7 +704,7 @@ function abgInputs(which){
     : fld("ph","pH")+fld("pco2","PaCO₂（mmHg）")+fld("po2","PaO₂（mmHg）")+fld("hco3","HCO₃⁻（mEq/L）")+fld("fio2","FiO₂（%）");
   const adv = which==="ams"? fld("po2","PaO₂（mmHg）")+fld("fio2","FiO₂（%）")+fld("cl","Cl（mEq/L）")+fld("alb","Albumin（g/dL）")+fld("lac","Lactate（mmol/L）")+fld("hb","Hb（g/dL）")+fld("bun","BUN（mg/dL）")+fld("ca","Ca（總鈣，mg/dL）")+fld("bhb","β-hydroxybutyrate（mmol/L）")
     : fld("na","Na（mEq/L）")+fld("cl","Cl（mEq/L）")+fld("k","K（mEq/L）")+fld("alb","Albumin（g/dL）")+fld("lac","Lactate（mmol/L）")+fld("hb","Hb（g/dL）")+fld("bun","BUN（mg/dL）");
-  return `<div class="card"><h3>${which==="ams"?"血糖、電解質與血液氣體":"血液氣體"} <span class="sub">各分頁同步</span></h3><div class="cb"><div class="grid">${core}</div>
+  return `<div class="card shr"><h3>${which==="ams"?"血糖、電解質與血液氣體":"血液氣體"} <span class="sub">各分頁同步</span></h3><div class="cb"><div class="grid">${core}</div>
   <details style="margin-top:6px;border-top:0"><summary style="padding-left:0">進階：${which==="ams"?"氧合、AG、滲透壓、鈣、酮體":"AG、lactate、Hb、BUN"}</summary><div class="grid" style="padding-top:4px">${adv}</div></details>
   <div class="note">FiO₂ 估計：鼻導管約 21% ＋ 每 L/min 加 3–4%（上限約 40%）；NRM 15 L/min 約 60–90%，實際不穩定。VBG 的 pH 與 HCO₃⁻ 可參考，PaO₂ 不能用。</div></div>
   <div class="res" id="r-abg-${which}"></div></div>`;
@@ -686,13 +740,13 @@ function sel(f,label,opts,cls=""){ return `<label class="f ${cls}"><span>${label
 function chk(f,label){ return `<label class="chk"><input type="checkbox" data-f="${f}"><span>${label}</span></label>`; }
 
 function ptCard(which,light){
-  const vit=`<div class="grid">
+  const vit=`<div class="grid v3">
     ${fld("hr","HR（/min）")}${fld("sbp","SBP（mmHg）")}${fld("rr","RR（/min）")}${fld("spo2","SpO₂（%）")}
     ${sel("o2","給氧",[["","—"],["air","室內空氣"],["o2","有給氧"]])}${fld("temp","體溫（°C）")}
     ${fld("gcs","GCS（3–15）")}${fld("glu","血糖（mg/dL）")}
   </div>
   <div class="chks">${chk("conf","新出現的混亂（NEWS2 計為 C）")}${chk("scale2","已確認 hypercapnic 呼吸衰竭（NEWS2 用 SpO₂ Scale 2）")}</div>`;
-  return `<div class="card"><h3>病人資料 <span class="sub">各分頁同步</span></h3><div class="cb">
+  return `<div class="card shr"><h3>病人資料 <span class="sub">各分頁同步</span></h3><div class="cb">
   <div class="chks" style="margin-bottom:6px">${chk("vs_ok","生命徵象已確認穩定、意識清楚（不逐項輸入）")}</div>
   ${light?`<details style="border-top:0"><summary style="padding-left:0">生命徵象（不穩定或需計分時填寫）</summary><div style="padding-top:4px">${vit}</div></details>`:vit}
   <details style="margin-top:6px;border-top:0"><summary style="padding-left:0">背景、共病、用藥（勾選後才影響結果）</summary><div style="padding:4px 0 0">
@@ -723,12 +777,12 @@ function scoreBox(){
 
 /* ================= v0.2 共用元件 ================= */
 function labCard(which,title,inner,note,adv,advT){
-  return `<div class="card"><h3>${title} <span class="sub">各分頁同步</span></h3><div class="cb"><div class="grid">${inner}</div>${adv?`<details style="margin-top:6px;border-top:0"><summary style="padding-left:0">${advT||"進階（需要時再填）"}</summary><div class="grid" style="padding-top:4px">${adv}</div></details>`:""}${note?`<div class="note">${note}</div>`:""}</div><div class="res" id="r-lab-${which}"></div></div>`;
+  return `<div class="card shr"><h3>${title} <span class="sub">各分頁同步</span></h3><div class="cb"><div class="grid">${inner}</div>${adv?`<details style="margin-top:6px;border-top:0"><summary style="padding-left:0">${advT||"進階（需要時再填）"}</summary><div class="grid" style="padding-top:4px">${adv}</div></details>`:""}${note?`<div class="note">${note}</div>`:""}</div><div class="res" id="r-lab-${which}"></div></div>`;
 }
 function advBox(t,inner){ return `<details style="margin-top:6px;border-top:0"><summary style="padding-left:0">${t}</summary><div style="padding-top:4px">${inner}</div></details>`; }
 function causeList(){ const L=[]; const push=(id,lvl,name,why)=>{ if(lvl) L.push({id,lvl,name,why:(why||[]).filter(Boolean)}); }; return {L,push}; }
 function ddxStep(st,cs,anyF,hint,x){
-  if(!anyF) return st({k:"info",t:"鑑別診斷",c:`<span class="muted">${hint}</span>`});
+  if(!anyF) return st({k:"info",t:"鑑別診斷",c:`<span class="muted">${hint}</span>`,ddx:null,hint});
   const must=cs.filter(v=>v.lvl==="must"), lik=cs.filter(v=>v.lvl==="likely"), con=cs.filter(v=>v.lvl==="consider");
   const li=a=>a.map(v=>`<li><b>${v.name}</b>${v.why.length?`<span class="muted small">（${v.why.join("、")}）</span>`:""}</li>`).join("");
   return st({k:must.length?"bx":"go",t:"鑑別診斷（依輸入推導）",
@@ -736,7 +790,7 @@ function ddxStep(st,cs,anyF,hint,x){
       (lik.length?`<div style="font-weight:700;margin-top:4px">最可能</div><ul class="tight">${li(lik)}</ul>`:"")+
       (con.length?`<div class="muted" style="font-weight:700;margin-top:4px">也考慮</div><ul class="tight">${li(con)}</ul>`:"")+
       (!cs.length?`<span class="muted">目前線索未指向特定病因；依 survey 結果再勾選。</span>`:""),
-    x:x||"", why:"本區為依輸入線索的規則式排序，非指引分類；每項處置與出處見下方卡片。"});
+    x:x||"", ddx:cs, why:"本區為依輸入線索的規則式排序，非指引分類；每項處置與出處見下方卡片。"});
 }
 function sortCauses(cs){ return cs.filter(v=>v.lvl==="must").concat(cs.filter(v=>v.lvl==="likely"),cs.filter(v=>v.lvl==="consider")); }
 function cardWrap(cs,o){ const lv={must:"must",likely:"pref",consider:""}[cs.lvl]; o.cls=o.cls||lv; o.title=o.title||cs.name;
@@ -800,6 +854,78 @@ function redFlags(){
   if(n.risk==="high") L.push(`<b>NEWS2 ${n.sum}</b>：emergency response，依院內規範啟動 RRT／重症團隊。${src("news2")}`);
   else if(n.risk==="mid") L.push(`<b>NEWS2 ${n.sum}</b>：urgent response（至少每小時監測，需有急重症能力者評估）。${src("news2")}`);
   return L;
+}
+/* ================= v1.1 目前結論卡 =================
+   只從本頁實際輸出的內容摘出（紅旗、立即處置步驟、鑑別、下一步、缺資料），不另做判斷，因此不會和下方建議矛盾。 */
+const LIGHT_P=new Set(["nv","pain","sleep","peri"]);
+const plainTxt=h=>String(h||"").replace(/<(\d)/g,"&lt;$1").replace(/<\/?(div|li|ul|ol|br|p|tr|td|th|table|tbody|thead|details|summary|h\d)\b[^>]*>/gi," ").replace(/<[^>]+>/g,"").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&quot;/g,'"').replace(/&amp;/g,"&").replace(/\s+/g," ").trim();
+function firstClause(h){
+  let x=String(h||"").replace(/<button\b[\s\S]*?<\/button>/g,"").replace(/<span class="(?:tag|brand)[^"]*"[^>]*>[\s\S]*?<\/span>/g,"");
+  const tb=x.match(/^\s*(?:<div[^>]*>\s*)*<table[\s\S]*?<\/tr>[\s\S]*?<tr[^>]*>([\s\S]*?)<\/tr>/); // 表格：取第一列資料
+  if(tb) x=tb[1].replace(/<\/t[dh]>/g," ");
+  else { x=x.replace(/^\s*(?:<div[^>]*>\s*)+/,"").replace(/^\s*<ul[^>]*>\s*<li>/,""); x=x.split(/<div|<br|<ul|<\/li>|<details|<table/)[0]; }
+  let t=plainTxt(x).replace(/（[A-Z][A-Za-z®\- ]*）/g,"").split(/[；。]|，(?![^（]*）)/)[0].trim();
+  let cut=false; if(t.length>46){ t=t.slice(0,45); cut=true; }
+  if((t.match(/（/g)||[]).length>(t.match(/）/g)||[]).length){ t=t.slice(0,t.lastIndexOf("（")).trim(); }
+  return t+(cut?"…":"");
+}
+const ccTitle=t=>plainTxt(t).replace(/（[^）]*）/g,"").replace(/\s*目前$/,"").trim();
+const CC_GEN=/^(時程摘要|先做|先排除|立即處置|診斷與嚴重度|用藥|先評估|先確認|治療|處置|分類|判斷|第一線)/;
+const CC_SKIP=/^(先做|先找|先評估|先確認|必做|非藥物|升級時機|監測|找誘因|矯正速度|Tryptase|後續|出院前|觀察時間|診斷條件|不建議|手術出血風險|同時處理|第二線)/;
+function ccLine(s,all){ const t=ccTitle(s.t); const c=(all||CC_GEN.test(t))?firstClause(s.c):""; return `<b>${esc(t)}</b>${c&&c!==t?" "+esc(c):""}`; }
+function pageOut(m){ STEPLOG=[]; let h, L; try{ h=hypoX(m.id)+o2X(m.id)+m.r(); } finally { L=STEPLOG; STEPLOG=null; } return {h,steps:L}; }
+function conclData(id,log){
+  const light=LIGHT_P.has(id); const rows=[];
+  const steps=log.filter(s=>!s.opt), opts=log.filter(s=>s.opt);
+  const T=s=>plainTxt(s.t);
+  // 1. 立即：紅旗（頁首紅框）＋本頁立即處置步驟
+  const flags=redFlags().map(x=>{ const m=String(x).match(/^<b>([\s\S]*?)<\/b>/); return m?plainTxt(m[1]):""; }).filter(Boolean);
+  // 檢核清單（例：意識改變「先排除可逆病因」）：只摘 ⚠ 項目，沒有 ⚠ 就不列
+  const chkBad=s=>[...String(s.c||"").matchAll(/<li><span class="ng dd">⚠<\/span>\s*([^：<]+)/g)].map(m=>m[1].trim());
+  let bx=steps.filter(s=>s.k==="bx" && !("ddx" in s) && !/^(升級時機|不建議)/.test(T(s)) && (!/chklist/.test(s.c||"")||chkBad(s).length));
+  if(bx.some(s=>/目前$/.test(T(s)))) bx=bx.filter(s=>/目前$/.test(T(s))||!/分鐘/.test(T(s)));
+  const now=[];
+  if(flags.length) now.push({h:`<b>紅旗 ${flags.length} 項</b> ${flags.slice(0,3).map(esc).join("、")}${flags.length>3?" 等":""}`,j:"rf"});
+  bx.slice(0,2).forEach(s=>now.push({h:/chklist/.test(s.c||"")?`<b>${esc(ccTitle(s.t))}</b> ${chkBad(s).map(esc).join("、")}`:ccLine(s,true),j:"st:"+T(s)}));
+  if(now.length) rows.push({k:"now",lab:"立即",items:now});
+  // 2. 鑑別或下一步
+  const dx=steps.find(s=>"ddx" in s);
+  const actN=dx&&dx.ddx?dx.ddx.filter(v=>/處置$/.test(plainTxt(v.name))):[]; // 例：高血鉀頁「高血鉀處置」是處置卡，不是鑑別
+  if(dx && dx.ddx && dx.ddx.length===0) rows.push({k:"dx",lab:"鑑別",items:[{h:"線索未指向特定病因",j:"st:"+T(dx)}]});
+  if(dx && dx.ddx && dx.ddx.length){
+    const nm=a=>{ const L=a.slice(0,3).map(v=>plainTxt(v.name)); const sep=L.some(x=>/、(?![^（]*）)/.test(x))?"；":"、"; return esc(L.join(sep))+(a.length>3?" 等":""); }; // 名稱本身含「、」時改用「；」分隔
+    const dd=dx.ddx.filter(v=>!actN.includes(v)); const must=dd.filter(v=>v.lvl==="must"), lik=dd.filter(v=>v.lvl==="likely"), con=dd.filter(v=>v.lvl==="consider");
+    const it=[];
+    if(must.length) it.push({h:`<b>${dx.mustLab||"先排除"}</b> ${nm(must)}`,j:"st:"+T(dx)});
+    if(lik.length) it.push({h:`<b>最可能</b> ${nm(lik)}`,j:"st:"+T(dx)});
+    if(!it.length && con.length) it.push({h:`<b>也考慮</b> ${nm(con)}`,j:"st:"+T(dx)});
+    if(it.length) rows.push({k:"dx",lab:"鑑別",items:it});
+    if(actN.length) rows.push({k:"next",lab:"下一步",items:actN.map(v=>({h:`見「${esc(ccTitle(v.name))}」`,j:"op:"+plainTxt(v.name)}))});
+  }
+  if(!rows.some(r=>r.k==="dx"&&r.items[0].h!=="線索未指向特定病因")&&!rows.some(r=>r.k==="next")){
+    const prompt=s=>/^(?:請)?(?:填入|輸入|勾選|選擇|選「|選)[^。]*?後/.test(s.hint||plainTxt(s.c));
+    const ok=s=>!("ddx" in s) && !bx.includes(s) && !/chklist/.test(s.c||"") && !CC_SKIP.test(ccTitle(s.t)) && !/^(鑑別診斷|抽搐狀態|風險分層|停藥時程)/.test(ccTitle(s.t));
+    const nx=steps.find(s=>s.k!=="info" && ok(s)) || steps.find(s=>s.k==="info" && ok(s) && !prompt(s) && !/^未符合/.test(firstClause(s.c)));
+    const op=opts.filter(o=>o.cls==="must").concat(opts.filter(o=>o.cls==="pref")).slice(0,2);
+    if(nx) rows.push({k:"next",lab:"下一步",items:[{h:ccLine(nx),j:"st:"+T(nx)}]});
+    else if(op.length) rows.push({k:"next",lab:"下一步",items:op.map(o=>({h:`見「${esc(ccTitle(o.title))}」`,j:"op:"+plainTxt(o.title)}))});
+  }
+  // 3. 缺資料：生命徵象＋本頁提示
+  const miss=[], seen=new Set(); const addM=(h,j)=>{ if(!h||seen.has(h)) return; seen.add(h); miss.push({h:esc(h),j}); };
+  if(!light && !S.vs_ok && !news2().parts.length) addM("生命徵象","pt");
+  steps.forEach(s=>{
+    const all=plainTxt((s.c||"")+" "+(s.x||""));
+    const m1=all.match(/(?:尚)?缺：([^。；）]+)/); if(m1) addM(m1[1].trim(),"st:"+T(s));
+    if(s.k==="info"){ const h=s.hint||all; const m2=h.match(/^(?:請)?((?:填入|輸入|勾選|選擇|選「|選)[^。]*?)後/); if(m2) addM(m2[1].replace(/，$/,""),"st:"+T(s)); }
+  });
+  if(miss.length) rows.push({k:"miss",lab:"缺",items:miss.slice(0,3)});
+  if(!rows.length) rows.push({k:"next",lab:"結論",items:[{h:"依目前輸入無立即處置；見下方處置流程",j:""}]});
+  return rows;
+}
+function concl(id,log){
+  const rows=conclData(id,log);
+  const it=i=>i.j?`<button type="button" class="cc-i" data-cj="${esc(i.j)}">${i.h}</button>`:`<span class="cc-i">${i.h}</span>`;
+  return `<div class="concl"><div class="cc-h">目前結論 <span class="sub">摘自本頁建議，點選跳到該段</span></div>${rows.map(r=>`<div class="cc-r cc-${r.k}"><span class="cc-k">${r.lab}</span><div class="cc-v">${r.items.map(it).join("")}</div></div>`).join("")}</div>`;
 }
 function redBanner(){
   const L=redFlags(); if(!L.length) return "";
@@ -1047,7 +1173,7 @@ function renderDysp(){
   const must=cs.filter(x=>x.lvl==="must"), lik=cs.filter(x=>x.lvl==="likely"), con=cs.filter(x=>x.lvl==="consider");
   const anyF = S.d_onset||S.d_wob||S.d_wheeze||S.d_crackle||S.d_unilat||S.d_stridor||S.d_jvp||S.d_posbal||S.d_sputum||S.d_cp||S.d_hemopt||S.d_dvt||S.d_immob||S.d_pelikely||S.d_asp||S.d_allergy||S.d_transf||S.d_line||S.d_us_bline||S.d_us_nosliding||S.d_us_eff||S.d_us_rv||c.t!==null||c.a.primary||c.po;
   if(!anyF){
-    H.push(st({k:"info",t:"鑑別診斷",c:`<span class="muted">勾選床邊所見（上方「喘的線索」）後顯示依線索排序的鑑別與處置。</span>`}));
+    H.push(st({k:"info",t:"鑑別診斷",c:`<span class="muted">勾選床邊所見（上方「喘的線索」）後顯示依線索排序的鑑別與處置。</span>`,ddx:null,hint:"勾選床邊所見（上方「喘的線索」）後顯示"}));
   }else{
     const li=a=>a.map(x=>`<li><b>${x.name}</b>${x.why.length?`<span class="muted small">（${x.why.join("、")}）</span>`:""}</li>`).join("");
     H.push(st({k:must.length?"bx":"go",t:"鑑別診斷（依輸入推導）",
@@ -1055,7 +1181,7 @@ function renderDysp(){
         (lik.length?`<div style="font-weight:700;margin-top:4px">最可能</div><ul class="tight">${li(lik)}</ul>`:"")+
         (con.length?`<div class="muted" style="font-weight:700;margin-top:4px">也考慮</div><ul class="tight">${li(con)}</ul>`:"")+
         (!cs.length?`<span class="muted">目前線索未指向特定病因；依 survey 結果再勾選。</span>`:""),
-      x:"排除以上後才考慮焦慮或疼痛造成的喘。",
+      x:"排除以上後才考慮焦慮或疼痛造成的喘。", ddx:cs,
       why:"本區為依輸入線索的規則式排序，非指引分類；每項處置與出處見下方卡片。"}));
   }
   // 4. 處置
@@ -1335,13 +1461,13 @@ function renderAMS(){
   const must=cs.filter(x=>x.lvl==="must"), lik=cs.filter(x=>x.lvl==="likely"), con=cs.filter(x=>x.lvl==="consider");
   const li=a=>a.map(x=>`<li><b>${x.name}</b>${x.why.length?`<span class="muted small">（${x.why.join("、")}）</span>`:""}</li>`).join("");
   if(!cs.length){
-    H.push(st({k:"info",t:"鑑別診斷",c:`<span class="muted">輸入生命徵象、血糖、檢驗或勾選線索後，依輸入排序鑑別與處置。</span>`}));
+    H.push(st({k:"info",t:"鑑別診斷",c:`<span class="muted">輸入生命徵象、血糖、檢驗或勾選線索後，依輸入排序鑑別與處置。</span>`,ddx:null,hint:"輸入生命徵象、血糖、檢驗或勾選線索後"}));
   }else{
     H.push(st({k:must.length?"bx":"go",t:"鑑別診斷（依輸入推導）",
       c:(must.length?`<div class="ng" style="margin-bottom:2px">先處理（致命、可逆）</div><ul class="tight">${li(must)}</ul>`:"")+
         (lik.length?`<div style="font-weight:700;margin-top:4px">最可能</div><ul class="tight">${li(lik)}</ul>`:"")+
         (con.length?`<div class="muted" style="font-weight:700;margin-top:4px">也考慮</div><ul class="tight">${li(con)}</ul>`:""),
-      x:"多種原因常同時存在（例如術後老人：感染＋藥物＋電解質）；找到一個不代表其他可排除。",
+      x:"多種原因常同時存在（例如術後老人：感染＋藥物＋電解質）；找到一個不代表其他可排除。", ddx:cs, mustLab:"先處理",
       why:"本區為依輸入線索的規則式排序，非指引分類；每項處置與出處見下方卡片。"}));
     H.push(`<div class="sec">依病因處置</div>`+must.concat(lik,con).map(x=>amsCard(x,c)).join(""));
   }
@@ -4122,7 +4248,7 @@ function dutyNoteEN(tabId){
   return L.join("\n");
 }
 function showSbar(lang){
-  const cur=(document.querySelector("nav [data-tab].on")||{dataset:{}}).dataset.tab;
+  const cur=(document.querySelector("#tabs [data-tab].on")||{dataset:{}}).dataset.tab;
   const en=lang==="en";
   const t=en?dutyNoteEN(cur):sbarText(cur);
   showOv(`<h4>${en?"English duty note":"SBAR 交班摘要"}</h4><div class="seg" style="margin-bottom:6px"><button type="button" class="btn ${en?"":"pri"}" data-sbar="zh">中文 SBAR</button><button type="button" class="btn ${en?"pri":""}" data-sbar="en">English duty note</button></div><div class="small muted" style="margin-bottom:6px">依目前輸入產生，${en?"S 與 Plan 請補充；Plan 為規則式建議，":""}可直接修改後複製；不會儲存。</div><textarea id="sbarTxt" class="sbar" rows="14">${esc(t)}</textarea><div style="margin-top:8px"><button type="button" class="btn pri" id="sbarCopy">複製</button> <span id="sbarMsg" class="small muted"></span></div>`);
@@ -5379,7 +5505,11 @@ function renderRefPanel(){
     <div class="note">建議強度標示：AHA/ACC、AHA/ASA＝Class 1／2a／2b／3 ＋ LOE；ESC＝I／IIa／IIb／III；ERS/ATS、GRADE＝strong／conditional；BTS＝Grade A–D。「依輸入推導」的鑑別排序為本工具的規則，不是指引分類。</div>
   </div></div>
   <div class="card"><h2>Changelog</h2><div class="cb small">
-    <p style="margin:0 0 6px"><b>v1.0（${CHECKED}）</b></p>
+    <p style="margin:0 0 6px"><b>v1.1（2026-10-22）</b></p>
+    <ul class="tight"><li>每個主訴頁最上方加「目前結論」：立即（紅旗、本頁立即處置）、鑑別或下一步、缺哪些資料；內容直接摘自本頁建議，點選跳到該段。</li>
+    <li>手機：頂部改為「目前主訴 ▾」＋最近 4 個主訴；生命徵象改 3 欄；免責聲明按「知道了」後移到頁尾。寬螢幕（≥920 px）改雙欄：左欄共用病人資料與檢驗（固定），右欄本頁線索與建議。</li>
+    <li>網址帶分頁（例：#hypo），可直接開到某頁或加到主畫面；頁首顯示查證日期；頁尾主要依據收合。臨床內容未變。</li></ul>
+    <p style="margin:8px 0 6px"><b>v1.0（2026-10-21）</b></p>
     <ul class="tight"><li>介面：輸入卡（病人資料、檢驗、各頁線索）可收合，收合時顯示已填摘要；切換分頁時已填的卡自動收合。手機版底部動作列：主訴、搜尋、跳到建議（已在建議區時變回頂端）、SBAR、清除。清除全部後 5 秒內可復原。</li>
     <li>搜尋：頁名、段落標題、藥名（含商品名）、計算工具、出處；內建中英文與縮寫同義詞（K、PE、AF、bridging 等），點結果切頁並捲到該段。寬螢幕在頁首。</li>
     <li>新頁「過敏反應」（急救群組）：WAO 2020 診斷條件、依體重 epinephrine IM 劑量（可複製）、refractory 輸注速率（RCUK 2021）、β-blocker 時 glucagon、抗組織胺與類固醇定位、依劑數的觀察時間（NICE 2026）、tryptase 抽血時機與 20%＋2 判讀、出院自動注射器（台灣許可證、健保待確認）。喘、低血壓頁改為連到本頁。</li>
@@ -5521,7 +5651,10 @@ function renderAll(full){
   const put=(id,f)=>{ const e=document.getElementById(id); if(e&&(!on||on.contains(e))) e.innerHTML=f(); };
   let sb=null, rb=null, ab=null;
   const SB=()=>sb===null?(sb=scoreBox()):sb, RB=()=>rb===null?(rb=redBanner()):rb, AB=()=>ab===null?(ab=abgRes()):ab;
-  MODS.forEach(m=>{ put("r-score-"+m.id,SB); put("r-rf-"+m.id,RB); put("r-"+m.id,()=>hypoX(m.id)+o2X(m.id)+m.r()); if(m.lab) put("r-lab-"+m.id,m.lab); });
+  MODS.forEach(m=>{ put("r-score-"+m.id,SB); put("r-rf-"+m.id,RB);
+    const e=document.getElementById("r-"+m.id);
+    if(e&&(!on||on.contains(e))){ const o=pageOut(m); e.innerHTML=o.h; if(!COL_SKIP.has(m.id)) setHTML("r-cc-"+m.id,concl(m.id,o.steps)); } // v1.1：目前結論與本頁同一次輸出
+    if(m.lab) put("r-lab-"+m.id,m.lab); });
   put("r-rsi",rsiCard); put("r-gluc",renderGluc); put("r-bpmed",renderBPmed);
   put("r-drip",dripRes); put("r-st",steroidRes); put("r-tx",txRes);
   ["hypo","calc"].forEach(w=>{ put("r-prs-"+w,prStatus); put("r-prc-"+w,prCalcRes); });
@@ -5535,7 +5668,58 @@ function renderAll(full){
 }
 /* ================= v1.0 介面：輸入卡收合、跳到建議、搜尋、復原 ================= */
 const COL_SKIP=new Set(["acls","calc","drug","ref"]);
-function curTab(){ return (document.querySelector("nav [data-tab].on")||{dataset:{}}).dataset.tab; }
+function curTab(){ return (document.querySelector("#tabs [data-tab].on")||{dataset:{}}).dataset.tab; }
+/* ================= v1.1 介面：切換分頁、網址 hash、手機主訴列、寬螢幕雙欄、結論卡跳轉 ================= */
+let RECENT=[];
+const TAB_T=Object.fromEntries(TABS.map(x=>[x.id,x.t]));
+function renderCcbar(){
+  const b=document.getElementById("ccbar"); if(!b) return; const cur=curTab();
+  const rec=RECENT.filter(x=>x!==cur).slice(0,4);
+  b.innerHTML=`<button type="button" id="ccCur" aria-label="切換主訴（目前：${esc(TAB_T[cur]||"")}）">${esc(TAB_T[cur]||"主訴")} ▾</button>`+(rec.length?`<span class="ccl">最近</span>`+rec.map(x=>`<button type="button" data-tab="${x}">${esc(TAB_T[x])}</button>`).join(""):"");
+}
+function goTab(id,jt){
+  if(!TAB_T[id]) return;
+  const prev=curTab();
+  document.querySelectorAll("#tabs [data-tab]").forEach(b=>b.classList.toggle("on",b.dataset.tab===id));
+  document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+id)); hideOv();
+  const nb=document.querySelector(`#tabs [data-tab="${id}"]`); if(nb&&nb.offsetParent&&nb.scrollIntoView) nb.scrollIntoView({block:"nearest",inline:"center"});
+  if(id!==prev){ renderAll(); autoCollapse(document.getElementById("p-"+id)); }
+  RECENT=[id].concat(RECENT.filter(x=>x!==id)).slice(0,5); renderCcbar();
+  if(location.hash.slice(1)!==id){ try{ history.replaceState(null,"","#"+id); }catch(e){} }
+  if(jt){ openTo(jt); jt.querySelectorAll("details").forEach(d=>d.open=true); scrollToEl(jt); flash(jt); }
+  else window.scrollTo({top:0});
+  updJumpBtn();
+}
+const WIDEQ=(typeof window!=="undefined"&&window.matchMedia)?window.matchMedia("(min-width:920px)"):null;
+function applyLayout(){
+  const wide=!!(WIDEQ&&WIDEQ.matches);
+  document.querySelectorAll(".panel").forEach(p=>{
+    const sh=[...p.querySelectorAll(".card.shr")]; let cols=p.querySelector(":scope > .pcols");
+    if(wide && sh.length && !cols){
+      sh.forEach(c=>{ const ph=document.createElement("i"); ph.hidden=true; ph.className="ph"; c.before(ph); c._ph=ph; });
+      cols=document.createElement("div"); cols.className="pcols";
+      const side=document.createElement("aside"); side.className="pside"; side.setAttribute("aria-label","共用病人資料");
+      const main=document.createElement("div"); main.className="pmain";
+      [...p.childNodes].forEach(n=>main.appendChild(n)); sh.forEach(c=>side.appendChild(c));
+      cols.append(side,main); p.appendChild(cols); p.classList.add("two");
+    } else if(!wide && cols){
+      sh.forEach(c=>{ if(c._ph){ c._ph.replaceWith(c); c._ph=null; } });
+      const main=cols.querySelector(":scope > .pmain"); [...main.childNodes].forEach(n=>p.insertBefore(n,cols)); cols.remove(); p.classList.remove("two");
+    }
+  });
+}
+function ccJump(j){
+  const id=curTab(); const p=document.getElementById("p-"+id); if(!p||!j) return;
+  const norm=x=>String(x||"").replace(/\s+/g,"");
+  let el=null;
+  if(j==="rf") el=document.getElementById("r-rf-"+id);
+  else if(j==="pt") el=p.querySelector(".card.shr");
+  else if(j.startsWith("st:")){ const t=norm(j.slice(3)); const h=[...p.querySelectorAll("#r-"+id+" .st-t")].find(e=>norm(e.textContent)===t); el=h&&h.closest(".step"); }
+  else if(j.startsWith("op:")){ const t=norm(j.slice(3)); const h=[...p.querySelectorAll("#r-"+id+" .opt-h > b")].find(e=>norm(e.textContent)===t); el=h&&h.closest(".opt"); }
+  if(!el) el=recTarget(); if(!el) return;
+  if(el.classList.contains("card")&&el.classList.contains("col")) setCol(el,false);
+  openTo(el); scrollToEl(el); flash(el);
+}
 function setupInputCards(){
   document.querySelectorAll(".panel").forEach(p=>{
     if(COL_SKIP.has(p.id.slice(2))) return;
@@ -5683,25 +5867,28 @@ function hideOv(){ document.getElementById("ov").classList.remove("on"); }
 
 /* ================= 初始化 ================= */
 function init(){
-  document.getElementById("ver").textContent="v"+APP_VERSION;
+  document.getElementById("ver").innerHTML=`v${APP_VERSION}<span class="vd"><span class="vs">・</span>查證 ${CHECKED}</span>`;
+  document.getElementById("frefN").textContent=FOOT_REFS.length; document.getElementById("fref").textContent=FOOT_REFS.join("、")+"。詳見「來源・版本」。";
   document.getElementById("ver2").textContent=APP_VERSION;
   document.getElementById("checked").textContent=CHECKED;
   const P=buildPanels();
   document.getElementById("tabs").innerHTML=TABS.map((t,i)=>`<button type="button" data-tab="${t.id}" class="${i===0?"on":""}">${t.t}</button>`).join("");
-  document.getElementById("panels").innerHTML=TABS.map((t,i)=>`<section class="panel ${i===0?"on":""}" id="p-${t.id}">${P[t.id]}</section>`).join("");
+  const CCID=new Set(MODS.map(m=>m.id).filter(x=>!COL_SKIP.has(x)));
+  document.getElementById("panels").innerHTML=TABS.map((t,i)=>`<section class="panel ${i===0?"on":""}" id="p-${t.id}">${CCID.has(t.id)?`<div id="r-cc-${t.id}"></div>`:""}${P[t.id]}</section>`).join("");
   setupInputCards();
   syncAll(); renderAll(true);
+  applyLayout(); if(WIDEQ){ if(WIDEQ.addEventListener) WIDEQ.addEventListener("change",applyLayout); else if(WIDEQ.addListener) WIDEQ.addListener(applyLayout); }
+  RECENT=[TABS[0].id]; renderCcbar();
+  { const h=(location.hash||"").slice(1); if(h&&TAB_T[h]&&h!==TABS[0].id) goTab(h); }
+  window.addEventListener("hashchange",()=>{ const h=(location.hash||"").slice(1); if(h&&TAB_T[h]&&h!==curTab()) goTab(h); });
   document.addEventListener("input",onInput); document.addEventListener("change",onInput);
   document.addEventListener("click",e=>{
     const t=e.target;
     const tab=t.closest("[data-tab]");
-    if(tab){ const id=tab.dataset.tab; const prev=curTab(); document.querySelectorAll("nav [data-tab]").forEach(b=>b.classList.toggle("on",b.dataset.tab===id));
-      document.querySelectorAll(".panel").forEach(p=>p.classList.toggle("on",p.id==="p-"+id)); hideOv();
-      const nb=document.querySelector(`nav [data-tab="${id}"]`); if(nb&&nb.scrollIntoView) nb.scrollIntoView({block:"nearest",inline:"center"});
-      const jt=tab.dataset.jump&&document.getElementById(tab.dataset.jump);
-      if(id!==prev){ renderAll(); autoCollapse(document.getElementById("p-"+id)); }
-      if(jt){ openTo(jt); jt.querySelectorAll("details").forEach(d=>d.open=true); scrollToEl(jt); flash(jt); }
-      else window.scrollTo({top:0}); updJumpBtn(); return; }
+    if(tab){ goTab(tab.dataset.tab, tab.dataset.jump&&document.getElementById(tab.dataset.jump)); return; }
+    const cj=t.closest("[data-cj]"); if(cj){ ccJump(cj.dataset.cj); return; }
+    if(t.closest("#ccCur")){ showMenu(); return; }
+    if(t.id==="discOk"){ document.getElementById("disc").hidden=true; document.getElementById("discF").hidden=false; return; }
     if(t.id==="sbarBtn"||t.id==="bbSbar"||t.closest("#sbarBtn2")){ showSbar("zh"); return; }
     if(t.id==="searchBtn"||t.id==="bbSearch"){ showSearch(); return; }
     if(t.id==="bbMenu"){ showMenu(); return; }
