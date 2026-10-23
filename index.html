@@ -202,6 +202,9 @@ textarea.sbar{width:100%;font:13.5px/1.55 var(--f-mono);color:var(--ink);backgro
   .toast{bottom:calc(64px + env(safe-area-inset-bottom))}
 }
 .copy{border:1px solid var(--line);background:var(--surface2);border-radius:6px;padding:1px 9px;font-size:12px;cursor:pointer;margin-left:4px;vertical-align:1px}
+.rn{margin:5px 0 2px;font-size:13px;line-height:1.5;background:var(--warn-bg);color:var(--ink);border-radius:6px;padding:4px 8px;overflow-wrap:anywhere}
+.rn>b:first-child{color:var(--warn)}
+.rn0{margin:4px 0 2px;font-size:12.5px;color:var(--muted)}
 pre.ord{white-space:pre-wrap;font:13px/1.55 var(--f-mono);background:var(--surface2);border:1px solid var(--line2);border-radius:7px;padding:7px 9px;margin:6px 0}
 /* v1.1 介面：目前結論、免責收合、手機主訴列、寬螢幕雙欄、生命徵象 3 欄、頁尾依據收合 */
 .concl{background:var(--accent-weak);border-radius:var(--r);padding:8px 12px 6px;margin:0 0 12px}
@@ -278,8 +281,8 @@ footer .fref{margin:4px 0 0;line-height:1.6}
 <script>
 "use strict";
 /* ================= 基本設定 ================= */
-const APP_VERSION="1.1";
-const CHECKED = "2026-10-21";
+const APP_VERSION="1.2";
+const CHECKED = "2026-10-24";
 /* 頁尾「主要依據」：完整清單見「來源・版本」 */
 const FOOT_REFS=["BTS 氧氣 2017", "GOLD 2026", "GINA 2026", "ESC 心衰竭 2021／2023", "AHA/ACC 急性 PE 2026", "ESC PE 2019", "ERS/ATS NIV 2017", "ERS HFNC 2022", "BTS 肋膜 2023", "AHA/ASA 急性缺血性中風 2026", "AHA/ASA 腦出血 2022", "AES 癲癇重積 2016", "NICE 譫妄", "ESAIC 2024", "歐洲低血鈉 2014", "ADA/EASD 高血糖危象 2024", "EASL 肝性腦病變 2022", "AHA ACLS 2025", "SSC 2026", "ACC/AHA ACS 2025", "ESC AF 2024", "ACC/AHA AF 2023", "ESC SVT 2019", "ADA 等高血糖危象共識 2024", "UKKA 高血鉀 2023", "AHA 急性照護血壓 2024", "ESC 高血壓急症 2019", "ACEP 頭痛 2019", "PONV 共識 2020", "APS/ASA 術後疼痛 2016", "AGS Beers 2023", "ACC/AHA 主動脈 2022", "ESC 心肌炎與心包炎 2025", "SCCM/IDSA 新發燒 2023", "IDSA 嗜中性球低下發燒", "IDSA/SHEA C. difficile 2021", "KDIGO AKI 2012", "WSES 腸繫膜缺血 2022", "ACG 胰臟炎 2024", "TG18", "ACG 上／下消化道出血 2021／2023", "ESGE 靜脈瘤 2022", "ACG-CAG 抗血栓 2022", "NEWS2（RCP 2017）", "SCCM RSI 2023", "AABB 紅血球 2023", "AABB/ICTMG 血小板 2025", "CHEST 血漿與血小板 2025", "ESE/ES 類固醇相關腎上腺功能不全 2024", "ACEP 癲癇 2024", "AAN/AES 首次發作 2015", "WAO 2020", "AAAAI/ACAAI 2023", "NICE NG258 2026", "ESC 暈厥 2018", "ACC/AHA/HRS 暈厥 2017", "CHEST 圍術期抗血栓 2022", "EHRA NOAC 2021", "ASRA 2025", "健保藥品給付規定"];
 
@@ -328,7 +331,7 @@ const REF = {
   esaic24:{t:"ESAIC 術後譫妄 2024",f:"Aldecoa C, Bettelli G, Bilotta F, et al. Update of the European Society of Anaesthesiology and Intensive Care Medicine evidence-based and consensus-based guideline on postoperative delirium in adult patients. Eur J Anaesthesiol 2024;41:81–108。以有效工具每日篩檢至少 3 天；術前、術中、術後多元非藥物預防；dexmedetomidine 僅選擇性使用。",u:"https://pubmed.ncbi.nlm.nih.gov/37599617/"},
   at4:{t:"4AT",f:"4AT rapid clinical test for delirium（MacLullich AMJ, www.the4at.com, CC BY 4.0）。Alertness 0／4；AMT4（年齡、生日、地點、年份）0／1／2；倒數月份 0（≥7 個正確）／1（開始但 <7 或拒絕）／2（無法開始）；急性變化或波動（2 週內、24 小時內仍存在）0／4。≥4 提示譫妄；1–3 提示認知障礙；0 不太可能（不能完全排除）。Tieges Z, et al. Age Ageing 2021;50:733–43（統合分析）。",u:"https://www.the4at.com/userguide"},
   eurHypoNa:{t:"歐洲低血鈉 2014",f:"Spasovski G, Vanholder R, Allolio B, et al. Clinical practice guideline on diagnosis and treatment of hyponatraemia. Eur J Endocrinol 2014;170:G1–G47（ESE/ESICM/ERA-EDTA）。嚴重症狀（嘔吐、心肺窘迫、異常嗜睡、抽搐、GCS ≤8）：1 小時內 150 mL 3% NaCl IV 20 分鐘，可重複（共 2–3 次）直到 Na 升 5 mmol/L；中度症狀（噁心、混亂、頭痛）：單次 150 mL 3% NaCl。第一個 24 小時上升 ≤10 mmol/L，之後每 24 小時 ≤8 mmol/L，直到 Na 130；6、12、24 小時監測。英國內分泌學會 2022 急症流程相同。",u:"https://www.endocrinology.org/media/xhrhxhxm/emergency-management-of-severe-and-moderately-severely-symptomatic-hyponatraemia-in-adult-patients-2022.pdf"},
-  dka24:{t:"高血糖危象共識 2024",f:"Umpierrez GE, Davis GM, ElSayed NA, et al. Hyperglycemic crises in adults with diabetes: a consensus report (ADA/EASD/JBDS/AACE/DTS). Diabetes Care 2024;47:1257–75。DKA：血糖 ≥200 mg/dL 或已知糖尿病＋β-hydroxybutyrate ≥3.0 mmol/L（或尿酮 ≥2+）＋pH <7.3 及／或 HCO₃⁻ <18。HHS：血糖 ≥600、有效滲透壓 >300（或總滲透壓 >320）、β-OHB <3.0、pH ≥7.3 且 HCO₃⁻ ≥15。血糖降至約 250 mg/dL 加葡萄糖並持續胰島素至 DKA 緩解（pH ≥7.3、HCO₃⁻ ≥18、β-OHB <0.6）。",u:"https://pubmed.ncbi.nlm.nih.gov/39052901/"},
+  dka24:{t:"高血糖危象共識 2024",f:"Umpierrez GE, Davis GM, ElSayed NA, et al. Hyperglycemic crises in adults with diabetes: a consensus report (ADA/EASD/JBDS/AACE/DTS). Diabetes Care 2024;47:1257–75。DKA：血糖 ≥200 mg/dL 或已知糖尿病＋β-hydroxybutyrate ≥3.0 mmol/L（或尿酮 ≥2+）＋pH <7.3 及／或 HCO₃⁻ <18。HHS：血糖 ≥600、有效滲透壓 >300（或總滲透壓 >320）、β-OHB <3.0、pH ≥7.3 且 HCO₃⁻ ≥15。血糖降至約 250 mg/dL 加葡萄糖並持續胰島素至 DKA 緩解（pH ≥7.3、HCO₃⁻ ≥18、β-OHB <0.6）。鉀（2026-10-24 依 Diabetologia 全文核對）：K <3.5 先以 10 mmol/h 補鉀並延後 insulin 至 K >3.5；K 降至 <5.0 開始補充，維持 4–5；多數病人每公升輸液加 20–30 mmol 即可；insulin 開始後 2 小時、之後每 4 小時驗 K；共識未以尿量作為補鉀前提；Table 4 末期腎病：輸液與補鉀需謹慎。",u:"https://pubmed.ncbi.nlm.nih.gov/39052901/"},
   adaHosp:{t:"ADA 住院血糖（Standards）",f:"American Diabetes Association. Diabetes Care in the Hospital: Standards of Care in Diabetes（2025／2026）。Level 1 低血糖 54–69 mg/dL、Level 2 <54 mg/dL（神經低醣症狀門檻）、Level 3 需他人協助之嚴重事件；清醒可吞嚥者 15–20 g 葡萄糖，15 分鐘後複測並重複；無法口服者 IV dextrose 或 glucagon。",u:"https://pmc.ncbi.nlm.nih.gov/articles/11635037"},
   easlHe:{t:"EASL 肝性腦病變 2022",f:"European Association for the Study of the Liver. EASL Clinical Practice Guidelines on the management of hepatic encephalopathy. J Hepatol 2022;77:807–24。尋找並處理誘發因素（出血、感染、便秘、電解質、鎮靜藥、利尿劑等）；overt HE grade 3–4 有吸入風險宜 ICU；lactulose 調整至每日 2–3 次軟便；6 個月內再發時 rifaximin 合併 lactulose；無法口服可鼻胃管或 lactulose 灌腸。ACG 2026 HE 指引：急性 overt HE 加 rifaximin 為 conditional。",u:"https://nursingcenter.com/clinical-resources/guideline-summaries/hepatic-encephalopathy"},
   aasldHe:{t:"AASLD/EASL HE 2014",f:"Vilstrup H, Amodio P, Bajaj J, et al. Hepatic encephalopathy in chronic liver disease: 2014 Practice Guideline by AASLD and EASL. Hepatology 2014;60:715–35。lactulose 25 mL q1–2h 直到至少 2 次軟便，之後調整為每日 2–3 次；rifaximin 550 mg BID 為預防復發之 add-on。",u:"https://www.aasld.org/sites/default/files/2022-07/Hepatic%20Encephalopathy%20in%20Chronic%20Liver%20Disease%202014.pdf"},
@@ -601,6 +604,62 @@ function renPick(ren){
   return t? {x, txt:t[2]} : null;
 }
 function renTag(x){ return `<span class="cau">已依腎功能調整（${x.lab}${x.sub?"；"+x.sub:""}）</span>`; }
+/* ================= v1.2 主訴頁腎功能提示 =================
+   rnLine：有腎功能資料且需調整時的一行黃底提示；rnMiss：高風險藥未填腎功能時的灰字。
+   akiFlag：KDIGO AKI 條件（Cr ≥1.5 倍基準；尿量 <0.5 mL/kg/h 持續 ≥6 小時）→ 提醒估計值可能偏高。 */
+const renOf=id=>(DRUGS.find(d=>d.id===id)||{}).ren||null;
+function akiFlag(){ const cr=num(S.cr), b=num(S.cr_base), uo=num(S.uo), uh=num(S.uo_h), wt=num(S.wt), r=[];
+  if(cr!==null&&b!==null&&b>0&&cr>=1.5*b) r.push(`Cr ${cr} ≥ 基準 ${b} 的 1.5 倍`);
+  if(uo!==null&&uh!==null&&uh>=6&&wt!==null&&wt>0&&uo/wt<0.5) r.push(`尿量 ${fmt(uo/wt,2)} mL/kg/h × ${uh} 小時`);
+  return r; }
+function akiNote(){ const r=akiFlag(); return r.length?`<br><span class="cau">Cr 不穩定（${r.join("、")}）：估計的 CrCl／eGFR 可能高估腎功能</span>${src("kdigoAki12")}`:""; }
+const rnLow=(x,cut)=>!!(x&&(x.hd||x.v<cut));
+function rnLine(x,body){ return `<div class="rn"><b>此病人（${x.hd?"透析中":x.lab}${x.sub?"；"+x.sub:""}）</b>：${body}${akiNote()}</div>`; }
+function rnMiss(){ return `<div class="rn0">未填腎功能（Cr 或 eGFR）：腎功能差時需調整</div>`; }
+/* 依藥物頁 REN 的一行提示；o.min：只在 < min（或透析、AKI）時顯示；o.risk：未填時顯示 rnMiss；o.lab：前綴藥名 */
+/* 子癇 Mg：仿單 2.3 重度腎功能不全及／或尿量 <0.5 mL/kg/h（仿單未定義重度，本工具以 CrCl <30 或透析） */
+function mgEclRen(){ const x=rv("crcl"), uo=num(S.uo), wt=num(S.wt); const lowUo=uo!==null&&wt!==null&&wt>0&&uo/wt<0.5;
+  const body=`仿單：<b>4 g 負荷、維持 1 g/h</b>，頻繁驗血鎂並觀察毒性（反射減弱、呼吸抑制）調整，維持量可能需更低；48 小時內 ≤20 g ${src("mgD5wPI")}<span class="small muted">（仿單未以 CrCl 定義重度，本工具以 <30 提示）</span>`;
+  if(rnLow(x,30)||lowUo||(x&&akiFlag().length)) return rnLine(x||{lab:"腎功能未填",v:null},(lowUo?`尿量 ${fmt(uo/wt,2)} mL/kg/h（<0.5）；`:"")+body);
+  return x?"":rnMiss(); }
+/* 高血鉀 insulin：腎功能差（CrCl／eGFR <30 或透析，本工具取法）時並列兩個來源，不替使用者選 */
+function hkInsRen(){ const x=rv("egfr");
+  if(!x) return rnMiss();
+  if(!rnLow(x,30)&&!akiFlag().length) return "";
+  return rnLine(x,`insulin 劑量來源不一致（並列）：<b>UKKA</b>：仍為 10 U，低劑量降鉀效果較差、證據不足不建議降低（Guideline 16.3.1, 1B）${src("ukkaK23")}；<b>McNicholas 2018</b>（單中心 QI）：CKD／ESRD 流程用 5 U，低血糖 28% → 11%，ESRD 小樣本降鉀速度相近 ${src("mcnich18")}。不論劑量：血糖監測 0、15、30、60、90、120、180、240、360、480、720 分鐘（UKKA 17.2, 1C）${x.hd?"；安排透析":""}`); }
+/* KCl：SPS 腎功能差減量（未給比例）＋仿單；本工具以 <30、透析或 AKI 提示 */
+function kclRen(){ const x=rv("crcl"); if(!x) return rnMiss();
+  if(!rnLow(x,30)&&!akiFlag().length) return "";
+  return rnLine(x,`KCl 減量、放慢並增加驗 K 頻率（SPS 未給減量比例）${src("spsK")}；仿單：腎衰竭禁用，腎功能不全可致致命高血鉀，從低劑量開始${x.hd?"；可被透析移除":""} ${src("ddRenal")}`); }
+/* 心包炎 aspirin／NSAID：本工具以 CrCl <30、透析或 AKI 提示 */
+function nsaidRen(){ const x=rv("crcl"); if(!x) return rnMiss();
+  if(!rnLow(x,30)&&!akiFlag().length) return "";
+  return rnLine(x,`ibuprofen：晚期腎病不建議（仿單）${src("ibuPI")}；aspirin：${x.hd?"可被透析移除，透析後給、注意出血":x.v<10?"CrCl <10 仿單禁忌（高劑量）":"小心使用"} ${src("ddRenal")}；ESC 2025 對腎功能不全的抗發炎藥選擇本版未核對，請確認`); }
+/* digoxin：負荷劑量 ESC 2024 與仿單並列；維持量依仿單 Table 3（CrCl＝(140－年齡)/Cr，女性 ×0.85；lean body weight 以 IBW 估計為本工具取法） */
+function digMaint(){
+  const age=num(S.age), cr=num(S.cr), wt=num(S.wt), ibw=ibwCalc();
+  const lbw = wt===null? null : (ibw!==null&&ibw<wt? ibw : wt), lbl = ibw!==null&&wt!==null&&ibw<wt? "IBW":"實際體重";
+  if(S.u_hd) return lbw===null? {hd:true} : {hd:true, mcg:lbw*1.6, lbw, lbl};
+  if(age===null||cr===null||cr<=0||lbw===null||(S.sex!=="m"&&S.sex!=="f")) return null;
+  const cl=(140-age)/cr*(S.sex==="f"?0.85:1), clU=Math.min(100,Math.max(10,cl));
+  return {mcg:lbw*(1.4+0.02*clU), cl, clU, lbw, lbl};
+}
+function digTxt(){
+  const wt=num(S.wt), ibw=ibwCalc(), lbw=wt===null?null:(ibw!==null&&ibw<wt?ibw:wt), m=digMaint();
+  const load = `負荷（並列）：ESC 2024：<b>0.5 mg IV bolus</b>，24 小時內共 0.75–1.5 mg 分次 ${src("escAf24")}；仿單：8–12 µg/kg IV（lean body weight）${lbw!==null?`＝ <b>${fmt(0.008*lbw,2)}–${fmt(0.012*lbw,2)} mg</b>`:""}，先給一半，之後 1/4 每 6–8 小時 × 2，每劑 ≥5 分鐘 ${src("digPI")}`;
+  let mt;
+  if(!m) mt=`<div class="rn0">維持量：填年齡、性別、Cr、體重後依仿單（CrCl 與 lean body weight）計算；ESC 2024 口服 0.0625–0.25 mg QD</div>`;
+  else if(m.hd) mt=rnLine({hd:true},`維持量：仿單表未列透析，透析無法有效移除；${m.mcg!==undefined?`以最低列（CrCl 10）＝ <b>約 ${fmt(m.mcg,0)} µg QD</b> 參考（本工具取法）`:"填體重後以最低列（CrCl 10）估算（本工具取法）"}，依濃度調整 ${src("digPI")}`);
+  else mt=rnLine({lab:`CrCl ${fmt(m.cl,0)}（仿單公式 (140－年齡)/Cr）`},`維持量（仿單 Table 3）：<b>約 ${fmt(m.mcg,0)} µg QD</b>（LBW ${fmt(m.lbw,0)} kg，以${m.lbl}估計${m.cl>100?"；CrCl >100 以 100 列計":m.cl<10?"；CrCl <10 以 10 列計":""}）${src("digPI")}；ESC 2024：開始前查腎功能，CKD 需調整，可監測濃度（高濃度與不良事件相關）${src("escAf24")}`);
+  return `<b>digoxin</b>：${load}${mt}`;
+}
+function renNote(id,o){ o=o||{}; const ren=renOf(id); if(!ren) return ""; const x=rv(ren.b||"crcl");
+  if(!x) return o.risk?rnMiss():"";
+  const aki=akiFlag().length>0;
+  if(o.min!==undefined && !x.hd && x.v>=o.min && !aki) return "";
+  const pk=ren.all? {txt:x.hd&&ren.hd?ren.hd:ren.all} : renPick(ren); if(!pk) return "";
+  if(/^(不需調整|同劑量)/.test(pk.txt) && !aki) return "";
+  return rnLine(x,`${o.lab?o.lab+"：":""}${pk.txt} ${(ren.r||[]).map(k=>src(k)).join("")}`); }
 
 /* 敗血症起始 30 mL/kg：SSC 2026 remark——BMI >30 以調整或理想體重計（調整體重＝IBW＋0.4×(實際−IBW)）；
    心衰竭／末期腎病：SSC 未另訂減量（引觀察性資料），之後 liberal／restrictive 依病人與監測床位 */
@@ -1071,7 +1130,7 @@ function dyspCard(cs,c){
     break;
   case "ahf":{
     o.tags=src("escHf")+src("ersNiv","strong");
-    o.lead=`坐起；呼吸窘迫或低血氧 → <b>CPAP／bilevel NIV</b>；<b>furosemide IV</b>：未用過利尿劑 20–40 mg，長期使用者為口服每日劑量的 1–2 倍；SBP >110 可加 nitroglycerin IV。`;
+    o.lead=`坐起；呼吸窘迫或低血氧 → <b>CPAP／bilevel NIV</b>；<b>furosemide IV</b>：未用過利尿劑 20–40 mg，長期使用者為口服每日劑量的 1–2 倍；SBP >110 可加 nitroglycerin IV。`+renNote("furo",{min:30,lab:"furosemide"});
     o.rows=[["反應評估",`2 小時 spot urine Na <50–70 mEq/L 或 6 小時尿量 <100–150 mL/h → 劑量加倍或合併不同作用部位利尿劑 ${src("escHf")}${src("hfaDiur")}`],
       ["血管擴張劑",`nitroglycerin IV 10–20 µg/min 起，可調至 200 µg/min（SBP >110；IIb）；低血壓、右心梗塞、嚴重主動脈瓣狹窄避免 ${src("escHf")}`],
       ["找誘因",`ESC CHAMPIT：急性冠心症、高血壓急症、心律不整、機械性原因、PE、感染、心包填塞；住院病人另查輸液量、停用利尿劑、輸血 ${src("escHf")}`],
@@ -1100,7 +1159,7 @@ function dyspCard(cs,c){
   case "asthma":
     o.tags=src("gina26")+upd("GINA 2026：SpO₂ <92% 才給氧，成人目標上限 95%（下修）");
     o.lead=`<b>SABA</b>（salbutamol MDI＋spacer 或 nebulizer，第一小時可每 20 分鐘重複）＋<b>早期全身性類固醇</b>；SpO₂ <92% 才給氧、上限 95%。`;
-    o.rows=[["劑量",ul([`salbutamol MDI 4–10 puffs 每 20 分鐘 × 1 小時（或 nebulizer 2.5–5 mg）`,`prednisolone 40–50 mg（或等效）`,`重度：加 ipratropium；初始治療反應差 → magnesium sulfate 2 g IV 20 分鐘`]) + `<div class="small cau">GINA 全文未取得，劑量依 GINA 慣用建議，請以原文確認。</div>`],
+    o.rows=[["劑量",ul([`salbutamol MDI 4–10 puffs 每 20 分鐘 × 1 小時（或 nebulizer 2.5–5 mg）`,`prednisolone 40–50 mg（或等效）`,`重度：加 ipratropium；初始治療反應差 → magnesium sulfate 2 g IV 20 分鐘`+renNote("mg",{min:30,risk:true})]) + `<div class="small cau">GINA 全文未取得，劑量依 GINA 慣用建議，請以原文確認。</div>`],
       ["提醒",(S.hx_hf||S.d_jvp)?"有心衰竭線索：wheeze 可能為心因性（cardiac asthma），注意不要大量給 β agonist。":"排除過敏性休克與上呼吸道阻塞。"]];
     break;
   case "metac":
@@ -1607,7 +1666,7 @@ function cpCard(cs,c){
       :`ECG、心臟超音波（積液）、CRP；<b>aspirin 或 NSAID ＋ colchicine 同時使用</b>（ESC 2025 Class I），合併胃腸保護。`;
     { const wt=num(S.wt), eg=num(S.egfr);
       const col = wt===null? "colchicine 0.5 mg QD（<70 kg）或 BID（≥70 kg）": wt<70? "colchicine 0.5 mg QD（體重 <70 kg）":"colchicine 0.5 mg BID（體重 ≥70 kg）";
-      o.rows=[["劑量",ul([`aspirin 750–1,000 mg q8h，或 ibuprofen 600–800 mg q8h，1–2 週後漸減`,col+(()=>{ const pk=renPick(DRUGS.find(d=>d.id==="colch").ren); return pk&&(pk.x.hd||pk.x.v<80)? `；<span class="cau">${pk.txt}</span> ${renTag(pk.x)}${src("colchPI")}`:""; })()+"，至少 3–6 個月",`<span class="small cau">劑量取自 ESC 2025 的二手整理，請以原文確認</span>`])],
+      o.rows=[["劑量",ul([`aspirin 750–1,000 mg q8h，或 ibuprofen 600–800 mg q8h，1–2 週後漸減`+nsaidRen(),col+(()=>{ const pk=renPick(DRUGS.find(d=>d.id==="colch").ren); return pk&&(pk.x.hd||pk.x.v<80)? `；<span class="cau">${pk.txt}</span> ${renTag(pk.x)}${src("colchPI")}`:""; })()+"，至少 3–6 個月",`<span class="small cau">劑量取自 ESC 2025 的二手整理，請以原文確認</span>`])],
         ["注意",ul([S.med_ac||S.g_type?`<span class="cau">已用抗凝或有出血：NSAID 出血風險高，與心臟科討論</span>`:"",(()=>{ const x=rv("crcl"); return x&&(x.hd||x.v<30)?`<span class="cau">${x.hd?"透析":x.lab+" <30"}：避免 NSAID</span>`:""; })(),"類固醇不作第一線（IIa C，第一線失敗後低至中劑量）",c.po?"心臟手術後之心包症候群處理依心臟外科":""])],
         ["健保",nhiLic("aspirin、ibuprofen、colchicine")]]; }
     break;
@@ -1857,7 +1916,7 @@ function renderFev(){
 /* ================= 尿少：出處 ================= */
 Object.assign(REF,{
   kdigoAki12:{t:"KDIGO AKI 2012",f:"Kidney Disease: Improving Global Outcomes (KDIGO) Acute Kidney Injury Work Group. KDIGO Clinical Practice Guideline for Acute Kidney Injury. Kidney Int Suppl 2012;2:1–138。定義：48 小時內 Cr 上升 ≥0.3 mg/dL，或 7 天內為基準值 ≥1.5 倍，或尿量 <0.5 mL/kg/h 持續 6 小時。分期：1 期 1.5–1.9 倍或 +≥0.3、尿量 <0.5 持續 6–12 小時；2 期 2.0–2.9 倍、尿量 <0.5 ≥12 小時；3 期 ≥3 倍或 Cr ≥4.0 或開始透析、尿量 <0.3 ≥24 小時或無尿 ≥12 小時。處置：停用腎毒性藥、確認容積與灌流壓、監測 Cr 與尿量、避免高血糖；擴充容積用等張晶體液而非膠體（2B）；血管收縮性休克時升壓劑合併輸液（1C）；不以利尿劑治療 AKI，容積過多除外（2C）；危及生命的液體、電解質、酸鹼異常時緊急透析（未分級）。2026 年 AKI／AKD 指引草案公開徵詢中，尚未定稿。",u:"https://kdigo.org/guidelines/acute-kidney-injury/"},
-  ukkaK23:{t:"UKKA 高血鉀 2023",f:"UK Kidney Association. Clinical Practice Guidelines: Treatment of Acute Hyperkalaemia in Adults (2023 update)。嚴重度：輕度 5.5–5.9、中度 6.0–6.4、重度 ≥6.5 mmol/L；K ≥6.0 做 12 導程 ECG，≥6.5 心電監測；ECG 變化時 IV calcium：10% calcium gluconate 30 mL（或 10% calcium chloride 10 mL）10 分鐘以上；insulin 10 U ＋ 葡萄糖 25 g IV 15 分鐘，治療前血糖 <7.0 mmol/L（約 126 mg/dL）者之後 10% 葡萄糖 50 mL/h × 5 小時，並於 0–360 分鐘多次監測血糖；salbutamol 10–20 mg nebulised 為輔助，不單獨使用；不常規給 sodium bicarbonate；建議 sodium zirconium cyclosilicate（patiromer 為選項），calcium resonium 不再常規使用；已透析病人安排緊急透析，其餘由腎臟科／ICU 決定。",u:"https://www.ukkidney.org/health-professionals/guidelines/treatment-acute-hyperkalaemia-adults"},
+  ukkaK23:{t:"UKKA 高血鉀 2023",f:"UK Kidney Association. Clinical Practice Guidelines: Treatment of Acute Hyperkalaemia in Adults (2023 update)。嚴重度：輕度 5.5–5.9、中度 6.0–6.4、重度 ≥6.5 mmol/L；K ≥6.0 做 12 導程 ECG，≥6.5 心電監測；ECG 變化時 IV calcium：10% calcium gluconate 30 mL（或 10% calcium chloride 10 mL）10 分鐘以上；insulin 10 U ＋ 葡萄糖 25 g IV 15 分鐘，治療前血糖 <7.0 mmol/L（約 126 mg/dL）者之後 10% 葡萄糖 50 mL/h × 5 小時，並於 0–360 分鐘多次監測血糖；salbutamol 10–20 mg nebulised 為輔助，不單獨使用；不常規給 sodium bicarbonate；建議 sodium zirconium cyclosilicate（patiromer 為選項），calcium resonium 不再常規使用；已透析病人安排緊急透析，其餘由腎臟科／ICU 決定。Insulin 段落（2026-10-24 依 UKKA 網站 PDF 核對，該檔為 2020/6 定稿、2025 review）：10 U soluble insulin ＋ 25 g 葡萄糖（K ≥6.5：Guideline 16.3.1, 1B；6.0–6.4：16.3.2, 2C）；低劑量 insulin 降鉀效果較 10 U 差，需更多證據才能建議降低劑量；最一致的低血糖危險因子為治療前血糖低（其他因子見 Table 18，本版未讀到）；治療前血糖 <7.0 mmol/L → 10% 葡萄糖 50 mL/h × 5 小時（16.3.3, 2D）；血糖監測 0、15、30、60、90、120、180、240、360、480、720 分鐘（17.2, 1C）",u:"https://www.ukkidney.org/health-professionals/guidelines/treatment-acute-hyperkalaemia-adults"},
   szcPI:{t:"Lokelma 仿單（SmPC）",f:"Lokelma（sodium zirconium cyclosilicate）SmPC：矯正期 10 g TID 口服，通常 24–48 小時達正常，48 小時未達可再 24 小時，72 小時未達應改其他治療；維持期 5 g QD 起（5 g QOD 至 10 g QD）；服用後約 1 小時開始降鉀；每 5 g 含鈉約 400 mg，水腫相關事件 5.7%（心衰竭病人需監測）。",u:"https://www.medicines.org.uk/emc/product/10074/smpc"},
   wsacs13:{t:"WSACS 2013",f:"Kirkpatrick AW, Roberts DJ, De Waele J, et al. Intra-abdominal hypertension and the abdominal compartment syndrome: updated consensus definitions and clinical practice guidelines from the World Society of the Abdominal Compartment Syndrome. Intensive Care Med 2013;39:1190–1206。IAH：IAP 持續 ≥12 mmHg；分級 I 12–15、II 16–20、III 21–25、IV >25；腹腔腔室症候群：IAP 持續 >20 mmHg 合併新器官功能障礙；經膀胱測量：≤25 mL 生理食鹽水、平躺、吐氣末、腋中線歸零；明顯腹腔腔室症候群建議剖腹減壓。",u:"https://link.springer.com/article/10.1007/s00134-013-2906-z"}
 });
@@ -1931,7 +1990,7 @@ function hyperkCard(cs,c){
   o.lead=`<b>${sev}</b>：12 導程 ECG、${k>=6.5?"心電監測、":""}複驗排除溶血；停用升鉀藥物與含鉀輸液。`+
     `<ol class="tight" style="margin:6px 0 0 18px;padding:0">`+
     `<li>${kE?'<b class="ng">ECG 變化 → 10% calcium gluconate 30 mL IV 10 分鐘以上</b>（或 10% CaCl₂ 10 mL），5–10 分鐘後 ECG 未改善可重複':"ECG 無變化：不需 calcium"}</li>`+
-    `<li>${k>=6.0?`<b>insulin 10 U ＋ 葡萄糖 25 g IV 15 分鐘</b>（如 50% 葡萄糖 50 mL）${glu!==null&&glu<126?`；<span class="cau">治療前血糖 ${glu} mg/dL（<126）→ 之後 10% 葡萄糖 50 mL/h × 5 小時</span>`:"；治療前血糖 <126 mg/dL 者之後加 10% 葡萄糖 50 mL/h × 5 小時"}；0–360 分鐘多次測血糖`:"輕度：處理原因、評估 K binder"}</li>`+
+    `<li>${k>=6.0?`<b>insulin 10 U ＋ 葡萄糖 25 g IV 15 分鐘</b>（如 50% 葡萄糖 50 mL）${glu!==null&&glu<126?`；<span class="cau">治療前血糖 ${glu} mg/dL（<126）→ 之後 10% 葡萄糖 50 mL/h × 5 小時</span>`:"；治療前血糖 <126 mg/dL 者之後加 10% 葡萄糖 50 mL/h × 5 小時"}；0–360 分鐘多次測血糖${hkInsRen()}`:"輕度：處理原因、評估 K binder"}</li>`+
     `${k>=6.5?`<li>salbutamol 10–20 mg nebulised（輔助，不單獨使用）</li>`:""}`+
     `<li>移除鉀：sodium zirconium cyclosilicate 10 g TID（≤72 小時）${src("szcPI")}；${S.u_hd?"<b>已透析病人 → 安排緊急透析</b>":"反覆或難治 → 腎臟科評估緊急透析"}</li></ol>`;
   o.rows=[["不建議",ul(["不常規給 sodium bicarbonate","calcium resonium（陽離子交換樹脂）不再常規使用"])],
@@ -2589,7 +2648,8 @@ function rateCtrl(c){
   if(!low) L.push(`<b>diltiazem</b> ${wt!==null?`${fmt(0.25*wt,0)} mg`:"0.25 mg/kg"} IV 2 分鐘；15 分鐘後不足 ${wt!==null?`${fmt(0.35*wt,0)} mg`:"0.35 mg/kg"}；輸注 5–15 mg/h（≤24 小時）${src("diltPI")}`);
   else L.push(`<span class="ng">LVEF <40% 或心衰竭：避免 diltiazem／verapamil（ACC/AHA 2023：有害）</span>${src("accAf23")}`);
   L.push(`<b>metoprolol</b> 5 mg IV（約 2 分鐘），可每 2 分鐘重複，共 3 劑${low?"（急性失代償心衰竭時謹慎）":""}${sbp!==null&&sbp<100?'；<span class="cau">SBP <100 謹慎</span>':""} ${src("metoPI")}`);
-  L.push(`β-blocker、CCB 無效或心衰竭：digoxin（ESC 2024 恢復為第一線選項之一；劑量依院內）${src("escAf24")}，或 <b>amiodarone</b> 150 mg IV 10 分鐘 → 1 mg/min × 6 小時 ${src("ahaAcls25")}`);
+  L.push(`β-blocker、CCB 無效或心衰竭：digoxin（ESC 2024 恢復為第一線選項之一，見下）、<b>amiodarone</b> 150 mg IV 10 分鐘 → 1 mg/min × 6 小時 ${src("ahaAcls25")}，兩者擇一`);
+  L.push(digTxt());
   L.push(`同時矯正誘因：K、Mg、容積、疼痛、發燒、低血氧、出血、停用 β-blocker`);
   return ul(L);
 }
@@ -2620,7 +2680,7 @@ function tachyCard(cs,c){
     break;
   case "wirr":
     o.tags=src("ahaAcls25");
-    o.lead=`<b>持續多形性 VT → 立即非同步電擊</b>（Class 1）；QT 延長之 torsades 復發可考慮 magnesium（2b，常用 1–2 g IV，劑量請確認）；QT 正常者不常規給 magnesium；預激 AF 避免 AV 結阻斷劑（adenosine 於不規則寬 QRS 有害，Class 3）。`;
+    o.lead=`<b>持續多形性 VT → 立即非同步電擊</b>（Class 1）；QT 延長之 torsades 復發可考慮 magnesium（2b，常用 1–2 g IV，劑量請確認）；QT 正常者不常規給 magnesium；預激 AF 避免 AV 結阻斷劑（adenosine 於不規則寬 QRS 有害，Class 3）。`+renNote("mg",{min:30,lab:"magnesium"});
     o.rows=[["找原因","QT 延長藥物、低 K／低 Mg、缺血；停用延長 QT 藥物"],["會診","心臟科"]];
     break;
   case "vt":
@@ -2835,11 +2895,12 @@ function dkaTx(c){
   const insTxt = wt!==null? `${fmt(rate*wt,1)} U/h（${rate} U/kg/h）`:`${rate} U/kg/h`;
   const kStep = k===null? `<span class="ng">先驗 K 再開 insulin</span>` :
     k<3.5? `<span class="ng">K ${k} <3.5：先補 K 10 mmol/h，K >3.5 才開 insulin</span>` :
-    k<=5.0? `K ${k}：每公升輸液加 10–20 mmol KCl，維持 K 4–5` : `K ${k} >5.0：暫不補鉀，每 2 小時複驗`;
+    k<5.0? `K ${k}：每公升輸液加 20–30 mmol KCl，維持 K 4–5` : `K ${k} ≥5.0：暫不補鉀，每 2 小時複驗`;
+  const kRen = (()=>{ const x=rv("egfr"); return k!==null&&k<5.0&&rnLow(x,15)? rnLine(x,`末期腎病：輸液與補鉀需謹慎（2024 共識 Table 4）${src("dka24")}`):""; })();
   const fluid = c.frail? `小量 bolus（如 250 mL）後再評估（老人、心衰竭、慢性腎病）` : `500–1,000 mL/h × 2–4 小時`;
   const L=[
     `<b>輸液</b>：0.9% NaCl 或 balanced crystalloid（可得時建議 balanced），${fluid}；之後依血行動力學、I/O、Na 調整；缺失於 24–48 小時補足`,
-    `<b>鉀</b>：${kStep}；insulin 開始後 2 小時、之後每 4 小時驗 K`,
+    `<b>鉀</b>：${kStep}；insulin 開始後 2 小時、之後每 4 小時驗 K${kRen}`,
     `<b>IV insulin</b>（fixed-rate）：${k!==null&&k<3.5?"（K 矯正後）":""}${insTxt}${isHHS?"":(c.glu!==null&&c.glu<250?`；<span class="cau">血糖已 <250（euglycemic）：一開始就併用 5–10% 葡萄糖</span>，持續 insulin 到酮酸緩解`:"；血糖 <250 → 加 5–10% 葡萄糖並降為 0.05 U/kg/h，持續到酮酸緩解")}${isHHS?"；血糖下降 ≤90–120 mg/dL/h":""}`,
     (c.dka&&(c.sev==="mild"||c.sev==="moderate"))?`輕度、無併發症中度 DKA：可用皮下速效 insulin ${wt!==null?`${fmt(0.1*wt,1)} U q1h 或 ${fmt(0.2*wt,1)} U q2h`:"0.1 U/kg q1h 或 0.2 U/kg q2h"}（需密集監測）`:"",
     S.h_basal?"已使用 basal insulin：持續原劑量，依需要調整":"",
@@ -3028,7 +3089,7 @@ function renderGluc(){
   // 4. 特殊情境
   const X=[];
   if(c.npo||S.sx_plan) X.push(`<b>NPO／手術</b>：早上 NPH 減 50%；glargine、degludec 前 24 小時劑量減 25%；睡前 NPH 照給；停餐前 insulin，矯正續用 ${src("endotext26")}；圍術期目標 100–180 ${src("endoSoc22")}${S.h_sglt2?`；<span class="ng">SGLT2i 術前 ≥3 天停</span> ${src("fdaSglt2")}`:""}`);
-  if(S.gl_ster==="am") X.push(`<b>早上單次口服類固醇</b>：NPH 為主或 basal-bolus（Endocrine Society 2.1）${src("endoSoc22")}；JBDS：<b>NPH 10 U 早上</b>（與類固醇同時），依晚餐前血糖每日調 10–20%，或 gliclazide 40 mg 早上（最多 240 mg）；已用晚上 basal 者改早上給；<b>類固醇減量時同步減量</b> ${src("jbdsSter23")}<br><span class="small">不同處：Endotext 不建議住院新開始 SU，JBDS 將 gliclazide 列為選項（並列）</span>`);
+  if(S.gl_ster==="am") X.push(`<b>早上單次口服類固醇</b>：NPH 為主或 basal-bolus（Endocrine Society 2.1）${src("endoSoc22")}；JBDS：<b>NPH 10 U 早上</b>（與類固醇同時），依晚餐前血糖每日調 10–20%${rnLow(rv("crcl"),30)?`（gliclazide：${rv("crcl").hd?"透析":"CrCl <30"} 禁用 ${src("glicSmPC")}）`:"，或 gliclazide 40 mg 早上（最多 240 mg）"}；已用晚上 basal 者改早上給；<b>類固醇減量時同步減量</b> ${src("jbdsSter23")}<br><span class="small">不同處：Endotext 不建議住院新開始 SU，JBDS 將 gliclazide 列為選項（並列）</span>`);
   if(S.gl_ster==="multi") X.push(`<b>每日多次或長效類固醇</b>：basal-bolus 或 NPH 為主皆可（Endocrine Society 2.1）${src("endoSoc22")}；類固醇減量時同步減量 ${src("jbdsSter23")}`);
   if(S.gl_eat==="tfc") X.push(`<b>連續管灌</b>：basal 為每日總量 50%；營養 insulin＝每日總量／12，管灌中每 4 小時給，<b>管灌中斷即停營養 insulin</b> ${src("endotext26")}；NPH 為主或 basal-bolus（Endocrine Society 6.1）${src("endoSoc22")}`);
   if(S.gl_eat==="tfi") X.push(`<b>間歇管灌（12–16 小時）</b>：管灌開始時給 NPH ${src("endotext26")}；NPH 為主或 basal-bolus（Endocrine Society 6.1）${src("endoSoc22")}`);
@@ -3257,7 +3318,7 @@ function lyteCards(c){
     const oral = c.k>=3.0? "口服 KCl 24 mmol，每日 2–3 次" : "口服 KCl 24–36 mmol，每日 3–4 次";
     C.push(optCard({cls:c.k<2.5||S.el_arr?"must":"pref",title:`低血鉀：${sev}`,tags:src("spsK"),open:true,lead:ul([
       S.el_npo||c.k<2.5||S.el_arr? `<b>IV KCl</b>：${c.k<2.5||S.el_arr?"40":"20–40"} mmol/L 不含葡萄糖之輸液；周邊濃度 ≤40 mmol/L、速率通常 ≤10 mmol/h；>20 mmol/h 需中心靜脈與心電監測` : `<b>${oral}</b>（隨餐）`,
-      `每日上限 2–3 mmol/kg${c.wt!==null?`（${fmt(2*c.wt,0)}–${fmt(3*c.wt,0)} mmol）`:""}；${c.eg!==null&&c.eg<30?'<span class="cau">eGFR <30：減量、密集追蹤</span>':"腎功能差時減量"}`,
+      `每日上限 2–3 mmol/kg${c.wt!==null?`（${fmt(2*c.wt,0)}–${fmt(3*c.wt,0)} mmol）`:""}；腎功能差時減量 ${src("spsK")}`+kclRen(),
       `<b>同時驗並補 Mg</b>（低血鎂時補鉀效果差）`,S.el_dig?'<span class="ng">使用 digoxin：低血鉀增加毒性，心電監測</span>':"","找原因：利尿劑、嘔吐腹瀉、鼻胃管引流、insulin、β agonist、低血鎂"]),rows:[]}));
   }
   if(c.mg!==null && c.mgM<0.7){
@@ -3437,9 +3498,9 @@ function bpCtx(){
   const hypot = h.sbp!==null&&h.sbp<90 || h.map!==null&&h.map<65;
   const ckdAlb = (eg&&!eg.hd&&eg.v<60&&S.bp_alb) || (S.hx_ckd&&S.bp_alb);
   const dmCkd = S.hx_dm&&((eg&&!eg.hd&&eg.v<60)||S.bp_alb);
-  const lowCr = !!(rc&&(rc.hd||rc.v<40));
+  const lowCr = !!(rc&&(rc.hd||rc.v<40)), cr20=rnLow(rc,20), cr30=rnLow(rc,30), eg30=rnLow(eg,30);
   const any = h.sbp!==null||anyMed||S.bp_alb||S.bp_preg||S.bp_gout||S.bp_aki||S.sx_plan;
-  return Object.assign({},h,{k,eg,rc,on,cls,meds,nAcd,anyMed,hypot,ckdAlb,dmCkd,lowCr,any});
+  return Object.assign({},h,{k,eg,rc,on,cls,meds,nAcd,anyMed,hypot,ckdAlb,dmCkd,lowCr,cr20,cr30,eg30,any});
 }
 const bpPO=t=>t.replace(/ (QD|BID)$/," PO $1");
 const bpName=x=>`${x.d.lab.replace(" 口服","")} ${x.d.st[x.i]}`;
@@ -3454,8 +3515,17 @@ function bpStart(id,c){
   return `<b>${d.lab.replace(" 口服","")} ${bpPO(d.st[i])}</b>${why} ${src(d.ref)}`;
 }
 /* 增量：下一階；已達上限回 null */
+/* v1.2 腎功能上限：回傳說明文字（有上限且已達時） */
+const rnName=(x,cut)=>x.hd?"透析":`${/^eGFR/.test(x.lab)?"eGFR":"CrCl"} <${cut}`;
+function bpCap(x,c){
+  if(x.d.id==="rami"&&c.lowCr&&x.i>=2) return `${rnName(c.rc,40)}：仿單上限 5 mg`;
+  if(x.d.id==="biso"&&c.cr20&&x.i>=2) return `${rnName(c.rc,20)}：不超過 10 mg（UK SmPC；US 仿單無固定上限，CrCl <40 小心調整）`;
+  if(x.d.id==="hctz"&&c.cr30) return `${rnName(c.rc,30)}：thiazide 效果差，不增量`;
+  if(x.d.id==="spir"&&c.eg30) return `${rnName(c.eg,30)}：仿單未載此腎功能劑量，不增量（請確認）`;
+  return "";
+}
 function bpUp(x,c){
-  if(x.d.id==="rami"&&c.lowCr&&x.i>=2) return null; // CrCl <40 上限 5 mg
+  if(bpCap(x,c)) return null;
   return x.i<x.d.st.length-1? x.d.st[x.i+1] : null;
 }
 /* 該藥目前是否應停／暫停（回傳原因或空字串） */
@@ -3475,7 +3545,7 @@ function renderBPmed(){
   if(c.on.length){
     const L=c.on.map(x=>{ const up=bpUp(x,c), stop=bpStop(x,c);
       const noUp = x.d.c==="D"&&S.bp_gout ? "痛風：不增量，可行時改 losartan" : x.d.c==="B"&&S.hx_asthma ? "氣喘：不增量（β-blocker 見下方）" : "";
-      return `${bpName(x)}（${BPC[x.d.c]}）：${stop?`<span class="ng">${stop}</span>`:noUp?`<span class="cau">${noUp}</span>`:up?`可增至 ${up}`:'<span class="cau">'+(x.d.top||'已達仿單上限')+(x.d.id==="rami"&&c.lowCr?"（CrCl <40：5 mg）":"")+'</span>'} ${src(x.d.ref)}`; });
+      return `${bpName(x)}（${BPC[x.d.c]}）：${stop?`<span class="ng">${stop}</span>`:noUp?`<span class="cau">${noUp}</span>`:up?`可增至 ${up}`:'<span class="cau">'+(bpCap(x,c)||x.d.top||'已達仿單上限')+'</span>'} ${src(x.d.ref)}${x.d.id==="biso"&&c.cr20?src("bisoSmPC"):""}${x.d.id==="hctz"&&c.cr30?src("ddRenal"):""}`; });
     const dup=Object.keys(BPC).filter(k=>c.on.filter(x=>x.d.c===k).length>1);
     if(dup.length) L.push(`<span class="ng">同類藥重複：${dup.map(k=>BPC[k]).join("、")}</span>`);
     H.push(st({k:"info",t:"目前降壓藥",c:ul(L)}));
@@ -3495,7 +3565,7 @@ function renderBPmed(){
   const kHi = c.k!==null&&c.k>=5.5, kOk5 = c.k===null||c.k<=5.0;
   if(c.emerg) H.push(st({k:"info",t:"高血壓急症",c:"依上方急症處置；口服藥調整待急性期後。"}));
   else if(elev){
-    const add=[], ups=[];
+    const add=[], ups=[]; let thzNote="";
     if(S.bp_preg){
       const lab=c.on.find(x=>x.d.id==="labe"), nif=c.on.find(x=>x.d.id==="nife");
       if(lab&&bpUp(lab,c)) ups.push(`labetalol ${lab.d.st[lab.i]} → <b>${bpPO(bpUp(lab,c))}</b> ${src("labePO")}`);
@@ -3509,7 +3579,8 @@ function renderBPmed(){
       if(wantA && (c.ckdAlb||c.dmCkd)) order.push("A");
       if(!c.meds.C) order.push("C");
       if(wantA && !order.includes("A")) order.push("A");
-      if(!c.meds.D && !S.bp_gout) order.push("D");
+      if(!c.meds.D && !S.bp_gout && !c.cr30) order.push("D");
+      if(!c.meds.D && !S.bp_gout && c.cr30) thzNote=`<span class="small cau">${rnName(c.rc,30)}：thiazide 類效果差，不建議新加</span> ${src("ddRenal")}`;
       for(const k of order){
         if(k==="A") add.push(`${bpStart("losa",c)}${S.bp_gout?"（痛風首選 ARB）"+src("acrGout20"):""}，或 ${bpStart("rami",c)}（擇一，不合併）${c.ckdAlb||c.dmCkd?"；CKD 合併 albuminuria、或糖尿病合併 eGFR <60／albuminuria：首選":""}`);
         if(k==="C") add.push(bpStart("amlo",c)+`<span class="small">（老人、虛弱 2.5 mg）</span>`);
@@ -3526,6 +3597,7 @@ function renderBPmed(){
     const L=[`<b>不追加 PRN 降壓藥</b>（IV 或口服）急速降壓（住院、無急性器官損傷，3: Harm）${src("accHtn25")}；先處理誘因、恢復平常口服藥 ${src("ahaBp24")}`];
     const start2 = c.nAcd===0&&!S.bp_preg&&!c.anyMed;
     if(add.length) L.push(`<b>${start2?"起始：下列兩類各選一（第 2 期 ≥140/90 以兩種不同類、最好單一錠起始，1, B-R）":S.bp_preg?"懷孕：選一":"加一種不同類（依序優先，擇一）"}</b>：`+ul(start2?add.slice(0,2):add.slice(0,3)));
+    if(thzNote) L.push(thzNote);
     if(ups.length) L.push(`<b>${add.length?"或":""}增量現有藥物</b>：`+ul(ups));
     if(!add.length&&!ups.length) L.push(`<span class="cau">目前用藥皆已達上限或受限</span>：檢查服藥順從性、誘因、次發性高血壓；會診心臟或腎臟科`);
     L.push(`${S.bp_preg?"":"加 ACEi／ARB、MRA 或利尿劑後追蹤 K、Cr；"}新開或加量後每月追蹤至控制（1, B-R）${src("accHtn25")}${S.bp_preg?"":src("spiroPI")}`);
@@ -4290,6 +4362,10 @@ function renderTools(){
 Object.assign(REF,{
   levPI:{t:"Levetiracetam 仿單",f:"Keppra（levetiracetam）Prescribing Information（US）與 SmPC（EU）：成人腎功能調整依 BSA 校正之 CrCl（mL/min/1.73 m²）——>80：500–1,500 mg q12h；50–80：500–1,000 mg q12h；30–50：250–750 mg q12h；<30：250–500 mg q12h；透析之 ESRD：500–1,000 mg q24h，透析後追加 250–500 mg。（2026-10-19 核對）",u:"https://www.pfizermedical.com/levetiracetam/dosage-admin"},
   mcpPI:{t:"Metoclopramide 注射劑仿單（US）",f:"Metoclopramide injection Prescribing Information（Pfizer）：CrCl <40 mL/min 者以約一半建議劑量開始，再依療效與安全性調整。（2026-10-19 核對）",u:"https://www.pfizermedical.com/metoclopramide/dosage-admin"},
+  mgD5wPI:{t:"Magnesium sulfate in D5W 仿單",f:"Magnesium Sulfate in 5% Dextrose Injection Prescribing Information（Pfizer）。2.2 子癇前症／子癇：4–6 g IV 15 分鐘，維持 1–2 g/h，依血鎂（目標 3–6 mg/dL）與臨床調整，最大 30–40 g／24 小時，超過 5–7 天不建議。2.3 重度腎功能不全及／或尿量 <0.5 mL/kg/h：4 g 負荷、維持 1 g/h，頻繁監測血鎂並觀察毒性徵象（顏面水腫、深部肌腱反射減弱、呼吸抑制）調整，維持量可能更低；48 小時內 ≤20 g。仿單未以 CrCl 定義「重度」。（2026-10-24 核對）",u:"https://www.pfizermedical.com/magnesium-sulfate/dosage-admin"},
+  ibuPI:{t:"Ibuprofen 仿單",f:"Ibuprofen Prescribing Information（Warnings：Renal effects）：晚期腎病無對照研究，不建議使用；若必須使用需密切監測腎功能。長期使用 NSAID 可致腎乳頭壞死等腎損傷；腎功能不全、心衰竭、肝功能不全、使用利尿劑或 ACEi、老人風險較高。仿單未訂腎功能減量。仿單未定義「晚期腎病」，本工具以 CrCl <30 或透析提示。（2026-10-24 核對）",u:"https://medlibrary.org/lib/rx/meds/ibuprofen-80/page/3/"},
+  digPI:{t:"Digoxin 仿單",f:"Digoxin Injection Prescribing Information（Drugs.com 轉載）：成人 IV 負荷 8–12 µg/kg（lean body weight），先給一半，之後 1/4 每 6–8 小時 × 2，每劑 ≥5 分鐘、避免快速推注；正常腎功能維持 2.4–3.6 µg/kg/日，每 2 週依反應、濃度、毒性調整。Table 3：每日維持量依校正 CrCl（校正為 70 kg 或 1.73 m²；僅有 Cr 時 CrCl＝(140－年齡)/Cr，女性 ×0.85）與 lean body weight，例：CrCl 10 時 70 kg 112 µg、CrCl 50 時 168 µg、CrCl 100 時 238 µg（表列 CrCl 10–100、體重 40–100 kg）。主要經腎排除，腎功能不全需較低維持量、達穩定需較久，未減量時毒性風險高；透析無法有效移除。注射劑 250 µg/mL。（2026-10-24 核對）",u:"https://www.drugs.com/pro/digoxin.html"},
+  mcnich18:{t:"McNicholas 2018（低劑量 insulin）",f:"McNicholas BA, Pham MH, Carli K, et al. Treatment of hyperkalemia with a low-dose insulin protocol is effective and results in reduced hypoglycemia. Kidney Int Rep 2018;3:328–336（PMID 29725636）。單中心急診前後比較品質改善研究：院內流程 CKD（eGFR <60）與 ESRD 用 5 U；介入後 insulin 相關低血糖 28% → 11%，嚴重低血糖 3 例 → 0；ESRD 14 例 6 小時內複驗 K，10 U 與 5 U 降鉀速度相近（0.45 vs 0.57 mEq/L/h）；第二期低血糖皆發生於接受 5 U 的血液透析病人。作者未提出正式劑量建議，建議 ESRD 監測血糖至 6 小時。回溯、單中心、無對照。（2026-10-24 核對）",u:"https://pmc.ncbi.nlm.nih.gov/articles/PMC5932119/"},
   mgPI:{t:"Magnesium sulfate 仿單",f:"Magnesium sulfate in water for injection Prescribing Information（Pfizer）：重度腎功能不全時須頻繁監測血清鎂，最大劑量 20 g／48 小時（仿單未以 CrCl 定義「重度」）。（2026-10-19 核對）",u:"https://www.pfizermedical.com/magnesium-sulfate-0/dosage-admin"},
   apapIV:{t:"Acetaminophen IV 仿單（Ofirmev）",f:"Ofirmev（acetaminophen injection）Prescribing Information 8.7：重度腎功能不全（CrCl ≤30 mL/min）可能需延長給藥間隔並減少每日總量；8.6：肝功能不全可能需減少每日總量。（2026-10-19 核對）",u:"https://www.drugs.com/pro/ofirmev.html"},
   colchPI:{t:"Colchicine 仿單（Colcrys）",f:"Colcrys（colchicine）Prescribing Information 2.5：FMF——CrCl 30–80 密切監測、可能需減量；CrCl <30 由 0.3 mg/日開始，加量需密切監測；透析起始 0.3 mg/日。痛風預防——CrCl <30 起始 0.3 mg/日，透析 0.3 mg 每週 2 次。心包炎非仿單適應症。（2026-10-19 依 FDA 仿單 2019 核對）",u:"https://www.accessdata.fda.gov/drugsatfda_docs/label/2019/022352s022lbl.pdf"},
@@ -4325,6 +4401,7 @@ Object.assign(REF,{
   ramiPI:{t:"Ramipril 仿單",f:"Ramipril capsules Prescribing Information：高血壓（未用利尿劑）2.5 mg 每日一次起始，維持 2.5–20 mg/日（每日一次或分兩次）；CrCl <40：1.25 mg 每日一次起始，每日上限 5 mg；疑容積不足或腎動脈狹窄 1.25 mg 起始。（2026-10-20 核對）",u:"https://www.drugs.com/pro/ramipril.html"},
   indaPI:{t:"Indapamide 仿單",f:"Indapamide tablets Prescribing Information：高血壓 1.25 mg 每日一次（早上），4 週反應不足增至 2.5 mg，再 4 週增至 5 mg；≥5 mg 未見額外降壓；與其他降壓藥合併初期，其他藥常規劑量減 50%。（2026-10-20 核對）",u:"https://www.drugs.com/pro/indapamide.html"},
   nifePI:{t:"Nifedipine ER 仿單（Procardia XL）",f:"Procardia XL Prescribing Information：高血壓 30 或 60 mg 每日一次起始，整顆吞服；一般每 7–14 天調整；>120 mg 不建議。（2026-10-20 核對）",u:"https://www.drugs.com/pro/procardia-xl.html"},
+  bisoSmPC:{t:"Bisoprolol SmPC（UK）",f:"Bisoprolol fumarate 10 mg film-coated tablets SmPC（emc）4.2：高血壓、心絞痛一般 10 mg 每日一次，最大 20 mg／日；重度腎功能不全（CrCl <20 mL/min）不超過 10 mg 每日一次；重度肝功能不全不需調整但需監測；透析資料有限，幾乎不被透析移除（4.9）。（2026-10-24 核對）",u:"https://www.medicines.org.uk/emc/product/14906/smpc"},
   bisoPI:{t:"Bisoprolol 仿單",f:"Bisoprolol fumarate tablets Prescribing Information：高血壓 5 mg 每日一次起始（部分病人 2.5 mg），可增至 10、20 mg 每日一次；CrCl <40 或肝炎、肝硬化 2.5 mg 起始；支氣管痙攣疾病一般不用 β-blocker，必要時 2.5 mg 起始並備 β2 agonist。（2026-10-20 核對）",u:"https://www.drugs.com/pro/bisoprolol.html"},
   carvPI:{t:"Carvedilol 仿單",f:"Carvedilol tablets Prescribing Information 2.3：高血壓 6.25 mg BID 起始，隨餐；7–14 天後可增至 12.5 mg BID，再 7–14 天至 25 mg BID；每日總量上限 50 mg。（2026-10-20 核對）",u:"https://www.drugs.com/pro/carvedilol.html"},
   labePO:{t:"Labetalol 口服錠仿單",f:"Labetalol tablets Prescribing Information：高血壓 100 mg BID 起始，每 2–3 天依站立血壓以 100 mg BID 調整（每次 ≤200 mg BID）；常用維持 200–400 mg BID；重度可需每日 1,200–2,400 mg。（2026-10-20 核對）",u:"https://www.drugs.com/pro/labetalol-tablets.html"},
@@ -4532,6 +4609,9 @@ const DRUGS = [
  {id:"amio",cls:"cardio",name:"Amiodarone",brand:"Cordarone",type:"抗心律不整",
   dose:"心跳停止 VF/pVT：300 mg IV/IO，第二劑 150 mg；有脈搏寬 QRS 或 AF：150 mg IV 10 分鐘 → 1 mg/min × 6 小時（之後依院內）。",adj:"—",
   caut:"低血壓、心搏過慢、QT 延長；甲狀腺、肝、肺毒性（長期）；預激 AF 謹慎。",guide:src("ahaAcls25")+src("ahaAlg25"),nhi:nhiLic()},
+ {id:"digo",cls:"cardio",name:"Digoxin",brand:"台灣品項請確認",type:"強心配醣體",
+  dose:"AF 心率控制負荷（並列）：ESC 2024 0.5 mg IV bolus，24 小時內共 0.75–1.5 mg 分次；仿單 8–12 µg/kg IV（lean body weight），先給一半，之後 1/4 每 6–8 小時 × 2。維持：ESC 0.0625–0.25 mg QD；仿單依 CrCl 與 lean body weight（Table 3，心搏過速頁自動計算）。",adj:"老人、低體重減量；低血鉀、低血鎂增加毒性。",
+  caut:"預激 AF 禁用；心搏過慢、房室阻滯；amiodarone、verapamil 等會升高濃度；監測濃度。",guide:src("escAf24")+src("digPI"),nhi:nhiLic()},
  {id:"lido",cls:"cardio",name:"Lidocaine（IV）",brand:"Xylocaine",type:"抗心律不整",
   dose:"心跳停止 VF/pVT（amiodarone 替代）：1–1.5 mg/kg IV/IO，第二劑 0.5–0.75 mg/kg。",adj:"肝衰竭、心衰竭減量。",caut:"神經毒性（抽搐）。",guide:src("ahaAlg25"),nhi:nhiLic()},
  {id:"proc",cls:"cardio",name:"Procainamide",brand:"台灣品項請確認",type:"抗心律不整",
@@ -4662,6 +4742,7 @@ const REN={
   amio:{all:"不需調整",r:["ddRenal"]},
   lido:{all:"小心使用；代謝物可能蓄積致毒性（仿單）",r:["ddRenal"]},
   proc:{b:"crcl",t:[[null,10,"口服間隔 q8–24h；IV 重度：負荷減至 12 mg/kg，維持輸注減 2/3"],[10,50,"口服間隔 q6–12h；IV 中度：維持輸注減 1/3"],[50,null,"不需調整"]],hd:"監測 procainamide／NAPA 濃度；透析後可能需補 200 mg",note:"仿單 IV 以「中度、重度」描述，對應 CrCl 10–50、<10 為本工具取法",r:["ddRenal"]},
+  digo:{all:"主要經腎排除：腎功能不全需較低維持量（仿單 Table 3 依 CrCl 與 lean body weight；心搏過速頁自動計算），達穩定需較久，未減量時毒性風險高",hd:"透析無法有效移除；仿單表未列透析，依濃度調整",r:["digPI"]},
   kcl:{all:"仿單：腎衰竭禁用；腎功能不全可致致命高血鉀，從低劑量開始、定期驗 K（尤其合併 RAAS 抑制劑）",hd:"可被透析移除，無劑量建議",r:["ddRenal"]},
   phos:{all:"potassium phosphate：嚴重腎衰竭小心使用（鉀滯留）；sodium phosphate：未查到",r:["ddRenal"]},
   nicar:{all:"小心使用；慢慢調整、密切監測（仿單）",r:["ddRenal"]},
@@ -4707,7 +4788,7 @@ function renPatient(ren){
 /* v1.0：藥物頁子分類（id 清單）與頁內藥名篩選 */
 const DSUB={
   resp:[["bronch","支氣管擴張",["salb","ipra","mg"]],["ster","類固醇",["pred"]],["allergy","過敏",["epi"]],["rsi","插管 RSI",["etom","keta","prop","roc","sux","suga"]]],
-  cardio:[["press","升壓／強心",["ne","vaso","epiinf","phen","dobu","dopa"]],["arr","心律不整・心搏過慢",["adeno","dilt","meto","amio","lido","proc","atro"]],["ivbp","靜脈降壓",["nicar","urap","labet","ntg"]],["pobp","口服降壓",["rami","valsa","olmes","losa","amlo","nifer","bisop","carve","doxaz"]],["diur","利尿劑",["furo","hctz","indap","spiro"]],["ac","抗凝・抗血小板",["ufh","enox","asa"]],["oth","其他",["colch"]]],
+  cardio:[["press","升壓／強心",["ne","vaso","epiinf","phen","dobu","dopa"]],["arr","心律不整・心搏過慢",["adeno","dilt","meto","amio","digo","lido","proc","atro"]],["ivbp","靜脈降壓",["nicar","urap","labet","ntg"]],["pobp","口服降壓",["rami","valsa","olmes","losa","amlo","nifer","bisop","carve","doxaz"]],["diur","利尿劑",["furo","hctz","indap","spiro"]],["ac","抗凝・抗血小板",["ufh","enox","asa"]],["oth","其他",["colch"]]],
   neuro:[["seiz","癲癇",["lzp","mdz","dzp","lev","vpa","pht","pb"]],["stroke","中風血栓溶解",["alte","tnk"]],["deli","譫妄",["hal"]],["sleep","失眠",["zolp","suvo","zopi","esta","traz"]],["pain","止痛",["apap"]]],
   metab:[["glu","血糖",["basal","prand","insulin","metf","sglt2","sita","glic","dex","glucagon"]],["lyte","電解質",["hts","kcl","phos","cagluc","szc","zol","ddavp"]],["endo","內分泌・維生素",["hydro","thia"]]],
   gi:[["emesis","止吐",["ond","mcp"]],["ugib","上消化道出血",["ppi","octr","terli","soma","eryth","ctx","alb"]],["he","肝性腦病變",["lactu","rifax"]],["cdi","C. difficile",["vancpo","fidax"]]],
@@ -5182,7 +5263,7 @@ function szCard(cs,c){
   switch(cs.id){
   case "glu": o.lead=`D50W 50 mL IV（或 glucagon 1 mg IM）；酒精或營養不良者同時給 thiamine。${jump("dka","dka-gluc","血糖")}`; break;
   case "na": o.tags=src("eurHypoNa"); o.lead=c.na<125?`<b>低血鈉合併抽搐</b>：3% NaCl 150 mL IV 20 分鐘，可重複至 Na 上升 5 mmol/L ${src("eurHypoNa")} ${tabBtn("na","低血鈉頁")}`:`Na ${c.na}：輕度低血鈉不太會單獨造成抽搐，仍需矯正並找其他原因 ${tabBtn("na","低血鈉頁")}`; break;
-  case "ecl": o.tags=src("smiEcl19"); o.lead=`<b>magnesium sulfate 4–6 g IV 20 分鐘，之後 1–2 g/h</b>；無 IV 時 10 g IM（兩側臀部各 5 g）；Mg 禁忌或反覆抽搐 → lorazepam 2–4 mg IV；通知婦產科，控制血壓 ${src("smiEcl19")} ${cpBtn("Magnesium sulfate 4 g IV over 20 min, then 1 g/h（依院內子癇流程）")}`; o.rows=[["腎功能","腎衰竭小心使用，監測 Mg 濃度、尿量、深部肌腱反射"+src("smiEcl19")]]; break;
+  case "ecl": o.tags=src("smiEcl19"); o.lead=`<b>magnesium sulfate 4–6 g IV 20 分鐘，之後 1–2 g/h</b>；無 IV 時 10 g IM（兩側臀部各 5 g）；Mg 禁忌或反覆抽搐 → lorazepam 2–4 mg IV；通知婦產科，控制血壓 ${src("smiEcl19")} ${cpBtn("Magnesium sulfate 4 g IV over 20 min, then 1 g/h（依院內子癇流程）")}`+mgEclRen(); o.rows=[["腎功能","腎衰竭小心使用，監測 Mg 濃度、尿量、深部肌腱反射"+src("smiEcl19")]]; break;
   case "ich": o.lead=`<b>頭部 CT</b>（首次發作、局部神經學症狀、外傷、抗凝血劑）；使用抗凝血劑者見意識改變頁顱內出血與逆轉 ${tabBtn("ams","意識改變")}`; o.rows=[["提醒","首次發作之後續評估：MRI、EEG（依神經科安排）；本項為本工具整理"]]; break;
   case "cns": o.lead=`血液培養後經驗性抗生素（± acyclovir），不因 CT 或 LP 延誤；見發燒頁與 abx-helper ${tabBtn("fev","發燒頁")}`; break;
   case "etoh": o.tags=src("asamAws"); o.lead=`以 benzodiazepine 治療（symptom-triggered；戒斷譫妄偏好靜脈）；給 thiamine ${src("asamAws")}`; break;
@@ -5478,14 +5559,14 @@ function renderRefPanel(){
     ["意識改變：評分、試驗與仿單",["gcs","at4","esett","adrogue","cerebyxPI","altePI","tnkPI","idaPI"]],
     ["胸痛",["accAcs25","accAorta22","acepAd15","advised","escPeri25","escNcs22","labetPI"]],
     ["發燒",["icuFever23","idsaFn10","esmoFn16","crbsi09","cdiff17","cdiff21","mavros11","easlCirr18"]],
-    ["尿少",["kdigoAki12","ukkaK23","szcPI","wsacs13"]],
+    ["尿少",["kdigoAki12","ukkaK23","mcnich18","szcPI","wsacs13"]],
     ["腹痛",["wsesAmi22","bolognaAsbo","acgPanc24","waterfall","tg18"]],
     ["GI bleeding",["acgUgib21","esgeVar22","acgLgib23","acgAc22","haltit","aabb23","gbs","childPugh"]],
     ["低血壓／休克、升壓藥",["ssc26hemo","levoPI","epiPI","vasoPI","pitTW","dopaPI","dobuPI","pheniPI","sfeAdrenal"]],
     ["心搏過速／過慢、ACLS",["ahaAcls25","ahaAlg25","rcuk25","escAf24","accAf23","escSvt19","diltPI","metoPI"]],
     ["住院血糖",["endoSoc22","endotext26","endotextDU","rabbit2","jbdsSter23","fdaSglt2","metPI","sitaPI","nhi51"]],
-    ["降壓藥選擇",["esc24htn","tw22htn","ahaPeri24","stopOrNot24","acrGout20","amloPI","nifePI","losPI","valsPI","olmePI","ramiPI","hctzPI","indaPI","bisoPI","carvPI","labePO","spiroPI","doxaPI"]],
-    ["腎功能劑量（仿單）",["levPI","mcpPI","mgPI","apapIV","colchPI","zolPI","ddavpPI","tramPI","hmPI","morPI","ketoPI"]],
+    ["降壓藥選擇",["esc24htn","tw22htn","ahaPeri24","stopOrNot24","acrGout20","amloPI","nifePI","losPI","valsPI","olmePI","ramiPI","hctzPI","indaPI","bisoPI","bisoSmPC","carvPI","labePO","spiroPI","doxaPI"]],
+    ["腎功能劑量（仿單）",["levPI","mcpPI","mgPI","mgD5wPI","ibuPI","digPI","apapIV","colchPI","zolPI","ddavpPI","tramPI","hmPI","morPI","ketoPI"]],
     ["RSI 插管",["sccmRsi23","rsiTrial25","preoxi24","etoPI","ketPI","propPI","rocPI","sccPI","sugPI"]],
     ["計算工具：類固醇、輸血",["litflSt","eseGiai24","woodcock20","aabbPlt25","chestTx25","vghBlood"]],
     ["高血糖",["dkaCcjm"]],
@@ -5505,7 +5586,13 @@ function renderRefPanel(){
     <div class="note">建議強度標示：AHA/ACC、AHA/ASA＝Class 1／2a／2b／3 ＋ LOE；ESC＝I／IIa／IIb／III；ERS/ATS、GRADE＝strong／conditional；BTS＝Grade A–D。「依輸入推導」的鑑別排序為本工具的規則，不是指引分類。</div>
   </div></div>
   <div class="card"><h2>Changelog</h2><div class="cb small">
-    <p style="margin:0 0 6px"><b>v1.1（2026-10-22）</b></p>
+    <p style="margin:0 0 6px"><b>v1.2（2026-10-24）</b></p>
+    <ul class="tight"><li>主訴頁劑量依腎功能提示（黃底「此病人（CrCl／eGFR）」一行，沿用藥物頁的判斷）：子癇 magnesium（重度腎功能不全或尿量 &lt;0.5 mL/kg/h：4 g＋1 g/h，48 小時 ≤20 g）、氣喘與 torsades magnesium、低血鉀 KCl、高血鉀 insulin（UKKA 10 U 與 McNicholas 2018 低劑量並列）、DKA 末期腎病補鉀、心包炎 ibuprofen／aspirin、急性心衰竭 furosemide、類固醇高血糖 gliclazide。</li>
+    <li>高風險藥（magnesium、KCl、高血鉀 insulin、心包炎抗發炎藥）未填腎功能時顯示「未填腎功能」；Cr ≥1.5 倍基準或尿量 &lt;0.5 mL/kg/h ≥6 小時時加註「Cr 不穩定，估計值可能偏高」（KDIGO）。</li>
+    <li>降壓藥：「可增至」不超過腎功能上限（ramipril CrCl &lt;40 5 mg、bisoprolol CrCl &lt;20 10 mg〔UK SmPC〕、HCTZ CrCl &lt;30 不增量、spironolactone eGFR &lt;30 不增量）；CrCl &lt;30 不再建議新加 thiazide。</li>
+    <li>Digoxin：心搏過速頁列出負荷劑量（ESC 2024 與仿單並列）與依仿單 Table 3 計算的維持量；藥物頁新增 digoxin。</li>
+    <li>修正：DKA 補鉀由「每公升 10–20 mmol」改為 2024 共識的 20–30 mmol，K ≥5.0 暫停。</li></ul>
+    <p style="margin:8px 0 6px"><b>v1.1（2026-10-22）</b></p>
     <ul class="tight"><li>每個主訴頁最上方加「目前結論」：立即（紅旗、本頁立即處置）、鑑別或下一步、缺哪些資料；內容直接摘自本頁建議，點選跳到該段。</li>
     <li>手機：頂部改為「目前主訴 ▾」＋最近 4 個主訴；生命徵象改 3 欄；免責聲明按「知道了」後移到頁尾。寬螢幕（≥920 px）改雙欄：左欄共用病人資料與檢驗（固定），右欄本頁線索與建議。</li>
     <li>網址帶分頁（例：#hypo），可直接開到某頁或加到主畫面；頁首顯示查證日期；頁尾主要依據收合。臨床內容未變。</li></ul>

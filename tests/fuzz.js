@@ -168,6 +168,37 @@ if(!MODSEL.length||MODSEL.includes('drug')) outs.push(['drugs',()=>{ A.S.dflt='a
     if(!known&&n) return name+' 無腎功能資料卻標 ▶'; }
   return ''; }]);
 
+/* v1.2 主訴頁腎功能提示 */
+if(A.renNote&&(!MODSEL.length||MODSEL.includes('ren'))){
+  const rnDivs=h=>[...String(h).matchAll(/<div class="rn">([\s\S]*?)<\/div>/g)].map(m=>txt(m[1]));
+  const ctxR=()=>{ const c=A.rv('crcl'), e=A.rv('egfr'), aki=A.akiFlag().length>0, uo=num(A.S.uo), wt=num(A.S.wt);
+    const low=x=>!!(x&&(x.hd||x.v<30)); return {c,e,aki,lowUo:uo!==null&&wt!==null&&wt>0&&uo/wt<0.5,known:!!(c||e),normal:!!(c||e)&&!low(c)&&!low(e)&&!aki}; };
+  const common=(t,h,id)=>{ const r=ctxR(), L=rnDivs(h);
+    if(/未填腎功能/.test(t)&&r.known) return '有腎功能仍顯示未填';
+    for(const x of L){ if(/腎功能未填/.test(x)) { if(!(id==='sz'&&r.lowUo)) return '腎功能未填標籤出現在非尿量情境'; continue; }
+      if(!r.known) return '無腎功能資料卻有此病人提示'; }
+    if(r.normal&&!r.lowUo) { const bad=L.filter(x=>!/維持量（仿單 Table 3）/.test(x)); if(bad.length) return '腎功能正常仍顯示提示：'+bad[0].slice(0,40); }
+    return ''; };
+  for(const id of ['sz','dysp','tachy','lyte','dka','uo','hk','cp']){ const m=A.MODS.find(x=>x.id===id); if(!m) continue;
+    outs.push(['ren.'+id,pageFn(m),(t,h,o)=>{ const e=common(t,h,id); if(e) return e; const r=ctxR();
+      if(id==='sz'&&/magnesium sulfate 4–6 g IV/.test(t)&&(r.lowUo||(r.c&&(r.c.hd||r.c.v<30)))&&!/4 g 負荷、維持 1 g\/h/.test(t)) return '子癇腎功能差或尿少未列 4 g＋1 g/h';
+      if((id==='uo'||id==='hk')&&/insulin 10 U ＋ 葡萄糖 25 g IV 15 分鐘/.test(t)&&r.e&&(r.e.hd||r.e.v<30)&&!/McNicholas/.test(t)) return '高血鉀腎功能差未並列 insulin 來源';
+      if(id==='dka'){ if(/10–20 mmol KCl/.test(t)) return 'DKA 補鉀仍為 10–20'; const k=num(o.k); if(/20–30 mmol KCl/.test(t)&&!(k!==null&&k>=3.5&&k<5.0)) return 'DKA 補鉀條件錯'; }
+      if(id==='tachy'){ const mm=t.match(/約 (\d+) µg QD （LBW/); if(mm){ const age=num(o.age),cr=num(o.cr),wt=num(o.wt); const ibw=A.ibwCalc(); const lbw=(ibw!==null&&ibw<wt)?ibw:wt;
+          const cl=Math.min(100,Math.max(10,(140-age)/cr*(o.sex==='f'?0.85:1))); const exp=lbw*(1.4+0.02*cl); if(Math.abs(exp-(+mm[1]))>1) return `digoxin 維持量 ${mm[1]} ≠ ${exp.toFixed(0)}`; }
+        if(/維持量（仿單 Table 3）/.test(t)&&o.u_hd) return '透析仍用 CrCl 計算 digoxin'; }
+      return ''; }]);
+  }
+  outs.push(['ren.bpmed',A.renderBPmed,(t,h,o)=>{ const c=A.rv('crcl'), e=A.rv('egfr'); const lt=(x,n)=>!!(x&&(x.hd||x.v<n));
+    if(lt(c,20)&&/Bisoprolol 10 mg QD → 20 mg|Bisoprolol 10 mg QD（β-blocker）：可增至/.test(t)) return 'CrCl <20 bisoprolol 仍增至 20';
+    if(lt(c,30)&&/Hydrochlorothiazide [\d.]+ mg QD（thiazide 類）：可增至|Hydrochlorothiazide [\d.]+ mg QD → /.test(t)) return 'CrCl <30 HCTZ 仍增量';
+    if(lt(c,30)&&/Indapamide 1\.25 mg PO QD/.test(t)) return 'CrCl <30 仍建議新加 thiazide';
+    if(lt(e,30)&&/Spironolactone [\d.]+ mg QD（MRA）：可增至|Spironolactone [\d.]+ mg QD → /.test(t)) return 'eGFR <30 spironolactone 仍增量';
+    if(lt(c,40)&&/Ramipril [\d.]+ mg QD → (10|20) mg/.test(t)) return 'CrCl <40 ramipril 超過 5 mg';
+    return ''; }]);
+  outs.push(['ren.gluc',A.renderGluc,(t,h,o)=>{ const c=A.rv('crcl'); if(c&&(c.hd||c.v<30)&&/gliclazide 40 mg/.test(t)) return 'CrCl <30 仍建議 gliclazide'; return ''; }]);
+}
+
 /* v1.1 目前結論卡：只能摘錄本頁實際輸出，不可自創或矛盾 */
 if(A.conclData&&(!MODSEL.length||MODSEL.includes('cc'))) for(const m of A.MODS.filter(m=>!['acls','calc','drug','ref'].includes(m.id))) outs.push(['cc.'+m.id,()=>{ const r=A.pageOut(m); A.__cc={rows:A.conclData(m.id,r.steps),page:r.h,steps:r.steps}; return A.concl(m.id,r.steps); },(t,h,o)=>{
   const {rows,page,steps}=A.__cc; const pt=txt(page).replace(/\s+/g,''); const row=k=>rows.find(r=>r.k===k);
